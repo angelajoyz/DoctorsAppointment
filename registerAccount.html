@@ -152,6 +152,48 @@
       cursor: pointer;
     }
 
+    #addSchedule {
+  display: inline-block;
+  padding: 10px 20px;
+  background: #0072ff;           /* bright blue */
+  background: linear-gradient(45deg, #00c6ff, #0072ff); /* gradient */
+  color: white;
+  font-weight: 600;
+  font-size: 14px;
+  border: none;
+  border-radius: 25px;
+  cursor: pointer;
+  transition: background 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: 0 4px 8px rgba(0, 114, 255, 0.3);
+  margin-top: 10px;
+}
+
+#addSchedule:hover {
+  background: linear-gradient(45deg, #0072ff, #00c6ff);
+  box-shadow: 0 6px 12px rgba(0, 198, 255, 0.6);
+}
+
+#addSchedule:active {
+  background: #005bbb;
+  box-shadow: none;
+  transform: scale(0.98);
+}
+
+  .schedule-input button {
+  background-color: #e74c3c;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 6px 12px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.schedule-input button:hover {
+  background-color: #c0392b;
+}
+
+
     @media (max-width: 768px) {
       .container {
         flex-direction: column;
@@ -208,6 +250,120 @@
         }
       });
 
+document.getElementById("addSchedule").addEventListener("click", () => {
+  const additionalSchedulesDiv = document.getElementById("additionalSchedules");
+
+  const scheduleContainer = document.createElement("div");
+  scheduleContainer.classList.add("schedule-input");
+  scheduleContainer.style.display = "flex";
+  scheduleContainer.style.flexWrap = "wrap";
+  scheduleContainer.style.alignItems = "center";
+  scheduleContainer.style.gap = "10px";
+  scheduleContainer.style.marginBottom = "10px";
+
+  const daySelect = document.createElement("select");
+  daySelect.name = "scheduleDay";
+  daySelect.required = true;
+  const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+
+  const placeholderOption = document.createElement("option");
+  placeholderOption.value = "";
+  placeholderOption.textContent = "Select day";
+  placeholderOption.disabled = true;
+  placeholderOption.selected = true;
+  daySelect.appendChild(placeholderOption);
+
+  days.forEach(day => {
+    const option = document.createElement("option");
+    option.value = day;
+    option.textContent = day;
+    daySelect.appendChild(option);
+  });
+
+  const timeInputsDiv = document.createElement("div");
+
+  const addTimeButton = document.createElement("button");
+  addTimeButton.type = "button";
+  addTimeButton.textContent = "Add Time";
+  addTimeButton.style.backgroundColor = "#2ecc71";
+  addTimeButton.style.color = "white";
+  addTimeButton.style.border = "none";
+  addTimeButton.style.borderRadius = "5px";
+  addTimeButton.style.padding = "6px 12px";
+  addTimeButton.style.cursor = "pointer";
+
+addTimeButton.addEventListener("click", () => {
+  const timeWrapper = document.createElement("div");
+  timeWrapper.style.display = "flex";
+  timeWrapper.style.alignItems = "center";
+  timeWrapper.style.gap = "8px";
+  timeWrapper.style.marginTop = "5px";
+
+  const timeInput = document.createElement("input");
+  timeInput.type = "time";
+  timeInput.name = "scheduleTime";
+  timeInput.required = true;
+
+  const deleteTimeBtn = document.createElement("button");
+  deleteTimeBtn.type = "button";
+  deleteTimeBtn.textContent = "🗑";
+  deleteTimeBtn.style.backgroundColor = "#e74c3c";
+  deleteTimeBtn.style.color = "white";
+  deleteTimeBtn.style.border = "none";
+  deleteTimeBtn.style.borderRadius = "5px";
+  deleteTimeBtn.style.padding = "4px 8px";
+  deleteTimeBtn.style.cursor = "pointer";
+
+  deleteTimeBtn.addEventListener("click", () => {
+    timeWrapper.remove();
+  });
+
+  timeWrapper.appendChild(timeInput);
+  timeWrapper.appendChild(deleteTimeBtn);
+  timeInputsDiv.appendChild(timeWrapper);
+});
+
+
+
+  // Add one time input by default
+  addTimeButton.click();
+
+  const deleteBtn = document.createElement("button");
+  deleteBtn.type = "button";
+  deleteBtn.textContent = "Delete";
+  deleteBtn.style.backgroundColor = "#e74c3c";
+  deleteBtn.style.color = "white";
+  deleteBtn.style.border = "none";
+  deleteBtn.style.borderRadius = "5px";
+  deleteBtn.style.padding = "4px 8px";  // smaller padding
+  deleteBtn.style.cursor = "pointer";
+  deleteBtn.style.height = "30px"; // aligns with select height
+  deleteBtn.style.marginTop = "0";
+
+  deleteBtn.addEventListener("click", () => {
+    scheduleContainer.remove();
+  });
+
+  // Wrap delete button and day select side by side, with delete first
+  const dayDeleteWrapper = document.createElement("div");
+  dayDeleteWrapper.style.display = "flex";
+  dayDeleteWrapper.style.alignItems = "center";
+  dayDeleteWrapper.style.gap = "8px";
+  dayDeleteWrapper.style.marginRight = "10px";
+
+  dayDeleteWrapper.appendChild(deleteBtn);
+  dayDeleteWrapper.appendChild(daySelect);
+
+  scheduleContainer.appendChild(dayDeleteWrapper);
+  scheduleContainer.appendChild(timeInputsDiv);
+  scheduleContainer.appendChild(addTimeButton);
+
+  additionalSchedulesDiv.appendChild(scheduleContainer);
+});
+
+
+
+
       document.getElementById("registerForm").addEventListener("submit", async (e) => {
         e.preventDefault();
 
@@ -221,7 +377,7 @@
         const role = e.target.role.value;
 
         // Doctor-specific fields
-        const doctorName = e.target.doctorName?.value.trim();
+       // const doctorName = e.target.doctorName?.value.trim();
         const specialization = e.target.specialization?.value.trim();
         const bio = e.target.bio?.value.trim();
         const availableDays = e.target.availableDays?.value.split(',').map(day => day.trim());
@@ -238,77 +394,76 @@
           return;
         }
 
-        try {
-          // 🔍 Check for duplicate email or username
-          const collectionRef = db.collection(role === "doctor" ? "doctors" : "patients");
+try {
+  // Check for duplicate email or username
+  const collectionRef = db.collection(role === "doctor" ? "doctors" : "patients");
 
-          const emailSnapshot = await collectionRef.where("email", "==", email).get();
-          if (!emailSnapshot.empty) {
-            alert("An account with this email already exists.");
-            return;
-          }
+  const emailSnapshot = await collectionRef.where("email", "==", email).get();
+  if (!emailSnapshot.empty) {
+    alert("An account with this email already exists.");
+    return;
+  }
 
-          const usernameSnapshot = await collectionRef.where("username", "==", username).get();
-          if (!usernameSnapshot.empty) {
-            alert("Username is already taken.");
-            return;
-          }
+  const usernameSnapshot = await collectionRef.where("username", "==", username).get();
+  if (!usernameSnapshot.empty) {
+    alert("Username is already taken.");
+    return;
+  }
 
-          // ✅ Create user if no duplicates
-          const userCredential = await auth.createUserWithEmailAndPassword(email, password);
-          const user = userCredential.user;
+  // Create user
+  const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+  const user = userCredential.user;
 
-          await user.sendEmailVerification();
-          alert("A verification email has been sent. Please verify your email before logging in.");
+  await user.sendEmailVerification();
 
-          const checkVerification = setInterval(() => {
-            user.reload().then(() => {
-              if (user.emailVerified) {
-                clearInterval(checkVerification);
+  alert("A verification email has been sent. Please verify your email before logging in.");
 
-                hashPassword(password).then((hashedPassword) => {
-                  // Base user data
-                  const userData = {
-                    fullName,
-                    username,
-                    email,
-                    phone,
-                    gender,
-                    role,
-                    password: hashedPassword,
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                  };
+  // Hash password and prepare user data
+  const hashedPassword = await hashPassword(password);
+  const userData = {
+    fullName,
+    username,
+    email,
+    phone,
+    gender,
+    role,
+    password: hashedPassword,
+    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+  };
 
-                  // Add doctor-specific fields if role is doctor
-                  if (role === "doctor") {
-                    userData.name = doctorName;
-                    userData.specialization = specialization;
-                    userData.bio = bio;
-                    userData.date = availableDays || [];
-                    userData.schedule = schedule || [];
-                    userData.licenseNumber = licenseNumber;
-                  }
+  if (role === "doctor") {
+    const scheduleEntries = document.querySelectorAll("#additionalSchedules .schedule-input");
+    const schedule = [];
 
+    scheduleEntries.forEach(entry => {
+      const day = entry.querySelector("select[name='scheduleDay']").value;
+      const timeInputs = entry.querySelectorAll("input[name='scheduleTime']");
+      const times = Array.from(timeInputs).map(input => input.value);
+      if (day && times.length > 0) {
+        schedule.push({ day, times });
+      }
+    });
 
-                  db.collection(role === "doctor" ? "doctors" : "patients")
-                    .doc(user.uid)
-                    .set(userData)
-                    .then(() => {
-                      alert("Registration successful and email verified!");
-                      window.location.href = "patientLogin.html";
-                    })
-                    .catch(err => {
-                      console.error("Firestore write error:", err);
-                      alert("Error saving user data.");
-                    });
-                });
-              }
-            });
-          }, 3000);
-        } catch (error) {
-          console.error("Registration Error:", error);
-          alert("Error: " + error.message);
-        }
+    //userData.name = doctorName;
+    userData.specialization = specialization;
+    userData.bio = bio;
+    userData.schedule = schedule;
+    userData.licenseNumber = licenseNumber;
+  }
+
+  // Save user data immediately
+  await db.collection(role === "doctor" ? "doctors" : "patients")
+          .doc(user.uid)
+          .set(userData);
+
+  alert("Registration successful! Please verify your email before logging in.");
+  window.location.href = "patientLogin.html";
+
+} catch (error) {
+  console.error("Registration Error:", error);
+  alert("Error: " + error.message);
+}
+
       });
     });
 
@@ -388,14 +543,13 @@
           </div>
 
           <div class="input-box doctor-only" style="width: 100%; display: none;">
-            <span class="details">Available Days (comma separated, e.g., Mon,Tue,Fri)</span>
-            <input type="text" name="availableDays">
+            <span class="details">Schedule</span>
+            <div id="additionalSchedules"></div>
+            <button type="button" id="addSchedule">Add Schedule</button>
+
           </div>
 
-          <div class="input-box doctor-only" style="width: 100%; display: none;">
-            <span class="details">Schedule (comma separated, e.g., 9:00 AM - 11:00 AM,...)</span>
-            <input type="text" name="schedule">
-          </div>
+
         </div>
 
         <div class="button">
