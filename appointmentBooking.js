@@ -11,9 +11,16 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-function validateReferenceNumber(referenceNumber) {
-    const regex = /^\d{13}$/;
-    return regex.test(referenceNumber);
+function validateReferenceNumber(referenceNumber, paymentMethod) {
+    if (paymentMethod === "GCash") {
+        return /^\d{13}$/.test(referenceNumber);
+    } else if (paymentMethod === "Bank Transfer") {
+        return /^[a-zA-Z0-9]{6,20}$/.test(referenceNumber);
+    } else if (paymentMethod === "Credit Card") {
+        // Credit Card can skip validation or you can add your logic here
+        return true;
+    }
+    return false;
 }
 
 function updateFee() {
@@ -71,6 +78,21 @@ function handleFileUpload(event) {
     reader.readAsDataURL(file);
 }
 
+// 1. Replace your old validateReferenceNumber with this one supporting all payment methods:
+function validateReferenceNumber(referenceNumber, paymentMethod) {
+    if (paymentMethod === "GCash") {
+        return /^\d{13}$/.test(referenceNumber);
+    } else if (paymentMethod === "Bank Transfer") {
+        return /^[a-zA-Z0-9]{6,20}$/.test(referenceNumber);
+    } else if (paymentMethod === "Credit Card") {
+        // Credit Card can skip validation or you can add your logic here
+        return true;
+    }
+    return false;
+}
+
+// 2. Update confirmAppointment() to use this and check duplicates only for GCash and Bank Transfer
+
 function confirmAppointment() {
     const inputs = document.querySelectorAll('#step2 input:not([type="checkbox"]), #step2 select');
     for (let input of inputs) {
@@ -89,9 +111,11 @@ function confirmAppointment() {
     const email = document.getElementById("email").value;
     const appointmentDateTime = document.getElementById("appointmentDateTime").value;
     const paymentRef = document.getElementById("paymentRef").value;
+    const paymentMethod = document.getElementById("paymentMethod").value;
 
-    if (!validateReferenceNumber(paymentRef)) {
-        alert("Invalid reference number.");
+    // Validate reference number according to payment method
+    if (!validateReferenceNumber(paymentRef, paymentMethod)) {
+        alert(`Invalid reference number for ${paymentMethod}.`);
         return;
     }
 
@@ -101,81 +125,96 @@ function confirmAppointment() {
         return;
     }
 
-    // Check for duplicate reference number
-    db.collection("appointments").where("paymentRef", "==", paymentRef).get().then((snapshot) => {
-        if (!snapshot.empty) {
-            alert("This GCash reference number has already been used.");
-            return;
-        }
-
-        // OCR validation
-        Tesseract.recognize(file, 'eng')
-            .then(({ data: { text } }) => {
+    // Function to proceed with saving appointment
+    function saveAppointment() {
+        // OCR validation for GCash only (optional, you can adapt or skip for others)
+        if (paymentMethod === "GCash") {
+            Tesseract.recognize(file, 'eng').then(({ data: { text } }) => {
                 if (!text.includes(paymentRef)) {
                     alert("Reference number not found in uploaded image.");
                     return;
                 }
-
-                // Proceed with appointment creation
-                db.collection("patients").where("email", "==", email).get()
-                    .then((querySnapshot) => {
-                        if (querySnapshot.empty) {
-                            alert("Email not registered.");
-                            return;
-                        }
-
-                        db.collection("appointments")
-                            .where("appointmentDateTime", "==", appointmentDateTime)
-                            .where("email", "==", email)
-                            .get()
-                            .then((snapshot) => {
-                                if (!snapshot.empty) {
-                                    alert("Appointment already exists.");
-                                    return;
-                                }
-
-                                const reader = new FileReader();
-                                reader.onload = function (e) {
-                                    const appointmentData = {
-                                        fullName: document.getElementById("fullName").value,
-                                        phone: document.getElementById("phone").value,
-                                        email: email,
-                                        age: document.getElementById("age").value,
-                                        gender: document.getElementById("gender").value,
-                                        address: document.getElementById("address").value,
-                                        allergies: document.getElementById("allergies").value,
-                                        medications: document.getElementById("medications").value,
-                                        conditions: document.getElementById("conditions").value,
-                                        familyHistory: document.getElementById("familyHistory").value,
-                                        appointmentDateTime: appointmentDateTime,
-                                        reason: document.getElementById("appointmentReason").value,
-                                        feeAmount: document.getElementById("feeAmount").value,
-                                        paymentMethod: document.getElementById("paymentMethod").value,
-                                        paymentRef: paymentRef,
-                                        paymentProof: e.target.result,
-                                        paymentConfirmed: true,
-                                        noRefundAccepted: true,
-                                        timestamp: new Date().toISOString(),
-                                        status: "Pending",
-                                        userId: auth.currentUser.uid
-                                    };
-
-                                    db.collection("appointments").add(appointmentData)
-                                        .then(() => {
-                                            document.getElementById("step2").classList.add("hidden");
-                                            document.getElementById("step3").classList.remove("hidden");
-                                        })
-                                        .catch(error => {
-                                            console.error("Error saving appointment:", error);
-                                            alert("Error scheduling appointment.");
-                                        });
-                                };
-                                reader.readAsDataURL(file);
-                            });
-                    });
+                continueSaving();
             });
-    });
+        } else {
+            continueSaving();
+        }
+
+        function continueSaving() {
+            db.collection("patients").where("email", "==", email).get()
+                .then(querySnapshot => {
+                    if (querySnapshot.empty) {
+                        alert("Email not registered.");
+                        return;
+                    }
+
+                    db.collection("appointments")
+                        .where("appointmentDateTime", "==", appointmentDateTime)
+                        .where("email", "==", email)
+                        .get()
+                        .then(snapshot => {
+                            if (!snapshot.empty) {
+                                alert("Appointment already exists.");
+                                return;
+                            }
+
+                            const reader = new FileReader();
+                            reader.onload = function (e) {
+                                const appointmentData = {
+                                    fullName: document.getElementById("fullName").value,
+                                    phone: document.getElementById("phone").value,
+                                    email: email,
+                                    age: document.getElementById("age").value,
+                                    gender: document.getElementById("gender").value,
+                                    address: document.getElementById("address").value,
+                                    allergies: document.getElementById("allergies").value,
+                                    medications: document.getElementById("medications").value,
+                                    conditions: document.getElementById("conditions").value,
+                                    familyHistory: document.getElementById("familyHistory").value,
+                                    appointmentDateTime: appointmentDateTime,
+                                    reason: document.getElementById("appointmentReason").value,
+                                    feeAmount: document.getElementById("feeAmount").value,
+                                    paymentMethod: paymentMethod,
+                                    paymentRef: paymentRef,
+                                    paymentProof: e.target.result,
+                                    paymentConfirmed: true,
+                                    noRefundAccepted: true,
+                                    timestamp: new Date().toISOString(),
+                                    status: "Pending",
+                                    userId: auth.currentUser.uid
+                                };
+
+                                db.collection("appointments").add(appointmentData)
+                                    .then(() => {
+                                        document.getElementById("step2").classList.add("hidden");
+                                        document.getElementById("step3").classList.remove("hidden");
+                                    })
+                                    .catch(error => {
+                                        console.error("Error saving appointment:", error);
+                                        alert("Error scheduling appointment.");
+                                    });
+                            };
+                            reader.readAsDataURL(file);
+                        });
+                });
+        }
+    }
+
+    // Duplicate check only for GCash and Bank Transfer
+    if (paymentMethod === "GCash" || paymentMethod === "Bank Transfer") {
+        db.collection("appointments").where("paymentRef", "==", paymentRef).get().then(snapshot => {
+            if (!snapshot.empty) {
+                alert("This reference number has already been used.");
+                return;
+            }
+            saveAppointment();
+        });
+    } else {
+        // For Credit Card or other payment methods, skip duplicate check
+        saveAppointment();
+    }
 }
+
 
 
 function fetchUserData(uid) {
