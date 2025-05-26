@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Doctor Dashboard</title>
+  <link rel="stylesheet" href="doctor-styles.css" />
+  <link rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg=="
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+<body>
+  <div class="dashboard-container">
+    <header>
+      <div class="doctor-info">
+        <img src="pfp.PNG" alt="Doctor Profile" id="profileImage" />
+        <div class="doctor-details">
+          <h1 id="fullNameDisplay">Loading...</h1>
+          <p class="doctor-spec" id="specializationDisplay">Loading...</p>
+        </div>
+      </div>
+      <div class="notifications">
+        <span class="notification-icon">
+          <i class="fas fa-bell">
+            <span class="notification-count">3</span>
+          </i>
+        </span>
+      </div>
+    </header>
+
+    <aside>
+      <nav>
+        <ul>
+          <li><a href="doctorDashboard.html">Dashboard</a></li>
+          <li><a href="doctorDetails.html">Profile</a></li>
+          <li><a href="#">Patients</a></li>
+          <li><a href="#">Reports</a></li>
+          <li><a href="#">Settings</a></li>
+        </ul>
+      </nav>
+    </aside>
+
+    <main>
+      <section class="profile-section">
+        <form id="doctorProfileForm">
+          <div>
+            <label for="fullName">Full Name</label>
+            <input type="text" id="fullName" name="fullName" disabled />
+          </div>
+          <div>
+            <label for="username">Username</label>
+            <input type="text" id="username" name="username" disabled />
+          </div>
+          <div>
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" disabled />
+          </div>
+          <div>
+            <label for="phone">Phone</label>
+            <input type="text" id="phone" name="phone" disabled />
+          </div>
+          <div>
+            <label for="gender">Gender</label>
+            <select id="gender" name="gender" disabled>
+              <option value="">Select Gender</option>
+              <option value="male">Male</option>
+              <option value="female">Female</option>
+              <option value="other">Other</option>
+              <option value="prefer not to say">Prefer not to say</option>
+            </select>
+          </div>
+          <div>
+            <label for="specialization">Specialization</label>
+            <input type="text" id="specialization" name="specialization" disabled />
+          </div>
+
+          <!-- Bio takes full width -->
+          <div class="full-width">
+            <label for="bio">Bio</label>
+            <textarea id="bio" name="bio" disabled></textarea>
+          </div>
+
+          <!-- Buttons at the bottom -->
+          <div class="button-row full-width">
+            <button type="button" class="edit-btn" id="editBtn">Edit Profile</button>
+            <button type="button" class="save-btn" id="saveBtn" style="display:none;">Save Changes</button>
+            <button type="button" class="cancel-btn" id="cancelBtn" style="display:none;">Cancel</button>
+          </div>
+        </form>
+      </section>
+    </main>
+
+    <footer>
+      <p>&copy; 2025 Doctor Dashboard</p>
+    </footer>
+  </div>
+
+  <!-- Firebase and JS logic -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
+    import {
+      getFirestore,
+      doc,
+      getDoc,
+      updateDoc,
+      serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDwCayQZ0JO6DjzQvAT6ToT33I4QXCS_NY",
+      authDomain: "login-sample-c3af0.firebaseapp.com",
+      projectId: "login-sample-c3af0",
+      storageBucket: "login-sample-c3af0.appspot.com",
+      messagingSenderId: "372688128666",
+      appId: "1:372688128666:web:bbc529c73c4665f95f6d23"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    const fullNameDisplay = document.getElementById("fullNameDisplay");
+    const specializationDisplay = document.getElementById("specializationDisplay");
+    const profileImage = document.getElementById("profileImage");
+
+    const form = document.getElementById("doctorProfileForm");
+    const editBtn = document.getElementById("editBtn");
+    const saveBtn = document.getElementById("saveBtn");
+    const cancelBtn = document.getElementById("cancelBtn");
+
+    const inputs = {
+      fullName: document.getElementById("fullName"),
+      username: document.getElementById("username"),
+      email: document.getElementById("email"),
+      phone: document.getElementById("phone"),
+      gender: document.getElementById("gender"),
+      specialization: document.getElementById("specialization"),
+      bio: document.getElementById("bio")
+    };
+
+    let originalData = {};
+
+    function enableEditing() {
+      Object.values(inputs).forEach(input => {
+        if (input.id !== "email") input.disabled = false;
+      });
+      editBtn.style.display = "none";
+      saveBtn.style.display = "inline-block";
+      cancelBtn.style.display = "inline-block";
+    }
+
+    function disableEditing() {
+      Object.values(inputs).forEach(input => input.disabled = true);
+      editBtn.style.display = "inline-block";
+      saveBtn.style.display = "none";
+      cancelBtn.style.display = "none";
+    }
+
+    async function loadDoctorProfile(uid) {
+      const docRef = doc(db, "doctors", uid);
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        originalData = data;
+
+        fullNameDisplay.textContent = data.fullName || "No Name";
+        specializationDisplay.textContent = data.specialization || "";
+        inputs.fullName.value = data.fullName || "";
+        inputs.username.value = data.username || "";
+        inputs.email.value = data.email || "";
+        inputs.phone.value = data.phone || "";
+        inputs.gender.value = data.gender || "";
+        inputs.specialization.value = data.specialization || "";
+        inputs.bio.value = data.bio || "";
+      } else {
+        alert("Doctor profile not found.");
+      }
+    }
+
+    async function saveDoctorProfile(uid) {
+      const updatedData = {
+        fullName: inputs.fullName.value.trim(),
+        username: inputs.username.value.trim(),
+        phone: inputs.phone.value.trim(),
+        gender: inputs.gender.value,
+        specialization: inputs.specialization.value.trim(),
+        bio: inputs.bio.value.trim(),
+        updatedAt: serverTimestamp()
+      };
+
+      try {
+        await updateDoc(doc(db, "doctors", uid), updatedData);
+        originalData = { ...originalData, ...updatedData };
+        fullNameDisplay.textContent = updatedData.fullName;
+        specializationDisplay.textContent = updatedData.specialization;
+        disableEditing();
+        alert("Profile updated successfully!");
+      } catch (error) {
+        alert("Error updating profile: " + error.message);
+      }
+    }
+
+    function cancelEditing() {
+      Object.keys(inputs).forEach(key => {
+        inputs[key].value = originalData[key] || "";
+      });
+      disableEditing();
+    }
+
+    onAuthStateChanged(auth, user => {
+      if (user) {
+        loadDoctorProfile(user.uid);
+      } else {
+        alert("Please login to view your profile.");
+        window.location.href = "login.html";
+      }
+    });
+
+    editBtn.addEventListener("click", enableEditing);
+    saveBtn.addEventListener("click", () => {
+      const user = auth.currentUser;
+      if (user) saveDoctorProfile(user.uid);
+    });
+    cancelBtn.addEventListener("click", cancelEditing);
+  </script>
+</body>
+</html>
