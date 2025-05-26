@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Doctor Dashboard - Patient Feedback</title>
+  <link rel="stylesheet" href="doctor-styles.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg=="
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+  <div class="dashboard-container">
+
+    <header>
+      <div class="doctor-info">
+        <img src="pfp.PNG" alt="Doctor Profile" />
+        <div class="doctor-details">
+          <h1>Dr. Juan Dela Cruz</h1>
+          <p class="doctor-spec">Cardiologist</p>
+        </div>
+      </div>
+      <div class="notifications">
+        <span class="notification-icon">
+          <i class="fas fa-bell">
+            <span class="notification-count">3</span>
+          </i>
+        </span>
+      </div>
+    </header>
+
+    <aside>
+      <nav>
+        <ul>
+          <li><a href="doctorDashboard.html">Dashboard</a></li>
+          <li><a href="doctorDetails.html">Profile</a></li>
+          <li><a href="#">Patients</a></li>
+          <li><a href="#">Reports</a></li>
+          <li><a href="#">Settings</a></li>
+        </ul>
+      </nav>
+    </aside>
+
+    <main>
+      <section class="feedback-report">
+        <h2>Patient Feedback Report</h2>
+        <label for="feedback-date">Select Date:</label>
+        <input type="date" id="feedback-date" max="" />
+
+        <div id="chart-container" style="max-width: 600px; margin-top: 20px;">
+          <canvas id="ratingChart"></canvas>
+        </div>
+
+        <div id="comments-section" style="margin-top: 30px;">
+          <h3>Patient Comments</h3>
+          <ul id="comments-list" style="list-style: none; padding-left: 0;"></ul>
+        </div>
+
+        <p id="no-feedback-msg" style="display:none; color: #555; margin-top: 20px;">
+          No feedback available for the selected date.
+        </p>
+      </section>
+    </main>
+
+    <footer>
+      <p>&copy; 2025 Doctor Dashboard</p>
+    </footer>
+
+  </div>
+
+  <!-- Firebase Compat SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.11.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.11.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore-compat.js"></script>
+
+  <script>
+    // Initialize Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyDwCayQZ0JO6DjzQvAT6ToT33I4QXCS_NY",
+      authDomain: "login-sample-c3af0.firebaseapp.com",
+      projectId: "login-sample-c3af0",
+      storageBucket: "login-sample-c3af0.appspot.com",
+      messagingSenderId: "372688128666",
+      appId: "1:372688128666:web:bbc529c73c4665f95f6d23"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    // Elements
+    const dateInput = document.getElementById("feedback-date");
+    const commentsList = document.getElementById("comments-list");
+    const noFeedbackMsg = document.getElementById("no-feedback-msg");
+    const ctx = document.getElementById("ratingChart").getContext("2d");
+    let ratingChart = null;
+
+    // Set max date to today
+    dateInput.max = new Date().toISOString().split("T")[0];
+
+    // Listen for date changes
+    dateInput.addEventListener("change", () => {
+      if (dateInput.value) {
+        loadFeedbackForDate(dateInput.value);
+      } else {
+        clearFeedbackDisplay();
+      }
+    });
+
+    // Clear chart and comments
+    function clearFeedbackDisplay() {
+      if (ratingChart) {
+        ratingChart.destroy();
+        ratingChart = null;
+      }
+      commentsList.innerHTML = "";
+      noFeedbackMsg.style.display = "none";
+    }
+
+    // Load feedback from Firestore for the selected date
+    async function loadFeedbackForDate(dateStr) {
+      clearFeedbackDisplay();
+
+      // Convert dateStr to start and end timestamps to query by date
+      // Assuming feedback documents have a timestamp field "feedbackDate" (Firestore Timestamp)
+      // We query feedbacks where feedbackDate is >= start of date and < next day start
+
+      const startDate = new Date(dateStr);
+      startDate.setHours(0, 0, 0, 0);
+      const endDate = new Date(startDate);
+      endDate.setDate(endDate.getDate() + 1);
+
+      try {
+        const feedbackRef = db.collection("patientFeedback");
+        const snapshot = await feedbackRef
+          .where("feedbackDate", ">=", firebase.firestore.Timestamp.fromDate(startDate))
+          .where("feedbackDate", "<", firebase.firestore.Timestamp.fromDate(endDate))
+          .get();
+
+        if (snapshot.empty) {
+          noFeedbackMsg.style.display = "block";
+          return;
+        }
+
+        // Collect ratings and comments
+        const ratings = [];
+        const comments = [];
+
+        snapshot.forEach(doc => {
+          const data = doc.data();
+          if (typeof data.rating === "number") {
+            ratings.push(data.rating);
+          }
+          if (data.comment && data.comment.trim() !== "") {
+            comments.push(data.comment.trim());
+          }
+        });
+
+        if (ratings.length === 0) {
+          noFeedbackMsg.textContent = "No ratings available for the selected date.";
+          noFeedbackMsg.style.display = "block";
+          return;
+        }
+
+        renderChart(ratings);
+        renderComments(comments);
+
+      } catch (error) {
+        console.error("Error fetching feedback:", error);
+        noFeedbackMsg.textContent = "Error loading feedback data.";
+        noFeedbackMsg.style.display = "block";
+      }
+    }
+
+    // Render bar chart of ratings distribution and average rating
+    function renderChart(ratings) {
+      // Calculate frequency of each rating 1-5 and average rating
+      const ratingCounts = [0, 0, 0, 0, 0]; // index 0 for rating 1, etc.
+      ratings.forEach(r => {
+        if (r >= 1 && r <= 5) {
+          ratingCounts[r - 1]++;
+        }
+      });
+      const totalRatings = ratings.length;
+      const avgRating = (ratings.reduce((a, b) => a + b, 0) / totalRatings).toFixed(2);
+
+      const labels = ["1 Star", "2 Stars", "3 Stars", "4 Stars", "5 Stars"];
+      const data = {
+        labels: labels,
+        datasets: [{
+          label: `Ratings Distribution (Avg: ${avgRating})`,
+          data: ratingCounts,
+          backgroundColor: [
+            "#ff4d4d",
+            "#ff944d",
+            "#ffdb4d",
+            "#b3ff66",
+            "#33cc33"
+          ]
+        }]
+      };
+
+      const options = {
+        scales: {
+          y: {
+            beginAtZero: true,
+            precision: 0,
+            stepSize: 1,
+            title: {
+              display: true,
+              text: "Number of Ratings"
+            }
+          }
+        },
+        plugins: {
+          legend: {
+            display: true,
+            position: "top"
+          },
+          tooltip: {
+            enabled: true
+          }
+        }
+      };
+
+      if (ratingChart) {
+        ratingChart.destroy();
+      }
+      ratingChart = new Chart(ctx, {
+        type: "bar",
+        data: data,
+        options: options
+      });
+    }
+
+    // Render patient comments list
+    function renderComments(comments) {
+      commentsList.innerHTML = "";
+      if (comments.length === 0) {
+        commentsList.innerHTML = "<li>No comments available.</li>";
+        return;
+      }
+      comments.forEach(comment => {
+        const li = document.createElement("li");
+        li.textContent = comment;
+        li.style.padding = "8px 0";
+        li.style.borderBottom = "1px solid #ddd";
+        commentsList.appendChild(li);
+      });
+    }
+
+    // Optionally, load today's feedback on page load
+    window.addEventListener("load", () => {
+      const todayStr = new Date().toISOString().split("T")[0];
+      dateInput.value = todayStr;
+      loadFeedbackForDate(todayStr);
+    });
+  </script>
+</body>
+
+</html>
