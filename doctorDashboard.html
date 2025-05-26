@@ -2,144 +2,189 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Doctor Dashboard</title>
-    <link rel="stylesheet" href="doctor-styles.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
-        integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg=="
-        crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Doctor Dashboard</title>
+  <link rel="stylesheet" href="doctor-styles.css" />
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg=="
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer"
+  />
 </head>
 
 <body>
+  <div class="dashboard-container">
+    <header>
+      <div class="doctor-info">
+        <img src="pfp.PNG" alt="Doctor Profile" id="profileImage" />
+        <div class="doctor-details">
+          <h1 id="fullNameDisplay">Loading...</h1>
+          <p class="doctor-spec" id="specializationDisplay">Loading...</p>
+        </div>
+      </div>
+      <div class="notifications">
+        <span class="notification-icon">
+          <i class="fas fa-bell">
+            <span class="notification-count">3</span>
+          </i>
+        </span>
+      </div>
+    </header>
 
-    <div class="dashboard-container">
+    <aside>
+      <nav>
+        <ul>
+          <li><a href="doctorDashboard.html">Dashboard</a></li>
+          <li><a href="doctorDetails.html">Profile</a></li>
+          <li><a href="#">Patients</a></li>
+          <li><a href="#">Reports</a></li>
+          <li><a href="#">Settings</a></li>
+        </ul>
+      </nav>
+    </aside>
 
-        <header>
-            <div class="doctor-info">
-                <img src="pfp.PNG" alt="Doctor Profile">
-                <div class="doctor-details">
-                    <h1>Dr. Juan Dela Cruz</h1>
-                    <p class="doctor-spec">Cardiologist</p>
-                </div>
-            </div>
-            <div class="notifications">
-                <span class="notification-icon">
-                    <i class="fas fa-bell">
-                        <span class="notification-count">3</span>
-                    </i>
-                </span>
-            </div>
-        </header>
+    <main>
+      <section class="schedule">
+        <h2>Appointment</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Date and Time</th>
+              <th>Patient Name</th>
+              <th>Reason</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </section>
+    </main>
 
-        <aside>
-          <nav>
-            <ul>
-              <li><a href="doctorDashboard.html">Dashboard</a></li>
-              <li><a href="doctorDetails.html">Profile</a></li>
-              <li><a href="#">Patients</a></li>
-              <li><a href="#">Reports</a></li>
-              <li><a href="#">Settings</a></li>
-            </ul>
-          </nav>
-        </aside>
+    <footer>
+      <p>&copy; 2025 Doctor Dashboard</p>
+    </footer>
+  </div>
 
-        <main>
-            <!-- <section class="overview">
-                <div class="widget">
-                    <h3>Today's Appointments</h3>
-                    <p>15</p>
-                </div>
-                <div class="widget">
-                    <h3>Pending Lab Results</h3>
-                    <p>5</p>
-                </div>
-                <div class="widget">
-                    <h3>Patient Feedback</h3>
-                    <p>4.8 Stars</p>
-                </div>
-            </section>
-          -->
-            <section class="schedule">
-                <h2>Appointment</h2>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Date and Time</th>
-                            <th>Patient Name</th>
-                            <th>Reason</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td><a href="patient-details.html?id=456" data-patient-id="456">View Details</a></td>
-                        </tr>
-                        <tr>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td><a href="patient-details.html?id=123" data-patient-id="123">View Details</a></td>
-                        </tr>
-                        <!-- More appointments here -->
-                    </tbody>
-                </table>
-            </section>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
+    import {
+      getFirestore,
+      collection,
+      getDocs,
+      doc,
+      getDoc,
+      query,
+      where,
+    } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
+    import {
+      getAuth,
+      onAuthStateChanged,
+      signInWithEmailAndPassword,
+      signOut,
+    } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
 
-            
-        </main>
+    const firebaseConfig = {
+      apiKey: "AIzaSyDwCayQZ0JO6DjzQvAT6ToT33I4QXCS_NY",
+      authDomain: "login-sample-c3af0.firebaseapp.com",
+      projectId: "login-sample-c3af0",
+      storageBucket: "login-sample-c3af0.appspot.com",
+      messagingSenderId: "372688128666",
+      appId: "1:372688128666:web:bbc529c73c4665f95f6d23",
+    };
 
-        <footer>
-            <p>&copy; 2025 Doctor Dashboard</p>
-        </footer>
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth();
 
-    </div>
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
-        import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
-      
-        const firebaseConfig = {
-          apiKey: "AIzaSyDwCayQZ0JO6DjzQvAT6ToT33I4QXCS_NY",
-          authDomain: "login-sample-c3af0.firebaseapp.com",
-          projectId: "login-sample-c3af0",
-          storageBucket: "login-sample-c3af0.firebasestorage.app",
-          messagingSenderId: "372688128666",
-          appId: "1:372688128666:web:bbc529c73c4665f95f6d23"
-        };
-      
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-      
-        const appointmentTableBody = document.querySelector("tbody");
-      
-        async function loadAppointments() {
-          const querySnapshot = await getDocs(collection(db, "appointments"));
-          appointmentTableBody.innerHTML = ""; // Clear previous data
-      
-          querySnapshot.forEach((doc) => {
-            const data = doc.data();
-      
-            const row = document.createElement("tr");
-            row.innerHTML = `
-              <td>${new Date(data.appointmentDateTime).toLocaleString([], {
-                year: 'numeric', month: 'short', day: 'numeric',
-                hour: '2-digit', minute: '2-digit'
-              })}</td>
-              <td>${data.fullName}</td>
-              <td>${data.reason || "N/A"}</td>
-              <td><a href="patient-details.html?id=${doc.id}" data-patient-id="${doc.id}">View Details</a></td>
-            `;
-            appointmentTableBody.appendChild(row);
-          });
+    const fullNameEl = document.getElementById("fullNameDisplay");
+    const specializationEl = document.getElementById("specializationDisplay");
+    const profileImageEl = document.getElementById("profileImage");
+    const appointmentTableBody = document.querySelector("tbody");
+
+    // Load doctor info by doctorId (user.uid)
+    async function loadDoctorInfo(doctorId) {
+      try {
+        const docRef = doc(db, "doctors", doctorId);
+        const docSnap = await getDoc(docRef);
+
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          fullNameEl.textContent = data.fullName || "No name found";
+          specializationEl.textContent = data.specialization || "No specialization found";
+          if (data.profileImageUrl) {
+            profileImageEl.src = data.profileImageUrl;
+          }
+        } else {
+          fullNameEl.textContent = "Doctor not found";
+          specializationEl.textContent = "";
+          console.warn("No doctor document found!");
         }
-      
-        loadAppointments();
-      </script>
-      
-    
+      } catch (error) {
+        console.error("Error fetching doctor info:", error);
+      }
+    }
+
+    // Load appointments (filter by doctorId if needed)
+    async function loadAppointments(doctorId) {
+      try {
+        // Optionally, filter appointments by doctorId if you store that field
+        // const q = query(collection(db, "appointments"), where("doctorId", "==", doctorId));
+        // const querySnapshot = await getDocs(q);
+
+        // Or load all appointments (if your rules allow)
+        const querySnapshot = await getDocs(collection(db, "appointments"));
+        appointmentTableBody.innerHTML = "";
+
+        querySnapshot.forEach((doc) => {
+          const data = doc.data();
+
+          // Convert Firestore timestamp to Date, handle string fallback
+          const dateObj = data.appointmentDateTime?.toDate
+            ? data.appointmentDateTime.toDate()
+            : new Date(data.appointmentDateTime);
+
+          const row = document.createElement("tr");
+          row.innerHTML = `
+            <td>${dateObj.toLocaleString([], {
+              year: "numeric",
+              month: "short",
+              day: "numeric",
+              hour: "2-digit",
+              minute: "2-digit",
+            })}</td>
+            <td>${data.fullName || "N/A"}</td>
+            <td>${data.reason || "N/A"}</td>
+            <td><a href="patient-details.html?id=${doc.id}" data-patient-id="${doc.id}">View Details</a></td>
+          `;
+          appointmentTableBody.appendChild(row);
+        });
+      } catch (error) {
+        console.error("Error loading appointments:", error);
+      }
+    }
+
+    // On auth state change, load doctor info and appointments if logged in
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        console.log("Logged in as", user.email);
+        loadDoctorInfo(user.uid);
+        loadAppointments(user.uid);
+      } else {
+        // Not logged in, show message or redirect to login page
+        fullNameEl.textContent = "Please log in";
+        specializationEl.textContent = "";
+        appointmentTableBody.innerHTML = "<tr><td colspan='4'>You must be logged in to view appointments.</td></tr>";
+        // Optionally, redirect to login:
+        // window.location.href = "login.html";
+      }
+    });
+
+    // Optional: Auto login for testing - REMOVE in production!
+    // signInWithEmailAndPassword(auth, "doctor@example.com", "password123").catch(console.error);
+  </script>
 </body>
 
 </html>
