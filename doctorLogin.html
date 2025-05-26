@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Doctor Login</title>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      background: url('bg-green.png') no-repeat center center/cover;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .login-container {
+      display: flex;
+      height: 700px;
+      width: 800px;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+      overflow: hidden;
+      justify-content: center;
+    }
+
+    .left-panel {
+      background: #31E180;
+      color: white;
+      width: 40%;
+      padding: 40px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .left-panel h2 {
+      font-size: 24px;
+      margin-bottom: 10px;
+    }
+
+    .left-panel p {
+      font-size: 14px;
+    }
+
+    .right-panel {
+      width: 60%;
+      padding: 40px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .login-box h3 {
+      font-size: 22px;
+      margin-bottom: 15px;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+    }
+
+    label {
+      font-size: 14px;
+      margin-top: 10px;
+    }
+
+    input {
+      padding: 10px;
+      margin-top: 5px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      width: 100%;
+    }
+
+    .forgot-password {
+      text-align: right;
+      font-size: 12px;
+      margin-top: 5px;
+      color: #2ecc71;
+      text-decoration: none;
+    }
+
+    .btn {
+      background: #31E180;
+      color: white;
+      border: none;
+      padding: 10px;
+      margin-top: 15px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .btn:hover {
+      background: #27ae60;
+    }
+
+    .google-signin {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 15px;
+      border: 1px solid #ccc;
+      padding: 10px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .google-signin img {
+      width: 20px;
+      margin-right: 10px;
+    }
+
+    .google-signin a {
+      text-decoration: none;
+      color: #333;
+    }
+
+    .input-container {
+      position: relative;
+      display: flex;
+      align-items: center;
+      width: 100%;
+    }
+
+    .input-container input {
+      width: 100%;
+      padding: 10px;
+      padding-right: 40px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    .input-container .icon {
+      position: absolute;
+      right: 10px;
+      width: 20px;
+      cursor: pointer;
+    }
+
+    #error-message {
+      color: red;
+      display: none;
+      font-size: 14px;
+      margin-top: 10px;
+    }
+  </style>
+  <script type="module" src="login.js" defer></script>
+  <script defer>
+    function togglePassword() {
+      const passwordField = document.getElementById("password");
+      const icon = document.querySelector(".toggle-password");
+
+      if (passwordField.type === "password") {
+        passwordField.type = "text";
+        icon.src = "hide.png"; // Optional: use a "hide" icon
+      } else {
+        passwordField.type = "password";
+        icon.src = "show.png";
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const form = document.querySelector("form");
+      const errorMessage = document.getElementById("error-message");
+
+      form.addEventListener("submit", function (e) {
+        const email = document.getElementById("email").value.trim();
+        const password = document.getElementById("password").value.trim();
+
+        if (email === "" || password === "") {
+          e.preventDefault();
+          errorMessage.textContent = "All fields are required.";
+          errorMessage.style.display = "block";
+        } else {
+          errorMessage.style.display = "none";
+        }
+      });
+    });
+  </script>
+</head>
+<body>
+  <div class="login-container">
+    <!-- Left Panel -->
+    <div class="left-panel">
+      <h2>Hi, Doctor!</h2>
+      <p>To access your schedule and manage patient appointments, please log in with your account.</p>
+    </div>
+
+    <!-- Right Panel (Login Form) -->
+    <div class="right-panel">
+      <div class="login-box">
+        <h3>Sign in</h3>
+        <form>
+          <div class="input-container">
+            <input type="email" id="email" name="email" placeholder="Enter your email" required>
+          </div>
+
+          <div class="input-container">
+            <input type="password" id="password" name="password" placeholder="Enter your password" required>
+            <img src="show.png" alt="Toggle Password" class="icon toggle-password" onclick="togglePassword()">
+          </div>
+
+          <p id="error-message"></p>
+
+          <a href="#" class="forgot-password">Forgot Password?</a>
+
+          <button id="submit" class="btn" type="submit">Sign In</button>
+
+        </form>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

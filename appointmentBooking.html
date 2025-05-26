@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Appointment Booking</title>
+  <style>
+    body {
+      background-image: url('bg-blue.png');
+      background-size: cover;
+      background-position: center;
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .container {
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+      width: 800px;
+      text-align: left;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .form-content {
+      margin-top: 20px;
+    }
+
+    .form-group {
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+    }
+
+    .column {
+      width: 48%;
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 16px;
+      box-sizing: border-box;
+    }
+
+    button {
+      background: #007BFF;
+      color: white;
+      border: none;
+      padding: 12px;
+      cursor: pointer;
+      border-radius: 5px;
+      width: 160px;
+      margin: 20px 10px 0 10px;
+      font-size: 16px;
+    }
+
+    button:hover {
+      background: #0056b3;
+    }
+
+    .header {
+      background: #007BFF;
+      color: white;
+      padding: 20px;
+      font-size: 24px;
+      font-weight: bold;
+      text-align: center;
+      width: 100%;
+      margin: -20px -20px -20px -20px;
+      border-radius: 10px 10px 0 0;
+    }
+
+    .checkbox-group {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .checkbox-group label {
+      display: flex;
+      align-items: center;
+      font-size: 14px;
+      margin-bottom: 10px;
+      cursor: pointer;
+      gap: 10px;
+      white-space: nowrap;
+    }
+
+    .checkbox-group input[type="checkbox"] {
+      margin-right: 8px;
+      transform: scale(1.2);
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 9999;
+      padding-top: 60px;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0, 0, 0, 0.7);
+    }
+
+    .modal-content {
+      margin: auto;
+      display: block;
+      max-width: 80%;
+      max-height: 80%;
+      border-radius: 10px;
+      box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+    }
+
+    .close {
+      position: absolute;
+      top: 20px;
+      right: 35px;
+      color: #fff;
+      font-size: 35px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    #openModalBtn:hover {
+      opacity: 0.8;
+      text-decoration: none;
+    }
+
+    #openModalBtn:hover i {
+      color: #007BFF;
+      transform: scale(1.1);
+    }
+
+
+    @media (max-width: 768px) {
+      .form-group {
+        flex-direction: column;
+      }
+
+      .column {
+        width: 100%;
+      }
+
+      .container {
+        width: 95%;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <script src="https://www.gstatic.com/firebasejs/10.11.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.11.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore-compat.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/js-md5/0.7.3/md5.min.js"></script>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyDwCayQZ0JO6DjzQvAT6ToT33I4QXCS_NY",
+      authDomain: "login-sample-c3af0.firebaseapp.com",
+      projectId: "login-sample-c3af0",
+      storageBucket: "login-sample-c3af0.appspot.com",
+      messagingSenderId: "372688128666",
+      appId: "1:372688128666:web:bbc529c73c4665f95f6d23"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    function validateReferenceNumber(referenceNumber) {
+  // Allow 13-digit numeric reference numbers
+  const regex = /^\d{13}$/; // Regex for a 13-digit number
+  return regex.test(referenceNumber);
+
+    function handleFileUpload(event) {
+  const file = event.target.files[0];
+  if (file) {
+    const validTypes = ['image/jpeg', 'image/png', 'image/gif'];
+    const maxSize = 2 * 1024 * 1024; // 2MB
+
+    if (!validTypes.includes(file.type)) {
+      alert("Please upload a valid image file (JPEG, PNG, GIF).");
+      return;
+    }
+
+    if (file.size > maxSize) {
+      alert("File size exceeds 2MB. Please upload a smaller file.");
+      return;
+    }
+
+    // Proceed with reading the file if valid
+    const reader = new FileReader();
+    reader.onload = function (e) {
+      document.getElementById("modalImage").src = e.target.result;
+      document.getElementById("openModalBtn").style.display = "inline-block";
+    };
+    reader.readAsDataURL(file);
+  }
+}
+
+
+  }
+
+
+  </script>
+
+  <!-- Step 1 -->
+  <div class="container" id="step1">
+    <div class="header">Book an Appointment</div>
+    <div class="form-content">
+      <div class="form-group">
+        <div class="column">
+          <h3>Patient Information</h3>
+          <input type="text" id="fullName" placeholder="Full Name"><br>
+          <input type="tel" id="phone" placeholder="Phone Number"><br>
+          <input type="email" id="email" placeholder="Email Address"><br>
+          <input type="number" id="age" placeholder="Age"><br>
+          <input type="text" id="gender" placeholder="Gender"><br>
+          <input type="text" id="address" placeholder="address"><br>
+        </div>
+        <div class="column">
+          <h3>Medical History</h3>
+          <label for="appointmentReason"></label>
+          <select id="appointmentReason" onchange="updateFee()">
+            <option disabled selected>Select Reason</option>
+            <option value="Consultation">Consultation</option>
+            <option value="Check-up">Check-up</option>
+            <option value="Follow-up">Follow-up</option>
+          </select>
+
+          <input type="hidden" id="feeAmount">
+
+          <label for="allergies"></label>
+          <select id="allergies" required>
+            <option disabled selected>Known Allergies</option>
+            <option>None</option>
+            <option>Peanuts</option>
+            <option>Shellfish</option>
+            <option>Penicillin</option>
+            <option>Latex</option>
+            <option>Pollen</option>
+            <option>Dust mites</option>
+            <option>Other</option>
+          </select>
+
+          <label for="medications"></label>
+          <select id="medications">
+            <option disabled selected>Current Medications</option>
+            <option>None</option>
+            <option>Antibiotics</option>
+            <option>Insulin</option>
+            <option>Blood Pressure Medication</option>
+            <option>Antidepressants</option>
+            <option>Birth Control Pills</option>
+            <option>Pain Relievers</option>
+            <option>Other</option>
+          </select>
+
+          <label for="conditions"></label>
+          <select id="conditions">
+            <option disabled selected>Previous Medical Conditions</option>
+            <option>None</option>
+            <option>Diabetes</option>
+            <option>Hypertension</option>
+            <option>Asthma</option>
+            <option>Heart Disease</option>
+            <option>Kidney Disease</option>
+            <option>Arthritis</option>
+            <option>Other</option>
+          </select>
+
+          <label for="familyHistory"></label>
+          <select id="familyHistory">
+            <option disabled selected>Family Medical History</option>
+            <option>None</option>
+            <option>Diabetes</option>
+            <option>Hypertension</option>
+            <option>Cancer</option>
+            <option>Stroke</option>
+            <option>Heart Disease</option>
+            <option>Other</option>
+          </select>
+        </div>
+      </div>
+      <div style="text-align: center;">
+        <button onclick="location.href='patientDashboard.html'">Cancel</button>
+        <button onclick="nextStep(1)">Next</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 2 -->
+  <div class="container hidden" id="step2">
+    <div class="header">Book an Appointment</div>
+    <div class="form-content">
+      <div class="form-group">
+        <div class="column" style="width: 100%;">
+          <h3>Appointment Details</h3>
+          <input type="datetime-local" id="appointmentDateTime"><br>
+
+          <h3>Appointment Fee Details</h3>
+          <input type="text" id="displayFee" placeholder="Appointment Fee" readonly><br>
+          <select id="paymentMethod">
+            <option disabled selected>Payment Method</option>
+            <option>Credit Card</option>
+            <option>Bank Transfer</option>
+            <option>GCash</option>
+          </select><br>
+          <input type="text" id="paymentRef" placeholder="Payment Reference Number"><br>
+          <label for="paymentProof">Upload Proof of Payment:</label>
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <input type="file" id="proofImage" accept="image/*" onchange="handleFileUpload(event)">
+            <button id="openModalBtn" style="display: none; background: none; border: none; cursor: pointer;">
+              <i class="fas fa-eye" style="font-size: 10px;" title="View Uploaded Image"></i>
+            </button>
+          </div>
+
+
+          <!-- Modal -->
+          <div id="imageModal" class="modal">
+            <span class="close" id="closeModal">&times;</span>
+            <img class="modal-content" id="modalImage">
+          </div>
+
+
+
+          <div class="checkbox-group">
+            <label><input type="checkbox" id="paymentConfirmed"> I confirm that I have completed the payment.</label>
+            <label><input type="checkbox" id="noRefundAccepted"> I understand that the appointment fee is non-refundable
+              and that cancellations are not allowed.</label>
+          </div>
+        </div>
+      </div>
+      <div style="text-align: center;">
+        <button onclick="prevStep(1)">Back</button>
+        <button id="confirmButton">Confirm</button>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 3: Success Message -->
+  <div class="container hidden" id="step3">
+    <h2>✅ Appointment Successfully Scheduled</h2>
+    <p>You will receive a confirmation email with the details of your appointment.
+      Please arrive 10 minutes before your scheduled time. Thank you!</p>
+    <button onclick="location.href='patientDashboard.html'">Book Again</button>
+  </div>
+
+  <script>
+
+    // Go to prev step
+    function prevStep(step) {
+      document.getElementById(`step${step + 1}`).classList.add("hidden");
+      document.getElementById(`step${step}`).classList.remove("hidden");
+    }
+    // Go to next step
+    function nextStep(step) {
+      const inputs = document.querySelectorAll('#step1 input, #step1 select');
+      for (let input of inputs) {
+        if (!input.value || input.value === input.querySelector('option[disabled]')?.value) {
+          alert('Please complete all required fields before proceeding.');
+          return;
+        }
+      }
+
+      document.getElementById(`step${step}`).classList.add("hidden");
+      document.getElementById(`step${step + 1}`).classList.remove("hidden");
+    }
+    function updateFee() {
+      let feeAmount;
+      const appointmentReason = document.getElementById("appointmentReason").value;
+      switch (appointmentReason) {
+        case "Consultation":
+          feeAmount = 150; // Set fee for Consultation
+          break;
+        case "Check-up":
+          feeAmount = 100; // Set fee for Check-up
+          break;
+        case "Follow-up":
+          feeAmount = 120; // Set fee for Follow-up
+          break;
+        default:
+          feeAmount = 0; // Default fee if no valid reason is selected
+      }
+      document.getElementById("feeAmount").value = feeAmount;
+      document.getElementById("displayFee").value = `₱${feeAmount}`;
+    }
+
+    // Finish and bind the confirm button
+    document.getElementById("confirmButton").addEventListener("click", confirmAppointment);
+
+    function confirmAppointment() {
+  console.log("Confirm button clicked!");
+  const inputs = document.querySelectorAll('#step2 input:not([type="checkbox"]), #step2 select');
+
+  // Check if all fields are filled
+  for (let input of inputs) {
+    if (!input.value || input.value === input.querySelector('option[disabled]')?.value) {
+      alert('Please complete all required fields before confirming.');
+      return;
+    }
+  }
+
+  const paymentConfirmed = document.getElementById("paymentConfirmed").checked;
+  const noRefundAccepted = document.getElementById("noRefundAccepted").checked;
+  if (!paymentConfirmed || !noRefundAccepted) {
+    alert("Please confirm payment and refund agreement before proceeding.");
+    return;
+  }
+
+  const email = document.getElementById("email").value;
+  const appointmentDateTime = document.getElementById("appointmentDateTime").value;
+  const paymentRef = document.getElementById("paymentRef").value;
+
+  // Validate the reference number format
+  if (!validateReferenceNumber(paymentRef)) {
+    alert("Invalid payment reference number format. Please check and try again.");
+    return;
+  }
+
+  // Check if the email is registered in the patients collection
+  db.collection("patients").where("email", "==", email).get()
+    .then((querySnapshot) => {
+      if (querySnapshot.empty) {
+        alert("This email is not registered. Please register as a patient before booking an appointment.");
+        return; // Stop the function if the email is not found
+      }
+
+      // Proceed with the existing logic to check for existing appointments
+      db.collection("appointments")
+        .where("appointmentDateTime", "==", appointmentDateTime)
+        .where("email", "==", email)
+        .get()
+        .then((querySnapshot) => {
+          if (!querySnapshot.empty) {
+            alert("You already have an appointment scheduled at this date and time.");
+            return;
+          }
+
+          // Proceed with the rest of the confirmation process
+          const fileInput = document.getElementById("proofImage");
+          if (fileInput.files.length === 0) {
+            alert("Please upload a proof of payment image.");
+            return;
+          }
+
+          const file = fileInput.files[0];
+          const reader = new FileReader();
+
+          reader.onload = function (e) {
+            const paymentProofBase64 = e.target.result;
+
+            const appointmentData = {
+              fullName: document.getElementById("fullName").value,
+              phone: document.getElementById("phone").value,
+              email: email,
+              age: document.getElementById("age").value,
+              gender: document.getElementById("gender").value,
+              address: document.getElementById("address").value,
+              allergies: document.getElementById("allergies").value,
+              medications: document.getElementById("medications").value,
+              conditions: document.getElementById("conditions").value,
+              familyHistory: document.getElementById("familyHistory").value,
+              appointmentDateTime: document.getElementById("appointmentDateTime").value,
+              reason: document.getElementById("appointmentReason").value,
+              feeAmount: document.getElementById("feeAmount").value,
+              paymentMethod: document.getElementById("paymentMethod").value,
+              paymentRef: paymentRef,
+              paymentProof: paymentProofBase64,
+              paymentConfirmed,
+              noRefundAccepted,
+              timestamp: new Date().toISOString(),
+              status: "Pending", // Default status can be "Pending"
+              userId: auth.currentUser .uid // Store the user's ID for reference
+            };
+
+            // Save to Firestore under "appointments" collection
+            db.collection("appointments").add(appointmentData)
+              .then((docRef) => {
+                console.log("Appointment successfully added with ID: ", docRef.id);
+                // On success, move to the success step
+                document.getElementById("step2").classList.add("hidden");
+                document.getElementById("step3").classList.remove("hidden");
+              })
+              .catch((error) => {
+                console.error("Error adding appointment: ", error);
+                alert("There was an error scheduling your appointment. Please try again.");
+              });
+          };
+
+          reader.readAsDataURL(file);
+        })
+        .catch((error) => {
+          console.error("Error checking existing appointments: ", error);
+          alert("There was an error checking your existing appointments. Please try again.");
+        });
+    })
+    .catch((error) => {
+      console.error("Error checking registered patients: ", error);
+      alert("There was an error checking your registration status. Please try again.");
+    });
+}
+
+          
+
+    // Restart booking process (optional)
+    function restart() {
+      document.getElementById("step3").classList.add("hidden");
+      document.getElementById("step1").classList.remove("hidden");
+    }
+    window.onload = function () {
+      // Ensure Firebase is initialized and the user is authenticated
+      firebase.auth().onAuthStateChanged(user => {
+        if (user) {
+          const uid = user.uid; // Get the UID of the logged-in user
+          fetchUserData(uid); // Fetch the user data using the UID
+        } else {
+          console.log("No user is signed in.");
+          // Handle case where no user is signed in (redirect, show login, etc.)
+        }
+
+        document.getElementById("confirmButton").addEventListener("click", confirmAppointment);
+        document.getElementById("proofImage").addEventListener("change", function () {
+
+          const file = this.files[0];
+          if (file) {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+              document.getElementById("modalImage").src = e.target.result;
+              document.getElementById("openModalBtn").style.display = "inline-block";
+            };
+            reader.readAsDataURL(file);
+          }
+        });
+
+        document.getElementById("openModalBtn").addEventListener("click", function () {
+          document.getElementById("imageModal").style.display = "block";
+        });
+
+        document.getElementById("closeModal").addEventListener("click", function () {
+          document.getElementById("imageModal").style.display = "none";
+        });
+
+        window.addEventListener("click", function (event) {
+          const modal = document.getElementById("imageModal");
+          if (event.target === modal) {
+            modal.style.display = "none";
+          }
+        });
+
+
+      });
+
+      const dateInput = document.getElementById("appointmentDateTime");
+      const selectedDate = localStorage.getItem("selectedDate");
+      const selectedTime = localStorage.getItem("selectedTime");
+
+      if (selectedDate && selectedTime && dateInput) {
+        const [hour, minutePart] = selectedTime.split(':');
+        const minute = minutePart.split(' ')[0];
+        const isAM = selectedTime.includes("AM");
+
+        let hour24 = parseInt(hour);
+        if (!isAM && hour24 !== 12) hour24 += 12;
+        if (isAM && hour24 === 12) hour24 = 0;
+
+        const hourStr = hour24.toString().padStart(2, '0');
+        const appointmentDateTime = `${selectedDate}T${hourStr}:${minute}`;
+        dateInput.value = appointmentDateTime;
+      }
+    };
+
+    // Function to fetch user data from Firestore and populate the form fields
+    function fetchUserData(uid) {
+      db.collection("patients").doc(uid).get().then((doc) => {
+        if (doc.exists) {
+          const data = doc.data();
+
+          // Populating the fields with the user's data
+          document.getElementById("fullName").value = data.fullName || "";
+          document.getElementById("phone").value = data.phone || "";
+          document.getElementById("email").value = data.email || "";
+          document.getElementById("age").value = data.age || "";  // Assuming 'age' is stored in 'age' field
+          document.getElementById("address").value = data.address || "";
+          document.getElementById("gender").value = data.gender || "";
+        } else {
+          console.log("No user data found!");
+        }
+      }).catch((error) => {
+        console.error("Error fetching user data:", error);
+      });
+    }
+
+  </script>
+</body>
+
+</html>

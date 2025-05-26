@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Registration Form</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.11.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.11.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore-compat.js"></script>
+
+  <!-- EmailJS SDK -->
+  <script src="https://cdn.emailjs.com/dist/email.min.js"></script>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f0f4f8 url('bg-blue.png') no-repeat center center;
+  background-size: cover;
+  background-attachment: fixed;
+}
+
+
+    .container {
+      width: 1000px;
+      display: flex;
+      background-color: #fff;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+      border-radius: 20px;
+      overflow: hidden;
+    }
+
+    .left-panel {
+      background-color: #29a9e1;
+      flex: 1;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 40px;
+    }
+
+    .left-panel h2 {
+      font-size: 28px;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+
+    .left-panel p {
+      font-size: 16px;
+      margin-bottom: 30px;
+      text-align: center;
+    }
+
+    .left-panel button {
+      padding: 10px 20px;
+      border: 2px solid #fff;
+      background: transparent;
+      color: white;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .right-panel {
+      flex: 2;
+      padding: 40px;
+    }
+
+    .title {
+      font-size: 22px;
+      font-weight: bold;
+      margin-bottom: 20px;
+      position: relative;
+    }
+
+    .title::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      bottom: -5px;
+      width: 30px;
+      height: 3px;
+      background: linear-gradient(to right, #00c6ff, #0072ff);
+    }
+
+    form .user-details {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+
+    .input-box {
+      width: calc(50% - 20px);
+      margin-bottom: 15px;
+      position: relative;
+    }
+
+    .input-box .details {
+      display: block;
+      font-weight: 500;
+      margin-bottom: 5px;
+      font-size: 14px;
+    }
+
+    .input-box input,
+    .input-box select {
+      width: 100%;
+      padding: 12px;
+      font-size: 14px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    .toggle-password {
+      position: absolute;
+      right: 10px;
+      top: 37px;
+      cursor: pointer;
+      width: 20px;
+      height: 20px;
+    }
+
+    .button {
+      margin-top: 20px;
+      text-align: right;
+    }
+
+    .button input {
+      padding: 12px 20px;
+      background-color: #29a9e1;
+      color: white;
+      font-size: 16px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        flex-direction: column;
+      }
+
+      .input-box {
+        width: 100%;
+      }
+    }
+  </style>
+
+  <script>
+    // Hash function using SHA-256
+    async function hashPassword(password) {
+      const encoder = new TextEncoder();
+      const data = encoder.encode(password);
+      const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+      return hashHex;
+    }
+
+    // Validate Password
+    function validatePassword(password) {
+      const regex = /^(?=.*[A-Z])(?=.*\d).{8,}$/;
+      return regex.test(password);
+    }
+
+    // Initialize Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyDwCayQZ0JO6DjzQvAT6ToT33I4QXCS_NY",
+      authDomain: "login-sample-c3af0.firebaseapp.com",
+      projectId: "login-sample-c3af0",
+      storageBucket: "login-sample-c3af0.appspot.com",
+      messagingSenderId: "372688128666",
+      appId: "1:372688128666:web:bbc529c73c4665f95f6d23"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    // Registration Logic
+    // Registration Logic
+    document.addEventListener("DOMContentLoaded", () => {
+      const roleSelect = document.querySelector("select[name='role']");
+      const doctorFields = document.querySelectorAll(".doctor-only");
+
+      // Show/hide doctor-only fields based on selected role
+      roleSelect.addEventListener("change", () => {
+        if (roleSelect.value === "doctor") {
+          doctorFields.forEach(field => field.style.display = "block");
+        } else {
+          doctorFields.forEach(field => field.style.display = "none");
+        }
+      });
+
+      document.getElementById("registerForm").addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const fullName = e.target.fullname.value.trim();
+        const username = e.target.username.value.trim();
+        const email = e.target.email.value.trim();
+        const phone = e.target.phone.value.trim();
+        const password = e.target.password.value;
+        const confirmPassword = e.target.confirmPassword.value;
+        const gender = e.target.gender.value;
+        const role = e.target.role.value;
+
+        // Doctor-specific fields
+        const doctorName = e.target.doctorName?.value.trim();
+        const specialization = e.target.specialization?.value.trim();
+        const bio = e.target.bio?.value.trim();
+        const availableDays = e.target.availableDays?.value.split(',').map(day => day.trim());
+        const schedule = e.target.schedule?.value.split(',').map(time => time.trim());
+        const licenseNumber = e.target.licenseNumber?.value.trim();
+
+        if (password !== confirmPassword) {
+          alert("Password and Confirm Password must match.");
+          return;
+        }
+
+        if (!validatePassword(password)) {
+          alert("Password must be at least 8 characters long, include one uppercase letter and one number.");
+          return;
+        }
+
+        try {
+          // 🔍 Check for duplicate email or username
+          const collectionRef = db.collection(role === "doctor" ? "doctors" : "patients");
+
+          const emailSnapshot = await collectionRef.where("email", "==", email).get();
+          if (!emailSnapshot.empty) {
+            alert("An account with this email already exists.");
+            return;
+          }
+
+          const usernameSnapshot = await collectionRef.where("username", "==", username).get();
+          if (!usernameSnapshot.empty) {
+            alert("Username is already taken.");
+            return;
+          }
+
+          // ✅ Create user if no duplicates
+          const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+          const user = userCredential.user;
+
+          await user.sendEmailVerification();
+          alert("A verification email has been sent. Please verify your email before logging in.");
+
+          const checkVerification = setInterval(() => {
+            user.reload().then(() => {
+              if (user.emailVerified) {
+                clearInterval(checkVerification);
+
+                hashPassword(password).then((hashedPassword) => {
+                  // Base user data
+                  const userData = {
+                    fullName,
+                    username,
+                    email,
+                    phone,
+                    gender,
+                    role,
+                    password: hashedPassword,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                  };
+
+                  // Add doctor-specific fields if role is doctor
+                  if (role === "doctor") {
+                    userData.name = doctorName;
+                    userData.specialization = specialization;
+                    userData.bio = bio;
+                    userData.date = availableDays || [];
+                    userData.schedule = schedule || [];
+                    userData.licenseNumber = licenseNumber;
+                  }
+
+
+                  db.collection(role === "doctor" ? "doctors" : "patients")
+                    .doc(user.uid)
+                    .set(userData)
+                    .then(() => {
+                      alert("Registration successful and email verified!");
+                      window.location.href = "patientLogin.html";
+                    })
+                    .catch(err => {
+                      console.error("Firestore write error:", err);
+                      alert("Error saving user data.");
+                    });
+                });
+              }
+            });
+          }, 3000);
+        } catch (error) {
+          console.error("Registration Error:", error);
+          alert("Error: " + error.message);
+        }
+      });
+    });
+
+  </script>
+
+</head>
+
+<body>
+  <div class="container">
+    <div class="left-panel">
+      <h1>Welcome</h1>
+      <p>To proceed, please login with your info.</p>
+      <button onclick="window.location.href='patientLogin.html'">Back to Login</button>
+    </div>
+
+    <div class="right-panel">
+      <div class="title">Registration Form</div>
+      <form id="registerForm">
+        <div class="user-details">
+          <div class="input-box">
+            <span class="details">Full Name</span>
+            <input type="text" name="fullname" required>
+          </div>
+          <div class="input-box">
+            <span class="details">Username</span>
+            <input type="text" name="username" required>
+          </div>
+          <div class="input-box">
+            <span class="details">Email</span>
+            <input type="email" name="email" required>
+          </div>
+          <div class="input-box">
+            <span class="details">Phone Number</span>
+            <input type="number" name="phone" required>
+          </div>
+          <div class="input-box">
+            <span class="details">Password</span>
+            <input type="password" id="password" name="password" required>
+          </div>
+          <div class="input-box">
+            <span class="details">Confirm Password</span>
+            <input type="password" id="confirmPassword" name="confirmPassword" required>
+          </div>
+          <div class="input-box" style="width: 100%;">
+            <span class="details">Gender</span>
+            <select name="gender" required>
+              <option value="" disabled selected>Select your gender</option>
+              <option value="male">Male</option>
+              <option value="female">Female</option>
+              <option value="prefer_not_to_say">Prefer not to say</option>
+            </select>
+          </div>
+
+          <div class="input-box" style="width: 100%;">
+            <span class="details">Role</span>
+            <select name="role" required>
+              <option value="" disabled selected>Select your role</option>
+              <option value="patient">Patient</option>
+              <option value="doctor">Doctor</option>
+            </select>
+          </div>
+          <!-- Doctor-only fields -->
+    
+
+          <div class="input-box doctor-only" style="width: 100%; display: none;">
+            <span class="details">Specialization</span>
+            <input type="text" name="specialization">
+          </div>
+
+          <div class="input-box doctor-only" style="width: 100%; display: none;">
+            <span class="details">Bio</span>
+            <input type="text" name="bio">
+          </div>
+          <div class="input-box doctor-only" style="width: 100%; display: none;">
+            <span class="details">License Number</span>
+            <input type="text" name="licenseNumber">
+          </div>
+
+          <div class="input-box doctor-only" style="width: 100%; display: none;">
+            <span class="details">Available Days (comma separated, e.g., Mon,Tue,Fri)</span>
+            <input type="text" name="availableDays">
+          </div>
+
+          <div class="input-box doctor-only" style="width: 100%; display: none;">
+            <span class="details">Schedule (comma separated, e.g., 9:00 AM - 11:00 AM,...)</span>
+            <input type="text" name="schedule">
+          </div>
+        </div>
+
+        <div class="button">
+          <input type="submit" value="Register">
+        </div>
+      </form>
+    </div>
+  </div>
+</body>
+
+</html>

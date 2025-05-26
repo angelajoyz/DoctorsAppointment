@@ -1,0 +1,208 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+
+body {
+    background: url('bg-green.png') no-repeat center center/cover;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 300px;
+}
+
+.form-box {
+    background: white;
+    padding: 30px;
+    border-radius: 10px;
+    text-align: center;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+    max-width: 350px;
+}
+
+h2 {
+    font-size: 20px;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+p {
+    margin-bottom: 30px;
+    color: #333;
+}
+
+h4 {
+    font-weight: normal;
+    margin-bottom: 10px;
+}
+.option {
+    margin-bottom: 15px;
+    text-align: left;
+}
+
+button {
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    width: 100%;
+}
+
+.patient-btn {
+    background-color: #2196F3;
+    color: white;
+}
+
+.patient-btn:hover {
+    background-color: #1976D2;
+}
+
+.doctor-btn {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.doctor-btn:hover {
+    background-color: #388E3C;
+}
+
+/* Doctor Login Page Styling */
+.login-container {
+    display: flex;
+    height: 700px;
+    width: 800px;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+    justify-content: center;
+}
+
+.left-panel {
+    background: #31E180;
+    color: white;
+    width: 40%;
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.left-panel h2 {
+    font-size: 24px;
+    margin-bottom: 10px;
+}
+
+.left-panel p {
+    font-size: 14px;
+}
+
+.right-panel {
+    width: 60%;
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+
+}
+
+.login-box h3 {
+    font-size: 22px;
+    margin-bottom: 15px;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+}
+
+label {
+    font-size: 14px;
+    margin-top: 10px;
+}
+
+input {
+    padding: 10px;
+    margin-top: 5px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    width: 100%;
+}
+
+.forgot-password {
+    text-align: right;
+    font-size: 12px;
+    margin-top: 5px;
+    color: #2ecc71;
+    text-decoration: none;
+}
+
+.btn {
+    background: #31E180;
+    color: white;
+    border: none;
+    padding: 10px;
+    margin-top: 15px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.btn:hover {
+    background: #27ae60;
+}
+
+.google-signin {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 15px;
+    border: 1px solid #ccc;
+    padding: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.google-signin img {
+    width: 20px;
+    margin-right: 10px;
+}
+
+.google-signin a {
+    text-decoration: none;
+    color: #333;
+}
+
+/* Style for input containers */
+.input-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+/* Style for input fields */
+.input-container input {
+    width: 100%;
+    padding: 10px;
+    padding-right: 40px; /* Space for the icon */
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+/* Style for icons inside input fields */
+.input-container .icon {
+    position: absolute;
+    right: 10px;
+    width: 20px;
+    cursor: pointer;
+}

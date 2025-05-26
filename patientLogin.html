@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Patient Login</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background: #f0f4f8;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      background: url('bg-blue.png') no-repeat center center/cover;
+    }
+
+    .container {
+      width: 900px;
+      height: 500px;
+      display: flex;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+      border-radius: 20px;
+      overflow: hidden;
+      background-color: #fff;
+    }
+
+    .left-panel {
+      background-color: #29a9e1;
+      flex: 1;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 40px;
+    }
+
+    .left-panel h2 {
+      font-size: 28px;
+      margin-bottom: 10px;
+    }
+
+    .left-panel p {
+      font-size: 16px;
+      margin-bottom: 30px;
+      text-align: center;
+    }
+
+    .left-panel button {
+      padding: 10px 20px;
+      border: 2px solid #fff;
+      background: transparent;
+      color: white;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .right-panel {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 40px;
+    }
+
+    .login-box {
+      width: 100%;
+      max-width: 400px;
+      margin: 0 auto;
+    }
+
+    .login-box h3 {
+      font-size: 22px;
+      margin-bottom: 20px;
+      font-weight: bold;
+    }
+
+    .input-container {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .input-container input {
+      width: 100%;
+      padding: 12px;
+      padding-right: 40px;
+      margin-bottom: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    .input-container img.icon {
+      position: absolute;
+      right: 10px;
+      width: 20px;
+      cursor: pointer;
+    }
+
+    .login-box .login-btn {
+      width: 100%;
+      padding: 12px;
+      background-color: #29a9e1;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-bottom: 15px;
+      font-size: 16px;
+    }
+
+    .google-btn,
+    .create-btn {
+      width: 100%;
+      padding: 12px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      background-color: white;
+      cursor: pointer;
+      font-size: 14px;
+      margin-bottom: 10px;
+    }
+
+    .google-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .google-btn img {
+      width: 20px;
+      height: 20px;
+    }
+
+    .create-btn {
+      font-size: 14px;
+      background-color: #fff;
+      color: #29a9e1;
+    }
+  </style>
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.11.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.11.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore-compat.js"></script>
+
+  <!-- EmailJS SDK -->
+  <script src="https://cdn.emailjs.com/dist/email.min.js"></script>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyDwCayQZ0JO6DjzQvAT6ToT33I4QXCS_NY",
+      authDomain: "login-sample-c3af0.firebaseapp.com",
+      projectId: "login-sample-c3af0",
+      storageBucket: "login-sample-c3af0.appspot.com",
+      messagingSenderId: "372688128666",
+      appId: "1:372688128666:web:bbc529c73c4665f95f6d23"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+    const provider = new firebase.auth.GoogleAuthProvider();
+    emailjs.init("bl3WcauRTizZhqr5b");
+  </script>
+</head>
+
+<body>
+  <div class="container">
+   <div class="left-panel">
+      <h1>Welcome</h1>
+      <p>To proceed, please login with your info.</p>
+    </div>
+    <div class="right-panel">
+      <div class="login-box">
+        <h3>Patient Login</h3>
+        <div class="input-container">
+          <input type="email" id="patient-email" placeholder="Email" required />
+        </div>
+        <div class="input-container">
+          <input type="password" id="patient-password" placeholder="Password" required />
+        </div>
+        <div style="text-align: right; margin-bottom:10px;">
+          <a href="#" style="color: #29a9e1; font-size: 12px; text-decoration: none;" onclick="forgotPassword()">Forgot
+            Password?</a>
+        </div>
+        <button class="login-btn" onclick="loginUser()">Log In</button>
+
+        <button class="google-btn" onclick="signInWithGoogle()">
+          <img src="https://www.svgrepo.com/show/355037/google.svg" alt="Google logo" />
+          Sign in with Google
+        </button>
+
+        <button class="create-btn" onclick="location.href='registerAccount.html'">Create Account</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function continueAsGuest() {
+      window.location.href = "guest.html";
+    }
+
+    function togglePassword() {
+      const passwordInput = document.getElementById("patient-password");
+      const icon = document.querySelector(".toggle-password");
+      if (passwordInput.type === "password") {
+        passwordInput.type = "text";
+        icon.src = "hide.png";
+      } else {
+        passwordInput.type = "password";
+        icon.src = "show.png";
+      }
+    }
+
+    async function loginUser() {
+      const email = document.getElementById("patient-email").value.trim().toLowerCase();
+      const password = document.getElementById("patient-password").value;
+
+      if (!email || !password) {
+        alert("Please enter both email and password.");
+        return;
+      }
+
+      try {
+        const loginBtn = document.querySelector('.login-btn');
+        loginBtn.disabled = true;
+        loginBtn.innerText = "Logging in...";
+
+        const userCredential = await auth.signInWithEmailAndPassword(email, password);
+        const user = userCredential.user;
+
+        // Check if user exists in either 'patients' or 'doctors' collection
+        const patientDoc = await db.collection("patients").doc(user.uid).get();
+        const doctorDoc = await db.collection("doctors").doc(user.uid).get();
+
+        if (!patientDoc.exists && !doctorDoc.exists) {
+          alert("This account is not registered in Firestore.");
+          await auth.signOut();
+          return;
+        }
+
+        if (!user.emailVerified) {
+          alert("Please verify your email first.");
+          await auth.signOut();
+          return;
+        }
+
+        if (patientDoc.exists) {
+          alert("Patient login successful!");
+          window.location.href = "patientDashboard.html";
+        } else if (doctorDoc.exists) {
+          alert("Doctor login successful!");
+          window.location.href = "doctorDashboard.html";
+        }
+
+      } catch (error) {
+        console.error("Login error:", error);
+
+        if (error.code === "auth/wrong-password") {
+          alert("Incorrect password.");
+        } else if (error.code === "auth/user-not-found") {
+          alert("No user found with this email.");
+        } else if (error.code === "auth/network-request-failed") {
+          alert("Network error. Please check your connection.");
+        } else {
+          alert("Something went wrong. Please try again.");
+        }
+      } finally {
+        const loginBtn = document.querySelector('.login-btn');
+        loginBtn.disabled = false;
+        loginBtn.innerText = "Log In";
+      }
+    }
+
+
+    async function signInWithGoogle() {
+      try {
+        const result = await auth.signInWithPopup(provider);
+        const user = result.user;
+
+        const snapshot = await db.collection("patients")
+          .where("email", "==", user.email)
+          .get();
+
+        if (snapshot.empty) {
+          alert("Email is not registered.");
+          await auth.signOut();
+          return;
+        }
+
+        if (!user.emailVerified) {
+          alert("Please verify your email first.");
+          await auth.signOut();
+          return;
+        }
+
+        alert("Welcome back!");
+        window.location.href = "patientDashboard.html";
+      } catch (error) {
+        console.error("Google Sign-In Error:", error);
+
+        if (error.code === "auth/popup-closed-by-user") {
+          alert("Popup closed before sign in.");
+        } else if (error.code === "auth/network-request-failed") {
+          alert("Network error. Please check your connection.");
+        } else {
+          alert("Google Sign-In failed: " + error.message);
+        }
+      }
+    }
+
+    function forgotPassword() {
+      let email = document.getElementById("patient-email").value.trim().toLowerCase();
+      if (!email) {
+        alert("Please enter your email address.");
+        return;
+      }
+
+      db.collection("patients")
+        .where("email", "==", email)
+        .get()
+        .then((querySnapshot) => {
+          if (querySnapshot.empty) {
+            alert("Invalid email. This email is not registered.");
+            return;
+          }
+
+          // Email exists, send password reset
+          auth.sendPasswordResetEmail(email)
+            .then(() => {
+              alert("Password reset email sent! Please check your inbox.");
+            })
+            .catch((error) => {
+              console.error("Error sending password reset email:", error);
+              alert("Error: " + error.message);
+            });
+        })
+        .catch((error) => {
+          console.error("Firestore query error:", error);
+          alert("Something went wrong. Please try again.");
+        });
+    }
+
+  </script>
+</body>
+
+</html>

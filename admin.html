@@ -1,0 +1,85 @@
+<!-- admin.html -->
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Admin Doctor Approval</title>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+    <style>
+        .card {
+            border: 1px solid #ddd;
+            padding: 16px;
+            margin: 10px 0;
+        }
+
+        button {
+            margin-right: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Pending Doctor Requests</h1>
+    <div id="pendingList"></div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyDwCayQZ0JO6DjzQvAT6ToT33I4QXCS_NY",
+            authDomain: "login-sample-c3af0.firebaseapp.com",
+            projectId: "login-sample-c3af0",
+            storageBucket: "login-sample-c3af0.appspot.com",
+            messagingSenderId: "372688128666",
+            appId: "1:372688128666:web:bbc529c73c4665f95f6d23"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        // Fetch pending requests
+        db.collection("pending_doctors").get().then(snapshot => {
+            const list = document.getElementById("pendingList");
+            snapshot.forEach(doc => {
+                const data = doc.data();
+                const card = document.createElement("div");
+                card.className = "card";
+                card.innerHTML = `
+          <p><strong>Name:</strong> ${data.name}</p>
+          <p><strong>Email:</strong> ${data.email}</p>
+          <p><strong>Specialization:</strong> ${data.specialization}</p>
+          <p><strong>PRC Number:</strong> ${data.prcNumber}</p>
+          <button onclick="approveDoctor('${doc.id}', ${JSON.stringify(data).replace(/"/g, '&quot;')})">Approve</button>
+          <button onclick="denyDoctor('${doc.id}')">Deny</button>
+        `;
+                list.appendChild(card);
+            });
+        });
+
+        // Approve doctor
+        function approveDoctor(docId, data) {
+            db.collection("doctors").doc(docId).set(data).then(() => {
+                return db.collection("pending_doctors").doc(docId).delete();
+            }).then(() => {
+                alert("Approved!");
+                location.reload();
+            }).catch(err => {
+                console.error(err);
+                alert("Error approving doctor");
+            });
+        }
+
+        // Deny doctor
+        function denyDoctor(docId) {
+            db.collection("pending_doctors").doc(docId).delete().then(() => {
+                alert("Denied and removed.");
+                location.reload();
+            }).catch(err => {
+                console.error(err);
+                alert("Error denying doctor");
+            });
+        }
+    </script>
+</body>
+
+</html>

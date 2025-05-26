@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doctor Dashboard</title>
+    <link rel="stylesheet" href="doctor-styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+        integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+
+<body>
+
+    <div class="dashboard-container">
+
+        <header>
+            <div class="doctor-info">
+                <img src="pfp.PNG" alt="Doctor Profile">
+                <div class="doctor-details">
+                    <h1>Dr. Juan Dela Cruz</h1>
+                    <p class="doctor-spec">Cardiologist</p>
+                </div>
+            </div>
+            <div class="notifications">
+                <span class="notification-icon">
+                    <i class="fas fa-bell">
+                        <span class="notification-count">3</span>
+                    </i>
+                </span>
+            </div>
+        </header>
+
+        <aside>
+          <nav>
+            <ul>
+              <li><a href="doctorDashboard.html">Dashboard</a></li>
+              <li><a href="doctorDetails.html">Profile</a></li>
+              <li><a href="#">Patients</a></li>
+              <li><a href="#">Reports</a></li>
+              <li><a href="#">Settings</a></li>
+            </ul>
+          </nav>
+        </aside>
+
+        <main>
+            <!-- <section class="overview">
+                <div class="widget">
+                    <h3>Today's Appointments</h3>
+                    <p>15</p>
+                </div>
+                <div class="widget">
+                    <h3>Pending Lab Results</h3>
+                    <p>5</p>
+                </div>
+                <div class="widget">
+                    <h3>Patient Feedback</h3>
+                    <p>4.8 Stars</p>
+                </div>
+            </section>
+          -->
+            <section class="schedule">
+                <h2>Appointment</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Date and Time</th>
+                            <th>Patient Name</th>
+                            <th>Reason</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td><a href="patient-details.html?id=456" data-patient-id="456">View Details</a></td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td><a href="patient-details.html?id=123" data-patient-id="123">View Details</a></td>
+                        </tr>
+                        <!-- More appointments here -->
+                    </tbody>
+                </table>
+            </section>
+
+            
+        </main>
+
+        <footer>
+            <p>&copy; 2025 Doctor Dashboard</p>
+        </footer>
+
+    </div>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
+        import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
+      
+        const firebaseConfig = {
+          apiKey: "AIzaSyDwCayQZ0JO6DjzQvAT6ToT33I4QXCS_NY",
+          authDomain: "login-sample-c3af0.firebaseapp.com",
+          projectId: "login-sample-c3af0",
+          storageBucket: "login-sample-c3af0.firebasestorage.app",
+          messagingSenderId: "372688128666",
+          appId: "1:372688128666:web:bbc529c73c4665f95f6d23"
+        };
+      
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+      
+        const appointmentTableBody = document.querySelector("tbody");
+      
+        async function loadAppointments() {
+          const querySnapshot = await getDocs(collection(db, "appointments"));
+          appointmentTableBody.innerHTML = ""; // Clear previous data
+      
+          querySnapshot.forEach((doc) => {
+            const data = doc.data();
+      
+            const row = document.createElement("tr");
+            row.innerHTML = `
+              <td>${new Date(data.appointmentDateTime).toLocaleString([], {
+                year: 'numeric', month: 'short', day: 'numeric',
+                hour: '2-digit', minute: '2-digit'
+              })}</td>
+              <td>${data.fullName}</td>
+              <td>${data.reason || "N/A"}</td>
+              <td><a href="patient-details.html?id=${doc.id}" data-patient-id="${doc.id}">View Details</a></td>
+            `;
+            appointmentTableBody.appendChild(row);
+          });
+        }
+      
+        loadAppointments();
+      </script>
+      
+    
+</body>
+
+</html>
