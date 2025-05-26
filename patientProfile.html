@@ -271,7 +271,7 @@
       </div>
       <div class="button-container">
         <button class="edit-btn" onclick="enableEditing()">Edit</button>
-        <button class="save-btn" id="saveBtn" onclick="saveProfile()">Save Changes</button>
+        <button class="save-btn" id="saveBtn" onclick="saveProfile()" style="display: none;">Save Changes</button>
       </div>
     </div>
 
@@ -329,7 +329,7 @@
       const user = auth.currentUser;
       if (user && file) {
         const storageRef = storage.ref();
-        const imageRef = storageRef.child(`users/${user.uid}/profile.jpg`);
+        const imageRef = storageRef.child(users/${user.uid}/profile.jpg);
   
         imageRef.put(file).then(() => {
           return imageRef.getDownloadURL();
@@ -435,7 +435,7 @@ function saveProfile() {
           } else {
             // Get Gravatar image based on email
             const emailHash = md5(data.email.trim().toLowerCase());
-            const gravatarURL = `https://www.gravatar.com/avatar/${emailHash}?d=identicon`;  // 'identicon' is the default Gravatar image style
+            const gravatarURL = https://www.gravatar.com/avatar/${emailHash}?d=identicon;  // 'identicon' is the default Gravatar image style
 
             document.getElementById("profileImage").src = gravatarURL;
           }
