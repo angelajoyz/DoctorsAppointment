@@ -318,3 +318,166 @@ footer {
   .day-schedule button {
     margin: 5px 0;
   }
+
+main {
+  padding: 2rem;
+  background-color: #f9f9f9;
+  flex: 1;
+}
+
+.profile-section {
+  max-width: 800px;
+  margin: 2rem auto;
+  background-color: #ffffff;
+  padding: 2rem;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.profile-section form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+}
+
+.profile-section form div {
+  flex: 1 1 45%;
+  display: flex;
+  flex-direction: column;
+}
+
+.full-width {
+  flex: 1 1 100%;
+}
+
+.profile-section label {
+  margin-bottom: 0.3rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.profile-section input,
+.profile-section select,
+.profile-section textarea {
+  padding: 0.65rem;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 1rem;
+  background-color: #fdfdfd;
+}
+
+.profile-section input:disabled,
+.profile-section select:disabled,
+.profile-section textarea:disabled {
+  background-color: #eee;
+  cursor: not-allowed;
+}
+
+.profile-section textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.button-row {
+  flex: 1 1 100%;
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+/* Buttons styling */
+.edit-btn,
+.save-btn,
+.cancel-btn {
+  padding: 0.6rem 1.3rem;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 0.95rem;
+  transition: background-color 0.2s ease;
+}
+
+.edit-btn {
+  background-color: #007bff;
+  color: white;
+}
+
+.save-btn {
+  background-color: #28a745;
+  color: white;
+}
+
+.cancel-btn {
+  background-color: #dc3545;
+  color: white;
+}
+
+.edit-btn:hover {
+  background-color: #0069d9;
+}
+
+.save-btn:hover {
+  background-color: #218838;
+}
+
+.cancel-btn:hover {
+  background-color: #c82333;
+}
+
+/* Responsive: stack fields on smaller screens */
+@media (max-width: 768px) {
+  .profile-section form div {
+    flex: 1 1 100%;
+  }
+
+ .button-row {
+  flex: 1 1 100%;
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+
+  .edit-btn,
+  .save-btn,
+  .cancel-btn {
+    width: 100%;
+  }
+}
+
+.notifications {
+  position: relative;
+}
+
+.notification-dropdown {
+  display: none;
+  position: absolute;
+  right: 0;
+  background-color: white;
+  border: 1px solid #ccc;
+  width: 300px;
+  max-height: 300px;
+  overflow-y: auto;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  z-index: 100;
+}
+
+.notifications:hover .notification-dropdown {
+  display: block;
+}
+
+.notification-item {
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+}
+
+.notification-item:last-child {
+  border-bottom: none;
+}
+
+.notification-item strong {
+  color: #007BFF;
+}
