@@ -11,18 +11,74 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 
+// --- New feature: Get doctorId from URL and fetch doctor info ---
+const urlParams = new URLSearchParams(window.location.search);
+const doctorId = urlParams.get("doctorId");
+
+let selectedDoctor = {
+    id: "",
+    name: "",
+    email: ""
+};
+
+if (doctorId) {
+    db.collection("doctors").doc(doctorId).get()
+        .then(doc => {
+            if (doc.exists) {
+                const doctor = doc.data();
+                selectedDoctor = {
+                    id: doctorId,
+                    name: doctor.fullName || "",
+                    email: doctor.email || ""
+                };
+
+                const docNameEl = document.getElementById("doctorName");
+                if (docNameEl) docNameEl.textContent = selectedDoctor.name;
+            } else {
+                alert("Doctor not found in database.");
+            }
+        })
+        .catch(error => {
+            console.error("Error fetching doctor info:", error);
+        });
+}
+
+// --- Original nextStep with validation for step 1 fields ---
+function nextStep(step) {
+    if (step === 1) {
+        // Validate step1 inputs before going next
+        const inputs = document.querySelectorAll('#step1 input, #step1 select');
+        for (let input of inputs) {
+            // Check if value is empty or select is default disabled option
+            if (!input.value || input.value === input.querySelector('option[disabled]')?.value) {
+                alert('Please complete all required fields before proceeding.');
+                return;
+            }
+        }
+    }
+    document.getElementById(`step${step}`).classList.add("hidden");
+    document.getElementById(`step${step + 1}`).classList.remove("hidden");
+}
+
+function prevStep(step) {
+    document.getElementById(`step${step + 1}`).classList.add("hidden");
+    document.getElementById(`step${step}`).classList.remove("hidden");
+}
+
+// --- Original validateReferenceNumber supporting multiple payment methods ---
 function validateReferenceNumber(referenceNumber, paymentMethod) {
     if (paymentMethod === "GCash") {
         return /^\d{13}$/.test(referenceNumber);
     } else if (paymentMethod === "Bank Transfer") {
         return /^[a-zA-Z0-9]{6,20}$/.test(referenceNumber);
     } else if (paymentMethod === "Credit Card") {
-        // Credit Card can skip validation or you can add your logic here
+        // Credit Card can skip validation or add logic here
         return true;
     }
     return false;
 }
 
+// --- Original updateFee ---
 function updateFee() {
     let feeAmount;
     const reason = document.getElementById("appointmentReason").value;
@@ -33,26 +89,10 @@ function updateFee() {
         default: feeAmount = 0;
     }
     document.getElementById("feeAmount").value = feeAmount;
-    document.getElementById("displayFee").value = ₱${feeAmount};
+    document.getElementById("displayFee").value = `₱${feeAmount}`;
 }
 
-function nextStep(step) {
-    const inputs = document.querySelectorAll('#step1 input, #step1 select');
-    for (let input of inputs) {
-        if (!input.value || input.value === input.querySelector('option[disabled]')?.value) {
-            alert('Please complete all required fields before proceeding.');
-            return;
-        }
-    }
-    document.getElementById(step${step}).classList.add("hidden");
-    document.getElementById(step${step + 1}).classList.remove("hidden");
-}
-
-function prevStep(step) {
-    document.getElementById(step${step + 1}).classList.add("hidden");
-    document.getElementById(step${step}).classList.remove("hidden");
-}
-
+// --- Original handleFileUpload ---
 function handleFileUpload(event) {
     const file = event.target.files[0];
     if (!file) return;
@@ -78,21 +118,7 @@ function handleFileUpload(event) {
     reader.readAsDataURL(file);
 }
 
-// 1. Replace your old validateReferenceNumber with this one supporting all payment methods:
-function validateReferenceNumber(referenceNumber, paymentMethod) {
-    if (paymentMethod === "GCash") {
-        return /^\d{13}$/.test(referenceNumber);
-    } else if (paymentMethod === "Bank Transfer") {
-        return /^[a-zA-Z0-9]{6,20}$/.test(referenceNumber);
-    } else if (paymentMethod === "Credit Card") {
-        // Credit Card can skip validation or you can add your logic here
-        return true;
-    }
-    return false;
-}
-
-// 2. Update confirmAppointment() to use this and check duplicates only for GCash and Bank Transfer
-
+// --- Merged confirmAppointment using original multi-payment validation + new doctor info in appointment data ---
 function confirmAppointment() {
     const inputs = document.querySelectorAll('#step2 input:not([type="checkbox"]), #step2 select');
     for (let input of inputs) {
@@ -115,7 +141,7 @@ function confirmAppointment() {
 
     // Validate reference number according to payment method
     if (!validateReferenceNumber(paymentRef, paymentMethod)) {
-        alert(Invalid reference number for ${paymentMethod}.);
+        alert(`Invalid reference number for ${paymentMethod}.`);
         return;
     }
 
@@ -181,7 +207,12 @@ function confirmAppointment() {
                                     noRefundAccepted: true,
                                     timestamp: new Date().toISOString(),
                                     status: "Pending",
-                                    userId: auth.currentUser.uid
+                                    userId: auth.currentUser?.uid || "",
+
+                                    // Include doctor info from new code
+                                    doctorId: selectedDoctor.id,
+                                    doctorName: selectedDoctor.name,
+                                    doctorEmail: selectedDoctor.email
                                 };
 
                                 db.collection("appointments").add(appointmentData)
@@ -215,8 +246,6 @@ function confirmAppointment() {
     }
 }
 
-
-
 function fetchUserData(uid) {
     db.collection("patients").doc(uid).get()
         .then(doc => {
@@ -243,14 +272,14 @@ window.onload = function () {
             console.log("No user signed in.");
         }
 
-        document.getElementById("confirmButton").addEventListener("click", confirmAppointment);
-        document.getElementById("proofImage").addEventListener("change", handleFileUpload);
+        document.getElementById("confirmButton")?.addEventListener("click", confirmAppointment);
+        document.getElementById("proofImage")?.addEventListener("change", handleFileUpload);
 
-        document.getElementById("openModalBtn").addEventListener("click", () => {
+        document.getElementById("openModalBtn")?.addEventListener("click", () => {
             document.getElementById("imageModal").style.display = "block";
         });
 
-        document.getElementById("closeModal").addEventListener("click", () => {
+        document.getElementById("closeModal")?.addEventListener("click", () => {
             document.getElementById("imageModal").style.display = "none";
         });
 
@@ -261,18 +290,7 @@ window.onload = function () {
         });
     });
 
-    const dateInput = document.getElementById("appointmentDateTime");
-    const selectedDate = localStorage.getItem("selectedDate");
-    const selectedTime = localStorage.getItem("selectedTime");
-
-    if (selectedDate && selectedTime && dateInput) {
-        const [hour, minutePart] = selectedTime.split(':');
-        const minute = minutePart.split(' ')[0];
-        const isAM = selectedTime.includes("AM");
-        let hour24 = parseInt(hour);
-        if (!isAM && hour24 !== 12) hour24 += 12;
-        if (isAM && hour24 === 12) hour24 = 0;
-        const hourStr = hour24.toString().padStart(2, '0');
-        dateInput.value = ${selectedDate}T${hourStr}:${minute};
-    }
+    const appointmentReason = document.getElementById("appointmentReason");
+    appointmentReason?.addEventListener("change", updateFee);
+    updateFee();
 };
