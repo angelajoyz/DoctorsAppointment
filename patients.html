@@ -1,213 +1,363 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Doctor Dashboard</title>
-  <link rel="stylesheet" href="doctor-styles.css" />
-  <link
-    rel="stylesheet"
-    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
-    integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg=="
-    crossorigin="anonymous"
-    referrerpolicy="no-referrer"
-  />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      background-color: #f4f4f4;
+    }
+
+    header {
+      background-image: url("header-green.png");
+      background-size: cover;
+      background-repeat: no-repeat;
+      background-color: #31E180;
+      padding: 15px 20px;
+      height: 80px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: flex-start;
+      padding-left: 80px;
+      position: relative;
+    }
+
+    .menu-icon {
+      font-size: 24px;
+      cursor: pointer;
+      position: absolute;
+      top: 10px;
+      left: 15px;
+      background: none;
+      border: none;
+      padding: 10px;
+      z-index: 100;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 2em;
+      margin-top: 30px;
+    }
+
+    h1 .small-text {
+      font-size: 0.5em;
+      display: block;
+    }
+
+    h1 .highlight {
+      color: #000000;
+      font-size: 1em;
+      font-weight: bold;
+    }
+
+    header p {
+      margin-top: 5px;
+      font-size: 1.1em;
+    }
+
+    .hidden-menu {
+      position: fixed;
+      top: 0;
+      left: -250px;
+      width: 250px;
+      height: 100%;
+      background: #31E180;
+      color: white;
+      padding-top: 60px;
+      transition: left 0.3s ease-in-out;
+      z-index: 99;
+    }
+
+    .hidden-menu.active {
+      left: 0;
+    }
+
+    .hidden-menu ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    .hidden-menu li {
+      padding: 10px;
+      text-align: center;
+    }
+
+    .hidden-menu a {
+      color: black;
+      text-decoration: none;
+      display: block;
+      padding: 10px;
+    }
+
+    .hidden-menu a:hover {
+      background: #fff;
+      border-radius: 20px;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 20px auto;
+      background: white;
+      border-radius: 10px;
+      padding: 30px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+
+    .top-section {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-bottom: 30px;
+    }
+
+    .profile-info {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .profile-info img {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+
+    .notifications {
+      position: relative;
+      cursor: pointer;
+    }
+
+    .notification-icon i {
+      font-size: 20px;
+      position: relative;
+    }
+
+    .notification-count {
+      background: red;
+      color: white;
+      border-radius: 50%;
+      padding: 2px 6px;
+      font-size: 12px;
+      position: absolute;
+      top: -10px;
+      right: -10px;
+    }
+
+    .notification-dropdown {
+      position: absolute;
+      top: 30px;
+      right: 0;
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      padding: 10px;
+      width: 250px;
+      display: none;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      z-index: 10;
+    }
+
+    .notification-item {
+      padding: 8px;
+      border-bottom: 1px solid #eee;
+    }
+
+    .notification-item:last-child {
+      border-bottom: none;
+    }
+
+    .notifications:hover .notification-dropdown {
+      display: block;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+    }
+
+    table {
+      text-decoration: none;
+    }
+
+    th, td {
+      padding: 10px;
+      border-bottom: 1px solid #ccc;
+      text-align: left;
+    }
+
+    th {
+      background-color: #31E180;
+      color: white;
+    }
+
+    @media(max-width: 768px) {
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
 </head>
 
 <body>
-  <div class="dashboard-container">
-    <header>
-      <div class="doctor-info">
-        <img src="pfp.PNG" alt="Doctor Profile" id="profileImage" />
-        <div class="doctor-details">
-          <h1 id="fullNameDisplay">Loading...</h1>
-          <p class="doctor-spec" id="specializationDisplay">Loading...</p>
+  <!-- Firebase Scripts -->
+  <script src="https://www.gstatic.com/firebasejs/10.11.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.11.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore-compat.js"></script>
+
+  <!-- Sidebar -->
+  <div class="hidden-menu" id="sidebarMenu">
+    <ul>
+      <li><a href="doctorDashboard.html">Dashboard</a></li>
+      <li><a href="doctorDetails.html">Profile</a></li>
+      <li><a href="patients.html">Patients</a></li>
+      <li><a href="reports.html">Reports</a></li>
+      <li><a href="index.html">Logout</a></li>
+    </ul>
+  </div>
+
+  <!-- Header -->
+  <header>
+    <button class="menu-icon" onclick="toggleMenu()">&#9776;</button>
+    <h1><span class="small-text">UPCOMING</span> <span class="highlight">APPOINTMENTS</span></h1>
+    <p>Manage your patients.</p>
+  </header>
+
+  <!-- Main Content -->
+  <div class="container">
+    <div class="top-section">
+      <div class="profile-info">
+        <img src="pfp.png" alt="Doctor Profile" id="profileImage" />
+        <div>
+          <h2 id="fullNameDisplay">Loading...</h2>
+          <p id="specializationDisplay">Loading...</p>
         </div>
       </div>
       <div class="notifications">
         <span class="notification-icon">
-            <i class="fas fa-bell">
+          <i class="fas fa-bell">
             <span class="notification-count" id="notificationCount">0</span>
-            </i>
+          </i>
         </span>
-        <div class="notification-dropdown" id="notificationDropdown">
-            <!-- Notifications will be injected here -->
-        </div>
+        <div class="notification-dropdown" id="notificationDropdown"></div>
       </div>
-    </header>
+    </div>
 
-    <aside>
-      <nav>
-        <ul>
-          <li><a href="doctorDashboard.html">Dashboard</a></li>
-          <li><a href="doctorDetails.html">Profile</a></li>
-          <li><a href="patients.html">Patients</a></li>
-          <li><a href="reports.html">Reports</a></li>
-        </ul>
-      </nav>
-    </aside>
-
-    <main>
-      <section class="schedule">
-        <h2>Appointment</h2>
-        <table>
-          <thead>
-            <tr>
-              <th>Date and Time</th>
-              <th>Patient Name</th>
-              <th>Reason</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
-      </section>
-    </main>
-
-    <footer>
-      <p>&copy; 2025 Doctor Dashboard</p>
-    </footer>
+    <section>
+      <h3>Upcoming Appointments</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Date and Time</th>
+            <th>Patient Name</th>
+            <th>Reason</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </section>
   </div>
 
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
-  import {
-    getFirestore,
-    collection,
-    getDocs,
-    doc,
-    getDoc,
-  } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
-  import {
-    getAuth,
-    onAuthStateChanged,
-  } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
+  <!-- JS -->
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyDwCayQZ0JO6DjzQvAT6ToT33I4QXCS_NY",
+      authDomain: "login-sample-c3af0.firebaseapp.com",
+      projectId: "login-sample-c3af0",
+      storageBucket: "login-sample-c3af0.appspot.com",
+      messagingSenderId: "372688128666",
+      appId: "1:372688128666:web:bbc529c73c4665f95f6d23"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    const auth = firebase.auth();
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyDwCayQZ0JO6DjzQvAT6ToT33I4QXCS_NY",
-    authDomain: "login-sample-c3af0.firebaseapp.com",
-    projectId: "login-sample-c3af0",
-    storageBucket: "login-sample-c3af0.appspot.com",
-    messagingSenderId: "372688128666",
-    appId: "1:372688128666:web:bbc529c73c4665f95f6d23",
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
-  const auth = getAuth();
-
-  const fullNameEl = document.getElementById("fullNameDisplay");
-  const specializationEl = document.getElementById("specializationDisplay");
-  const profileImageEl = document.getElementById("profileImage");
-  const appointmentTableBody = document.querySelector("tbody");
-  const notificationDropdown = document.getElementById("notificationDropdown");
-  const notificationCount = document.getElementById("notificationCount");
-
-  async function loadDoctorInfo(doctorId) {
-    try {
-      const docRef = doc(db, "doctors", doctorId);
-      const docSnap = await getDoc(docRef);
-
-      if (docSnap.exists()) {
-        const data = docSnap.data();
-        fullNameEl.textContent = data.fullName || "No name found";
-        specializationEl.textContent = data.specialization || "No specialization found";
-        if (data.profileImageUrl) {
-          profileImageEl.src = data.profileImageUrl;
-        }
-      } else {
-        fullNameEl.textContent = "Doctor not found";
-        specializationEl.textContent = "";
-        console.warn("No doctor document found!");
-      }
-    } catch (error) {
-      console.error("Error fetching doctor info:", error);
+    function toggleMenu() {
+      document.getElementById("sidebarMenu").classList.toggle("active");
     }
-  }
 
-  async function loadAppointments() {
-    try {
-      const querySnapshot = await getDocs(collection(db, "approved"));
+    const fullNameEl = document.getElementById("fullNameDisplay");
+    const specializationEl = document.getElementById("specializationDisplay");
+    const profileImageEl = document.getElementById("profileImage");
+    const appointmentTableBody = document.querySelector("tbody");
+    const notificationDropdown = document.getElementById("notificationDropdown");
+    const notificationCount = document.getElementById("notificationCount");
+
+    async function loadDoctorInfo(uid) {
+      const docRef = db.collection("doctors").doc(uid);
+      const docSnap = await docRef.get();
+      if (docSnap.exists) {
+        const data = docSnap.data();
+        fullNameEl.textContent = data.fullName || "No name";
+        specializationEl.textContent = data.specialization || "No specialization";
+        if (data.profileImageURL) {
+          profileImageEl.src = data.profileImageURL;
+        }
+      }
+    }
+
+    async function loadAppointments() {
+      const snapshot = await db.collection("approved").get();
       const now = new Date();
       appointmentTableBody.innerHTML = "";
       notificationDropdown.innerHTML = "";
       let upcomingCount = 0;
 
-      querySnapshot.forEach((docSnap) => {
-        const data = docSnap.data();
-        const dateStr = data.appointmentDateTime || data.timestamp;
+      snapshot.forEach(doc => {
+        const data = doc.data();
+        const date = new Date(data.appointmentDateTime || data.timestamp);
+        if (isNaN(date) || date < now) return;
 
-        const appointmentDate = new Date(dateStr);
-        if (isNaN(appointmentDate) || appointmentDate < now) return;
-
-        // Table row
         const row = document.createElement("tr");
         row.innerHTML = `
-          <td>${appointmentDate.toLocaleString([], {
-            year: "numeric",
-            month: "short",
-            day: "numeric",
-            hour: "2-digit",
-            minute: "2-digit",
-          })}</td>
+          <td>${date.toLocaleString()}</td>
           <td>${data.fullName || "N/A"}</td>
           <td>${data.reason || "N/A"}</td>
-          <td><a href="patient-details.html?id=${docSnap.id}" data-patient-id="${docSnap.id}">View Details</a></td>
+          <td><a href="patient-details.html?id=${doc.id}" data-patient-id="${doc.id}">View Details</a></td>
         `;
         appointmentTableBody.appendChild(row);
 
-        // Notifications for tomorrow
         const tomorrow = new Date();
         tomorrow.setDate(now.getDate() + 1);
-        const isTomorrow =
-          appointmentDate.getDate() === tomorrow.getDate() &&
-          appointmentDate.getMonth() === tomorrow.getMonth() &&
-          appointmentDate.getFullYear() === tomorrow.getFullYear();
-
-        if (isTomorrow) {
+        if (
+          date.getDate() === tomorrow.getDate() &&
+          date.getMonth() === tomorrow.getMonth() &&
+          date.getFullYear() === tomorrow.getFullYear()
+        ) {
           upcomingCount++;
-          const notifItem = document.createElement("div");
-          notifItem.classList.add("notification-item");
-          notifItem.innerHTML = `
-            <strong>${data.fullName}</strong> has an appointment<br/>
-            <small>${appointmentDate.toLocaleString([], {
-              month: "short",
-              day: "numeric",
-              hour: "2-digit",
-              minute: "2-digit",
-            })}</small>
-          `;
-          notificationDropdown.appendChild(notifItem);
+          const notif = document.createElement("div");
+          notif.className = "notification-item";
+          notif.innerHTML = `<strong>${data.fullName}</strong><br><small>${date.toLocaleString()}</small>`;
+          notificationDropdown.appendChild(notif);
         }
       });
 
       if (!appointmentTableBody.hasChildNodes()) {
-        appointmentTableBody.innerHTML =
-          "<tr><td colspan='4'>No upcoming approved appointments.</td></tr>";
+        appointmentTableBody.innerHTML = "<tr><td colspan='4'>No upcoming appointments.</td></tr>";
       }
 
       notificationCount.textContent = upcomingCount;
       notificationCount.style.display = upcomingCount > 0 ? "inline-block" : "none";
-    } catch (error) {
-      console.error("Error loading approved appointments:", error);
     }
-  }
 
-  onAuthStateChanged(auth, (user) => {
-    if (user) {
-      console.log("Logged in as", user.email);
-      loadDoctorInfo(user.uid);
-      loadAppointments(); // no doctorId filtering
-    } else {
-      fullNameEl.textContent = "Please log in";
-      specializationEl.textContent = "";
-      appointmentTableBody.innerHTML =
-        "<tr><td colspan='4'>You must be logged in to view appointments.</td></tr>";
-    }
-  });
-</script>
-
+    auth.onAuthStateChanged(user => {
+      if (user) {
+        loadDoctorInfo(user.uid);
+        loadAppointments();
+      } else {
+        fullNameEl.textContent = "Not logged in";
+        appointmentTableBody.innerHTML = "<tr><td colspan='4'>Please log in.</td></tr>";
+      }
+    });
+  </script>
 </body>
-
 </html>
