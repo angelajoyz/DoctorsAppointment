@@ -2,111 +2,234 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Doctor Dashboard</title>
-  <link rel="stylesheet" href="doctor-styles.css" />
-  <link rel="stylesheet"
-    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
-    integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg=="
-    crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Doctor Profile</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      background-color: #f4f4f4;
+    }
+
+    header {
+      background-image: url("header-green.png");
+      background-size: cover;
+      background-repeat: no-repeat;
+      background-color: #31E180;
+      padding: 15px 20px;
+      height: 80px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: flex-start;
+      padding-left: 80px;
+      position: relative;
+    }
+
+    .menu-icon {
+      font-size: 24px;
+      cursor: pointer;
+      position: absolute;
+      top: 10px;
+      left: 15px;
+      background: none;
+      border: none;
+      padding: 10px;
+      z-index: 100;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 2em;
+      margin-top: 30px;
+    }
+
+    h1 .small-text {
+      font-size: 0.5em;
+      display: block;
+    }
+
+    h1 .highlight {
+      color: #000000;
+      font-size: 1em;
+      font-weight: bold;
+    }
+
+    header p {
+      margin-top: 5px;
+      font-size: 1.1em;
+    }
+
+    .hidden-menu {
+      position: fixed;
+      top: 0;
+      left: -250px;
+      width: 250px;
+      height: 100%;
+      background: #31E180;
+      color: white;
+      padding-top: 60px;
+      transition: left 0.3s ease-in-out;
+      z-index: 99;
+    }
+
+    .hidden-menu.active {
+      left: 0;
+    }
+
+    .hidden-menu ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    .hidden-menu li {
+      padding: 10px;
+      text-align: center;
+    }
+
+    .hidden-menu a {
+      color: black;
+      text-decoration: none;
+      display: block;
+      padding: 10px;
+    }
+
+    .hidden-menu a:hover {
+      background: #fff;
+      border-radius: 20px;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 20px auto;
+      background: white;
+      border-radius: 10px;
+      padding: 40px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+
+    .top-section {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      flex-wrap: wrap;
+    }
+
+    .profile-info {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .profile-info img {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      object-fit: cover;
+      cursor: pointer;
+    }
+
+    .user-text h2 {
+      margin: 0;
+      font-size: 20px;
+    }
+
+    .user-text p {
+      margin: 5px 0 0;
+      color: #555;
+    }
+
+    .edit-btn {
+      background-color: #31E180;
+      color: white;
+      padding: 10px 18px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    .form-grid {
+      margin-top: 30px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .form-group label {
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    .form-group input,
+    .form-group select {
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      background-color: #f7f7f7;
+    }
+
+    .email-section {
+      margin-top: 40px;
+    }
+
+    .email-box {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      padding: 15px;
+      background-color: #f0f4ff;
+      border-radius: 10px;
+      margin-bottom: 10px;
+    }
+
+    .email-box i {
+      background-color: #007bff;
+      color: white;
+      padding: 10px;
+      border-radius: 50%;
+    }
+
+    .email-info p {
+      margin: 0;
+    }
+
+    .save-btn {
+      background-color: red;
+      color: white;
+      padding: 10px 18px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    .button-container button {
+      display: inline-block;
+    }
+
+    @media(max-width: 768px) {
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+  }
+  </style>
 </head>
 <body>
-  <div class="dashboard-container">
-    <header>
-      <div class="doctor-info">
-        <img src="pfp.PNG" alt="Doctor Profile" id="profileImage" />
-        <div class="doctor-details">
-          <h1 id="fullNameDisplay">Loading...</h1>
-          <p class="doctor-spec" id="specializationDisplay">Loading...</p>
-        </div>
-      </div>
-      <div class="notifications">
-        <span class="notification-icon">
-          <i class="fas fa-bell">
-            <span class="notification-count">3</span>
-          </i>
-        </span>
-      </div>
-    </header>
+  <!-- Firebase Scripts -->
+  <script src="https://www.gstatic.com/firebasejs/10.11.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.11.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.11.1/firebase-storage-compat.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/js-md5/0.7.3/md5.min.js"></script>
 
-    <aside>
-      <nav>
-        <ul>
-          <li><a href="doctorDashboard.html">Dashboard</a></li>
-          <li><a href="doctorDetails.html">Profile</a></li>
-          <li><a href="patients.html">Patients</a></li>
-          <li><a href="reports.html">Reports</a></li>
-        </ul>
-      </nav>
-    </aside>
-
-    <main>
-      <section class="profile-section">
-        <form id="doctorProfileForm">
-          <div>
-            <label for="fullName">Full Name</label>
-            <input type="text" id="fullName" name="fullName" disabled />
-          </div>
-          <div>
-            <label for="username">Username</label>
-            <input type="text" id="username" name="username" disabled />
-          </div>
-          <div>
-            <label for="email">Email</label>
-            <input type="email" id="email" name="email" disabled />
-          </div>
-          <div>
-            <label for="phone">Phone</label>
-            <input type="text" id="phone" name="phone" disabled />
-          </div>
-          <div>
-            <label for="gender">Gender</label>
-            <select id="gender" name="gender" disabled>
-              <option value="">Select Gender</option>
-              <option value="male">Male</option>
-              <option value="female">Female</option>
-              <option value="other">Other</option>
-              <option value="prefer not to say">Prefer not to say</option>
-            </select>
-          </div>
-          <div>
-            <label for="specialization">Specialization</label>
-            <input type="text" id="specialization" name="specialization" disabled />
-          </div>
-
-          <!-- Bio takes full width -->
-          <div class="full-width">
-            <label for="bio">Bio</label>
-            <textarea id="bio" name="bio" disabled></textarea>
-          </div>
-
-          <!-- Buttons at the bottom -->
-          <div class="button-row full-width">
-            <button type="button" class="edit-btn" id="editBtn">Edit Profile</button>
-            <button type="button" class="save-btn" id="saveBtn" style="display:none;">Save Changes</button>
-            <button type="button" class="cancel-btn" id="cancelBtn" style="display:none;">Cancel</button>
-          </div>
-        </form>
-      </section>
-    </main>
-
-    <footer>
-      <p>&copy; 2025 Doctor Dashboard</p>
-    </footer>
-  </div>
-
-  <!-- Firebase and JS logic -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
-    import {
-      getFirestore,
-      doc,
-      getDoc,
-      updateDoc,
-      serverTimestamp
-    } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
-
+  <script>
     const firebaseConfig = {
       apiKey: "AIzaSyDwCayQZ0JO6DjzQvAT6ToT33I4QXCS_NY",
       authDomain: "login-sample-c3af0.firebaseapp.com",
@@ -115,114 +238,186 @@
       messagingSenderId: "372688128666",
       appId: "1:372688128666:web:bbc529c73c4665f95f6d23"
     };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+    const storage = firebase.storage();
+  </script>
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
+  <!-- Sidebar -->
+<div class="hidden-menu" id="sidebarMenu">
+  <ul>
+    <li><a href="doctorDashboard.html">Dashboard</a></li>
+    <li><a href="doctorDetails.html">Profile</a></li>
+    <li><a href="patients.html">Patients</a></li>
+    <li><a href="reports.html">Reports</a></li>
+    <li><a href="index.html">Logout</a></li>
+  </ul>
+</div>
 
-    const fullNameDisplay = document.getElementById("fullNameDisplay");
-    const specializationDisplay = document.getElementById("specializationDisplay");
-    const profileImage = document.getElementById("profileImage");
+<!-- Header -->
+<header>
+  <button class="menu-icon" onclick="toggleMenu()">&#9776;</button>
+  <h1><span class="small-text">DOCTOR</span> <span class="highlight">PROFILE</span></h1>
+  <p>Manage your profile information.</p>
+</header>
 
-    const form = document.getElementById("doctorProfileForm");
-    const editBtn = document.getElementById("editBtn");
-    const saveBtn = document.getElementById("saveBtn");
-    const cancelBtn = document.getElementById("cancelBtn");
+<!-- Main Content -->
+<div class="container">
+  <div class="top-section">
+    <div class="profile-info">
+      <img src="pfp.png" id="profileImage" alt="Profile Image" style="cursor:pointer;">
+      <div class="user-text">
+        <h2 id="fullNameDisplay">Loading...</h2>
+        <p id="specializationDisplay">Specialization</p>
+      </div>
+    </div>
+    <div class="button-container">
+      <button class="edit-btn" onclick="enableEditing()" id="editBtn">Edit</button>
+      <button class="save-btn" id="saveBtn" onclick="saveProfile()" style="display: none;">Save Changes</button>
+    </div>
+  </div>
 
-    const inputs = {
-      fullName: document.getElementById("fullName"),
-      username: document.getElementById("username"),
-      email: document.getElementById("email"),
-      phone: document.getElementById("phone"),
-      gender: document.getElementById("gender"),
-      specialization: document.getElementById("specialization"),
-      bio: document.getElementById("bio")
+  <div class="form-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;">
+    <div class="form-group">
+      <label for="fullName">Full Name</label>
+      <input type="text" id="fullName" disabled />
+    </div>
+    <div class="form-group">
+      <label for="username">Username</label>
+      <input type="text" id="username" disabled />
+    </div>
+    <div class="form-group">
+      <label for="phone">Phone</label>
+      <input type="text" id="phone" disabled />
+    </div>
+    <div class="form-group">
+      <label for="gender">Gender</label>
+      <input type="text" id="gender" disabled />
+    </div>
+    <div class="form-group">
+      <label for="specialization">Specialization</label>
+      <input type="text" id="specialization" disabled />
+    </div>
+    <div class="form-group" style="grid-column: span 2;">
+      <label for="bio">Bio</label>
+      <textarea id="bio" rows="4" disabled placeholder="Tell us something about yourself..." style="padding: 10px; border: 1px solid #ddd; border-radius: 5px; background-color: #f7f7f7;"></textarea>
+    </div>
+  </div>
+
+  <div class="email-section" style="margin-top: 20px;">
+    <h3>Email Address</h3>
+    <div class="email-box" style="display: flex; align-items: center;">
+      <img src="email.png" alt="Email Icon" width="20" height="20" style="margin-right: 10px;">
+      <div class="email-info">
+        <p id="email">Loading...</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<input type="file" id="imageUpload" accept="image/*" style="display: none" disabled />
+
+<script>
+  let isEditMode = false;
+
+  function toggleMenu() {
+    document.getElementById("sidebarMenu").classList.toggle("active");
+  }
+
+  document.getElementById("profileImage").addEventListener("click", () => {
+    if (isEditMode) document.getElementById("imageUpload").click();
+  });
+
+  document.getElementById("imageUpload").addEventListener("change", function () {
+    const file = this.files[0];
+    const reader = new FileReader();
+
+    reader.onload = function (e) {
+      document.getElementById("profileImage").src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+
+    const user = auth.currentUser;
+    if (user && file) {
+      const imageRef = storage.ref().child(`doctors/${user.uid}/profile.jpg`);
+      imageRef.put(file).then(() => imageRef.getDownloadURL())
+        .then(url => db.collection("doctors").doc(user.uid).update({ profileImageURL: url }))
+        .then(() => console.log("Profile image updated."))
+        .catch(err => console.error("Image upload error:", err));
+    }
+  });
+
+  function enableEditing() {
+    document.querySelectorAll("input").forEach(input => {
+      if (input.id !== "email") input.disabled = false;
+    });
+    document.getElementById("bio").disabled = false;
+    document.getElementById("imageUpload").disabled = false;
+    document.getElementById("editBtn").style.display = "none";
+    document.getElementById("saveBtn").style.display = "inline-block";
+    isEditMode = true;
+  }
+
+  function saveProfile() {
+    const user = auth.currentUser;
+    if (!user) return alert("No user logged in.");
+
+    const updatedData = {
+      fullName: document.getElementById("fullName").value.trim(),
+      username: document.getElementById("username").value.trim(),
+      phone: document.getElementById("phone").value.trim(),
+      gender: document.getElementById("gender").value.trim(),
+      specialization: document.getElementById("specialization").value.trim(),
+      bio: document.getElementById("bio").value.trim(),
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
     };
 
-    let originalData = {};
+    db.collection("doctors").doc(user.uid).update(updatedData).then(() => {
+      alert("Profile updated!");
+      document.getElementById("fullNameDisplay").textContent = updatedData.fullName;
+      document.getElementById("specializationDisplay").textContent = updatedData.specialization;
+      document.querySelectorAll("input").forEach(i => i.disabled = true);
+      document.getElementById("bio").disabled = true;
+      document.getElementById("imageUpload").disabled = true;
+      document.getElementById("editBtn").style.display = "inline-block";
+      document.getElementById("saveBtn").style.display = "none";
+      isEditMode = false;
+    }).catch(error => {
+      alert("Error saving profile: " + error.message);
+    });
+  }
 
-    function enableEditing() {
-      Object.values(inputs).forEach(input => {
-        if (input.id !== "email") input.disabled = false;
-      });
-      editBtn.style.display = "none";
-      saveBtn.style.display = "inline-block";
-      cancelBtn.style.display = "inline-block";
-    }
+  function loadProfile(uid) {
+    db.collection("doctors").doc(uid).get().then(doc => {
+      if (!doc.exists) return;
 
-    function disableEditing() {
-      Object.values(inputs).forEach(input => input.disabled = true);
-      editBtn.style.display = "inline-block";
-      saveBtn.style.display = "none";
-      cancelBtn.style.display = "none";
-    }
-
-    async function loadDoctorProfile(uid) {
-      const docRef = doc(db, "doctors", uid);
-      const docSnap = await getDoc(docRef);
-      if (docSnap.exists()) {
-        const data = docSnap.data();
-        originalData = data;
-
-        fullNameDisplay.textContent = data.fullName || "No Name";
-        specializationDisplay.textContent = data.specialization || "";
-        inputs.fullName.value = data.fullName || "";
-        inputs.username.value = data.username || "";
-        inputs.email.value = data.email || "";
-        inputs.phone.value = data.phone || "";
-        inputs.gender.value = data.gender || "";
-        inputs.specialization.value = data.specialization || "";
-        inputs.bio.value = data.bio || "";
-      } else {
-        alert("Doctor profile not found.");
-      }
-    }
-
-    async function saveDoctorProfile(uid) {
-      const updatedData = {
-        fullName: inputs.fullName.value.trim(),
-        username: inputs.username.value.trim(),
-        phone: inputs.phone.value.trim(),
-        gender: inputs.gender.value,
-        specialization: inputs.specialization.value.trim(),
-        bio: inputs.bio.value.trim(),
-        updatedAt: serverTimestamp()
-      };
-
-      try {
-        await updateDoc(doc(db, "doctors", uid), updatedData);
-        originalData = { ...originalData, ...updatedData };
-        fullNameDisplay.textContent = updatedData.fullName;
-        specializationDisplay.textContent = updatedData.specialization;
-        disableEditing();
-        alert("Profile updated successfully!");
-      } catch (error) {
-        alert("Error updating profile: " + error.message);
-      }
-    }
-
-    function cancelEditing() {
-      Object.keys(inputs).forEach(key => {
-        inputs[key].value = originalData[key] || "";
-      });
-      disableEditing();
-    }
-
-    onAuthStateChanged(auth, user => {
-      if (user) {
-        loadDoctorProfile(user.uid);
-      } else {
-        alert("Please login to view your profile.");
-        window.location.href = "login.html";
+      const data = doc.data();
+      document.getElementById("fullName").value = data.fullName || "";
+      document.getElementById("username").value = data.username || "";
+      document.getElementById("phone").value = data.phone || "";
+      document.getElementById("gender").value = data.gender || "";
+      document.getElementById("specialization").value = data.specialization || "";
+      document.getElementById("bio").value = data.bio || "";
+      document.getElementById("email").textContent = data.email || "";
+      document.getElementById("fullNameDisplay").textContent = data.fullName || "No Name";
+      document.getElementById("specializationDisplay").textContent = data.specialization || "";
+      if (data.profileImageURL) {
+        document.getElementById("profileImage").src = data.profileImageURL;
+      } else if (data.email) {
+        const hash = md5(data.email.trim().toLowerCase());
+        document.getElementById("profileImage").src = `https://www.gravatar.com/avatar/${hash}?d=identicon`;
       }
     });
+  }
 
-    editBtn.addEventListener("click", enableEditing);
-    saveBtn.addEventListener("click", () => {
-      const user = auth.currentUser;
-      if (user) saveDoctorProfile(user.uid);
-    });
-    cancelBtn.addEventListener("click", cancelEditing);
-  </script>
+  auth.onAuthStateChanged(user => {
+    if (!user) {
+      window.location.href = "login.html";
+    } else {
+      loadProfile(user.uid);
+    }
+  });
+</script>
 </body>
 </html>
