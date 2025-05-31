@@ -3,72 +3,280 @@
 
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Doctor Dashboard</title>
-  <link rel="stylesheet" href="doctor-styles.css" />
-  <link
-    rel="stylesheet"
-    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
-    integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg=="
-    crossorigin="anonymous"
-    referrerpolicy="no-referrer"
-  />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f4f4;
+    }
+
+    header {
+      background-image: url("header-green.png");
+      background-size: cover;
+      background-repeat: no-repeat;
+      background-color: #31E180;
+      padding: 15px 20px;
+      height: 80px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: flex-start;
+      padding-left: 80px;
+      color: white;
+    }
+
+    .menu-icon {
+      font-size: 24px;
+      cursor: pointer;
+      position: absolute;
+      top: 10px;
+      left: 15px;
+      background: none;
+      border: none;
+      padding: 10px;
+      z-index: 100;
+      color: black;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 2em;
+      margin-top: 30px;
+    }
+
+    h1 .small-text {
+      font-size: 0.5em;
+      display: block;
+      color: #000000;
+    }
+
+    h1 .highlight {
+      color: #000000;
+      font-size: 1em;
+      font-weight: bold;
+    }
+
+    header p {
+      margin-top: 5px;
+      font-size: 1.1em;
+      color: #000000;
+    }
+
+    nav.hidden-menu {
+      position: fixed;
+      top: 0;
+      left: -250px;
+      width: 250px;
+      height: 100%;
+      background: #31E180;
+      color: white;
+      padding-top: 60px;
+      transition: left 0.3s ease-in-out;
+      z-index: 99;
+    }
+
+    nav.hidden-menu.active {
+      left: 0;
+    }
+
+    nav.hidden-menu ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    nav.hidden-menu li {
+      padding: 10px;
+      text-align: center;
+    }
+
+    nav.hidden-menu a {
+      color: black;
+      text-decoration: none;
+      display: block;
+      padding: 10px;
+    }
+
+    nav.hidden-menu a:hover {
+      background: #fff;
+      border-radius: 20px;
+    }
+
+    .container {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin: 20px;
+    }
+
+    .card {
+      background-color: white;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      padding: 20px;
+      width: 90%;
+      max-width: 900px;
+      text-align: left;
+    }
+
+    .doctor-info {
+      display: flex;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .doctor-info img {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      margin-right: 20px;
+      object-fit: cover;
+    }
+
+    .doctor-spec {
+      font-size: 1em;
+      color: #555;
+    }
+
+    .notifications {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      color: white;
+    }
+
+    .notification-icon {
+      position: relative;
+      font-size: 20px;
+      cursor: pointer;
+    }
+
+    .notification-count {
+      background: red;
+      color: white;
+      font-size: 0.75em;
+      padding: 2px 6px;
+      border-radius: 10px;
+      position: absolute;
+      top: -8px;
+      right: -10px;
+      display: none;
+    }
+
+    .notification-dropdown {
+      position: absolute;
+      top: 30px;
+      right: 0;
+      background: white;
+      color: black;
+      width: 250px;
+      box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+      border-radius: 5px;
+      padding: 10px;
+      z-index: 999;
+    }
+
+    .notification-item {
+      margin-bottom: 10px;
+      font-size: 0.9em;
+      border-bottom: 1px solid #ddd;
+      padding-bottom: 5px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+    }
+
+    th, td {
+      padding: 10px;
+      border-bottom: 1px solid #ccc;
+      text-align: left;
+    }
+
+    th {
+      background-color: #31E180;
+      color: white;
+    }
+
+    td a {
+      color: #2196F3;
+      text-decoration: none;
+    }
+
+    footer {
+      text-align: center;
+      padding: 10px;
+      font-size: 0.9em;
+      color: #999;
+    }
+  </style>
 </head>
 
 <body>
-  <div class="dashboard-container">
-    <header>
+  <header>
+    <button class="menu-icon" onclick="toggleMenu()">&#9776;</button>
+    <h1><span class="small-text">DOCTOR</span> <span class="highlight">DASHBOARD</span></h1>
+    <p>Check your schedule and appointment.</p>
+  </header>
+
+  <nav id="hiddenMenu" class="hidden-menu">
+    <ul>
+      <li><a href="doctorDashboard.html">Dashboard</a></li>
+      <li><a href="doctorDetails.html">Profile</a></li>
+      <li><a href="patients.html">Patients</a></li>
+      <li><a href="reports.html">Reports</a></li>
+      <li><a href="index.html">Logout</a></li>
+    </ul>
+  </nav>
+
+  <div class="notifications">
+    <span class="notification-icon">
+      <i class="fas fa-bell">
+        <span class="notification-count" id="notificationCount">0</span>
+      </i>
+    </span>
+    <div class="notification-dropdown" id="notificationDropdown"></div>
+  </div>
+
+  <div class="container">
+    <div class="card">
       <div class="doctor-info">
         <img src="pfp.PNG" alt="Doctor Profile" id="profileImage" />
-        <div class="doctor-details">
-          <h1 id="fullNameDisplay">Loading...</h1>
+        <div>
+          <h2 id="fullNameDisplay">Loading...</h2>
           <p class="doctor-spec" id="specializationDisplay">Loading...</p>
         </div>
       </div>
-      <div class="notifications">
-        <span class="notification-icon">
-            <i class="fas fa-bell">
-            <span class="notification-count" id="notificationCount">0</span>
-            </i>
-        </span>
-        <div class="notification-dropdown" id="notificationDropdown">
-            <!-- Notifications will be injected here -->
-        </div>
-      </div>
-    </header>
 
-    <aside>
-      <nav>
-        <ul>
-          <li><a href="doctorDashboard.html">Dashboard</a></li>
-          <li><a href="doctorDetails.html">Profile</a></li>
-          <li><a href="patients.html">Patients</a></li>
-          <li><a href="reports.html">Reports</a></li>
-        </ul>
-      </nav>
-    </aside>
-
-    <main>
-      <section class="schedule">
-        <h2>Appointment</h2>
-        <table>
-          <thead>
-            <tr>
-              <th>Date and Time</th>
-              <th>Patient Name</th>
-              <th>Reason</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
-      </section>
-    </main>
-
-    <footer>
-      <p>&copy; 2025 Doctor Dashboard</p>
-    </footer>
+      <h3>Appointments</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Date & Time</th>
+            <th>Patient</th>
+            <th>Reason</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
   </div>
+
+  <footer>
+    <p>&copy; 2025 Doctor Dashboard</p>
+  </footer>
+
+  <script>
+    function toggleMenu() {
+      document.getElementById('hiddenMenu').classList.toggle('active');
+    }
+  </script>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
@@ -132,6 +340,7 @@ async function loadAppointments(doctorId) {
     appointmentTableBody.innerHTML = "";
     notificationDropdown.innerHTML = "";
     let upcomingCount = 0;
+    let hasAppointments = false;
 
     const now = new Date();
 
@@ -143,6 +352,8 @@ async function loadAppointments(doctorId) {
 
       // Skip past appointments
       if (dateObj < now) return;
+
+      hasAppointments = true;  // Mark that there's at least one valid appointment
 
       // Table row
       const row = document.createElement("tr");
@@ -184,6 +395,12 @@ async function loadAppointments(doctorId) {
       }
     });
 
+    // If no upcoming appointments, show message
+    if (!hasAppointments) {
+      appointmentTableBody.innerHTML =
+        "<tr><td colspan='4' style='text-align:center;'>No appointment request</td></tr>";
+    }
+
     // Show or hide count
     notificationCount.textContent = upcomingCount;
     notificationCount.style.display = upcomingCount > 0 ? "inline-block" : "none";
@@ -207,5 +424,4 @@ async function loadAppointments(doctorId) {
 </script>
 
 </body>
-
 </html>
