@@ -1,447 +1,156 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Appointment History</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      background-color: #f4f4f4;
+body {
+    background-image: url('bg-blue.png');
+    background-size: cover;
+    background-position: center;
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+
+.container {
+    background: white;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+    width: 800px;
+    text-align: left;
+}
+
+.hidden {
+    display: none;
+}
+
+.form-content {
+    margin-top: 20px;
+}
+
+.form-group {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+}
+
+.column {
+    width: 48%;
+}
+
+input,
+select,
+textarea {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+    box-sizing: border-box;
+}
+
+button {
+    background: #007BFF;
+    color: white;
+    border: none;
+    padding: 12px;
+    cursor: pointer;
+    border-radius: 5px;
+    width: 160px;
+    margin: 20px 10px 0 10px;
+    font-size: 16px;
+}
+
+button:hover {
+    background: #0056b3;
+}
+
+.header {
+    background: #007BFF;
+    color: white;
+    padding: 20px;
+    font-size: 24px;
+    font-weight: bold;
+    text-align: center;
+    width: 100%;
+    margin: -20px -20px -20px -20px;
+    border-radius: 10px 10px 0 0;
+}
+
+.checkbox-group {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.checkbox-group label {
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    gap: 10px;
+    white-space: nowrap;
+}
+
+.checkbox-group input[type="checkbox"] {
+    margin-right: 8px;
+    transform: scale(1.2);
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 9999;
+    padding-top: 60px;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.7);
+}
+
+.modal-content {
+    margin: auto;
+    display: block;
+    max-width: 80%;
+    max-height: 80%;
+    border-radius: 10px;
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+}
+
+.close {
+    position: absolute;
+    top: 20px;
+    right: 35px;
+    color: #fff;
+    font-size: 35px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+#openModalBtn:hover {
+    opacity: 0.8;
+    text-decoration: none;
+}
+
+#openModalBtn:hover i {
+    color: #007BFF;
+    transform: scale(1.1);
+}
+
+
+@media (max-width: 768px) {
+    .form-group {
+        flex-direction: column;
     }
 
-    header {
-      background-image: url("header.png");
-      background-size: cover;
-      background-repeat: no-repeat;
-      background-color: #29a9e1;
-      padding: 15px 20px;
-      height: 80px;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: flex-start;
-      padding-left: 80px;
-      position: relative;
-      z-index: 2;
-    }
-
-    .menu-icon {
-      font-size: 24px;
-      cursor: pointer;
-      position: absolute;
-      top: 10px;
-      left: 15px;
-      background: none;
-      border: none;
-      padding: 10px;
-      z-index: 1100;
-    }
-
-    h1 {
-      margin: 0;
-      font-size: 2em;
-      margin-top: 30px;
-    }
-
-    h1 .small-text {
-      font-size: 0.5em;
-      display: block;
-    }
-
-    h1 .highlight {
-      color: #000000;
-      font-size: 1em;
-      font-weight: bold;
-    }
-
-    .hidden-menu {
-      position: fixed;
-      top: 0;
-      left: -250px;
-      width: 250px;
-      height: 100%;
-      background: #29a9e1;
-      color: white;
-      padding-top: 60px;
-      transition: left 0.3s ease-in-out;
-      z-index: 1000;
-    }
-
-    .hidden-menu.active {
-      left: 0;
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
-    }
-
-    .hidden-menu ul {
-      list-style: none;
-      padding: 0;
-    }
-
-    .hidden-menu li {
-      padding: 10px;
-      text-align: center;
-    }
-
-    .hidden-menu a {
-      color: black;
-      text-decoration: none;
-      display: block;
-      padding: 10px;
-    }
-
-    .hidden-menu a:hover {
-      background: #fff;
-      border-radius: 20px;
+    .column {
+        width: 100%;
     }
 
     .container {
-      max-width: 1000px;
-      margin: 100px auto;
-      background: white;
-      border-radius: 10px;
-      padding: 40px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        width: 95%;
     }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 20px;
-    }
-
-    table, th, td {
-      border: 1px solid #ddd;
-    }
-
-    th, td {
-      padding: 12px;
-      text-align: left;
-    }
-
-    th {
-      background-color: #29a9e1;
-      color: white;
-    }
-
-    tr:nth-child(even) {
-      background-color: #f9f9f9;
-    }
-
-    .stars {
-      cursor: pointer;
-      color: #ccc;
-      font-size: 20px;
-      user-select: none;
-      transition: color 0.3s ease;
-    }
-
-    .stars:hover,
-    .stars.active {
-      color: gold;
-    }
-
-    .rate-cell span {
-      font-size: 20px;
-      margin-right: 3px;
-    }
-
-    .details-button {
-      background-color: #29a9e1;
-      color: white;
-      border: none;
-      padding: 5px 10px;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-
-    .details-button:hover {
-      background-color: #1f8ec2;
-    }
-
-    .modal {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0, 0, 0, 0.6);
-      justify-content: center;
-      align-items: center;
-      z-index: 999;
-      pointer-events: none;
-    }
-
-    .modal[style*="display: flex"] {
-      pointer-events: auto;
-    }
-
-    .modal-content {
-      background: white;
-      padding: 20px;
-      border-radius: 10px;
-      max-width: 500px;
-      width: 80%;
-      position: relative;
-    }
-
-    .modal-close {
-      position: absolute;
-      top: 10px;
-      right: 15px;
-      cursor: pointer;
-      font-size: 20px;
-    }
-
-    @media(max-width: 768px) {
-      table, thead, tbody, th, td, tr {
-        display: block;
-      }
-
-      th {
-        position: absolute;
-        top: -9999px;
-        left: -9999px;
-      }
-
-      td {
-        position: relative;
-        padding-left: 50%;
-        border: none;
-        border-bottom: 1px solid #eee;
-      }
-
-      td::before {
-        content: attr(data-label);
-        position: absolute;
-        left: 15px;
-        font-weight: bold;
-      }
-    }
-  </style>
-</head>
-<body>
-
-<!-- Sidebar -->
-<div class="hidden-menu" id="sidebarMenu">
-  <ul>
-    <li><a href="patientDashboard.html">Home</a></li>
-    <li><a href="patientProfile.html">Profile</a></li>
-    <li><a href="appointmentHistory.html">Appointment History</a></li>
-    <li><a href="services.html">Services</a></li>
-    <li><a href="about.html">About</a></li>
-    <li><a href="contact.html">Contact</a></li>
-    <li><a href="index.html">Logout</a></li>
-  </ul>
-</div>
-
-<!-- Header -->
-<header>
-  <button class="menu-icon" id="menu-icon">&#9776;</button>
-  <h1><span class="small-text">VIEW YOUR</span> <span class="highlight">APPOINTMENTS</span></h1>
-  <p>Keep track of your past and upcoming bookings.</p>
-</header>
-
-
-<!-- Main Content -->
-<div class="container">
-  <h2>Appointment History</h2>
-  <table id="appointmentsTable">
-    <thead>
-      <tr>
-        <th>Date & Time</th>
-        <th>Doctor</th>
-        <th>Reason</th>
-        <th>Status</th>
-        <th>Details</th>
-        <th>Rate Doctor</th>
-      </tr>
-    </thead>
-    <tbody>
-      <!-- Appointments will be loaded here -->
-    </tbody>
-  </table>
-</div>
-
-<!-- Modal -->
-<div class="modal" id="detailsModal">
-  <div class="modal-content">
-    <span class="modal-close" onclick="document.getElementById('detailsModal').style.display='none'">&times;</span>
-    <h3>Appointment Details</h3>
-    <pre id="detailsContent" style="white-space: pre-wrap;"></pre>
-  </div>
-</div>
-
-<!-- Firebase + Sidebar Toggle Script -->
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
-  import { getFirestore, collection, getDocs, doc, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
-  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
-
-  const firebaseConfig = {
-    apiKey: "AIzaSyDwCayQZ0JO6DjzQvAT6ToT33I4QXCS_NY",
-    authDomain: "login-sample-c3af0.firebaseapp.com",
-    projectId: "login-sample-c3af0",
-    storageBucket: "login-sample-c3af0.appspot.com",
-    messagingSenderId: "372688128666",
-    appId: "1:372688128666:web:bbc529c73c4665f95f6d23"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
-  const auth = getAuth(app);
-
-  const tableBody = document.querySelector("#appointmentsTable tbody");
-
-  onAuthStateChanged(auth, async (user) => {
-    if (!user) {
-      alert("You are not logged in.");
-      window.location.href = "index.html";
-      return;
-    }
-
-    const currentEmail = user.email;
-    await loadAppointments(currentEmail);
-  });
-
-  async function loadAppointments(email) {
-    try {
-      const snapshot = await getDocs(collection(db, "approved"));
-      tableBody.innerHTML = "";
-      let count = 0;
-
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-
-      snapshot.forEach((docSnap) => {
-        const data = docSnap.data();
-        if (data.email !== email) return;
-
-        count++;
-        const appointmentDate = new Date(data.appointmentDateTime);
-        const status = appointmentDate < today ? "Completed" : "Pending";
-        const dateStr = appointmentDate.toLocaleString();
-        const rating = data.rating || 0;
-
-        const row = document.createElement("tr");
-        row.innerHTML = `
-          <td data-label="Date & Time">${dateStr}</td>
-          <td data-label="Doctor">N/A</td>
-          <td data-label="Reason">${data.reason || "N/A"}</td>
-          <td data-label="Status">${status}</td>
-          <td data-label="Details">
-            <button class="details-button">View</button>
-          </td>
-          <td class="rate-cell" data-label="Rate Doctor">
-            ${[1, 2, 3, 4, 5].map(i => `
-              <span class="stars ${i <= rating ? 'active' : ''}" 
-                    data-id="${docSnap.id}" 
-                    data-rate="${i}">&#9733;</span>
-            `).join('')}
-          </td>
-        `;
-
-        const detailsBtn = row.querySelector(".details-button");
-        detailsBtn.appointmentData = data;
-        detailsBtn.addEventListener("click", () => {
-          showDetails(data);
-        });
-
-        tableBody.appendChild(row);
-      });
-
-      if (count === 0) {
-        tableBody.innerHTML = `<tr><td colspan="6" style="text-align:center;">No approved appointments found.</td></tr>`;
-      }
-
-      enableRating();
-    } catch (error) {
-      console.error("Error loading appointments:", error);
-      tableBody.innerHTML = `<tr><td colspan="6" style="text-align:center;">Failed to load appointments.</td></tr>`;
-    }
-  }
-
-  function enableRating() {
-    document.querySelectorAll(".stars").forEach(star => {
-      star.addEventListener("click", async function () {
-        const rate = parseInt(this.getAttribute("data-rate"));
-        const id = this.getAttribute("data-id");
-
-        try {
-          await updateDoc(doc(db, "approved", id), { rating: rate });
-          const parent = this.parentElement;
-          parent.querySelectorAll(".stars").forEach(s => s.classList.remove("active"));
-          for (let i = 0; i < rate; i++) {
-            parent.children[i].classList.add("active");
-          }
-        } catch (err) {
-          console.error("Rating error:", err);
-          alert("Could not update rating.");
-        }
-      });
-    });
-  }
-
-  function showDetails(data) {
-    const content = `
-      <strong>Full Name:</strong> ${data.fullName || "N/A"}<br>
-      <strong>Conditions:</strong> ${data.conditions || "N/A"}<br>
-      <strong>Allergies:</strong> ${data.allergies || "N/A"}<br>
-      <strong>Medications:</strong> ${data.medications || "N/A"}<br>
-      <strong>Family History:</strong> ${data.familyHistory || "N/A"}<br>
-      <strong>Gender:</strong> ${data.gender || "N/A"}<br>
-      <strong>Age:</strong> ${data.age || "N/A"}<br>
-      <strong>Phone:</strong> ${data.phone || "N/A"}<br>
-      <strong>Address:</strong> ${data.address || "N/A"}<br>
-      <strong>Payment Method:</strong> ${data.paymentMethod || "N/A"}<br>
-      <strong>Payment Ref:</strong> ${data.paymentRef || "N/A"}<br>
-      <strong>Fee:</strong> ₱${data.feeAmount || "N/A"}<br>
-      <strong>Date:</strong> ${new Date(data.appointmentDateTime).toLocaleString()}<br>
-      <strong>Status:</strong> ${data.status || "Approved"}<br>
-    `;
-
-    document.getElementById("detailsContent").innerHTML = content;
-    document.getElementById("detailsModal").style.display = "flex";
-  }
-
-  document.getElementById("detailsModal").addEventListener("click", (e) => {
-    if (e.target.id === "detailsModal") {
-      e.target.style.display = "none";
-    }
-  });
-
-  // Sidebar toggle logic
-  document.addEventListener("DOMContentLoaded", () => {
-    const menuIcon = document.getElementById("menu-icon");
-    const sidebarMenu = document.getElementById("sidebarMenu");
-
-    menuIcon.addEventListener("click", () => {
-      const isActive = sidebarMenu.classList.toggle("active");
-      menuIcon.innerHTML = isActive ? "&#10005;" : "&#9776;"; // X or menu icon
-    });
-
-    document.querySelectorAll(".hidden-menu a").forEach(link => {
-      link.addEventListener("click", () => {
-        sidebarMenu.classList.remove("active");
-        menuIcon.innerHTML = "&#9776;";
-      });
-    });
-
-    // Close sidebar on outside click
-    document.addEventListener("click", (e) => {
-      if (
-        sidebarMenu.classList.contains("active") &&
-        !sidebarMenu.contains(e.target) &&
-        e.target !== menuIcon
-      ) {
-        sidebarMenu.classList.remove("active");
-        menuIcon.innerHTML = "&#9776;";
-      }
-    });
-  });
-</script>
-
-</body>
-</html>
+}
