@@ -6,18 +6,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Appointment Booking</title>
   <link rel="stylesheet" href="appointmentBooking.css">
-</head>
-
-<body>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
   <script src="https://www.gstatic.com/firebasejs/10.11.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.11.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore-compat.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/js-md5/0.7.3/md5.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js"></script>
+  <script src="appointmentBooking.js" defer></script>
+</head>
 
-
-
-
+<body>
   <!-- Step 1 -->
   <div class="container" id="step1">
     <div class="header">Book an Appointment</div>
@@ -30,7 +28,7 @@
           <input type="email" id="email" placeholder="Email Address"><br>
           <input type="number" id="age" placeholder="Age"><br>
           <input type="text" id="gender" placeholder="Gender"><br>
-          <input type="text" id="address" placeholder="address"><br>
+          <input type="text" id="address" placeholder="Address"><br>
         </div>
         <div class="column">
           <h3>Medical History</h3>
@@ -109,8 +107,19 @@
     <div class="form-content">
       <div class="form-group">
         <div class="column" style="width: 100%;">
-          <h3>Appointment Details</h3>
-          <input type="datetime-local" id="appointmentDateTime"><br>
+          <div class="doctor-schedule">
+<h3 style="margin-bottom: 10px;">Doctor's Availability</h3>
+  <div class="doctor-details">
+    <p><strong>Name:</strong> <span id="doctorName"></span></p>
+    <p><strong>Specialization:</strong> <span id="doctorSpecialization"></span></p>
+  </div>
+
+  <div id="calendarContainer"></div><br>
+
+<label for="timeSlots" style="margin-top: 20px; font-weight: bold;">Select a Time Slot</label>
+<div id="timeSlots" class="time-slots"></div>
+</div>
+
 
           <h3>Appointment Fee Details</h3>
           <input type="text" id="displayFee" placeholder="Appointment Fee" readonly><br>
@@ -129,26 +138,21 @@
             </button>
           </div>
 
-
           <!-- Modal -->
           <div id="imageModal" class="modal">
             <span class="close" id="closeModal">&times;</span>
             <img class="modal-content" id="modalImage">
           </div>
 
-
-
           <div class="checkbox-group">
             <label><input type="checkbox" id="paymentConfirmed"> I confirm that I have completed the payment.</label>
-            <label><input type="checkbox" id="noRefundAccepted"> I understand that the appointment fee is non-refundable
-              and that cancellations are not allowed.</label>
+            <label><input type="checkbox" id="noRefundAccepted"> I understand that the appointment fee is non-refundable and that cancellations are not allowed.</label>
           </div>
         </div>
       </div>
       <div style="text-align: center;">
         <button onclick="prevStep(1)">Back</button>
         <button id="confirmButton">Confirm</button>
-
       </div>
     </div>
   </div>
@@ -160,10 +164,6 @@
       Please arrive 10 minutes before your scheduled time. Thank you!</p>
     <button onclick="location.href='patientDashboard.html'">Book Again</button>
   </div>
-
-
-  <script src="appointmentBooking.js"></script>
-
 </body>
 
 </html>
