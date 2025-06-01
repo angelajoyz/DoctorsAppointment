@@ -6,216 +6,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Doctor Dashboard</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 0;
-      background-color: #f4f4f4;
-    }
+  <link rel="stylesheet" href="doctorDashboard.css" />
 
-    header {
-      background-image: url("header-green.png");
-      background-size: cover;
-      background-repeat: no-repeat;
-      background-color: #31E180;
-      padding: 15px 20px;
-      height: 80px;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: flex-start;
-      padding-left: 80px;
-      color: white;
-    }
-
-    .menu-icon {
-      font-size: 24px;
-      cursor: pointer;
-      position: absolute;
-      top: 10px;
-      left: 15px;
-      background: none;
-      border: none;
-      padding: 10px;
-      z-index: 100;
-      color: black;
-    }
-
-    h1 {
-      margin: 0;
-      font-size: 2em;
-      margin-top: 30px;
-    }
-
-    h1 .small-text {
-      font-size: 0.5em;
-      display: block;
-      color: #000000;
-    }
-
-    h1 .highlight {
-      color: #000000;
-      font-size: 1em;
-      font-weight: bold;
-    }
-
-    header p {
-      margin-top: 5px;
-      font-size: 1.1em;
-      color: #000000;
-    }
-
-    nav.hidden-menu {
-      position: fixed;
-      top: 0;
-      left: -250px;
-      width: 250px;
-      height: 100%;
-      background: #31E180;
-      color: white;
-      padding-top: 60px;
-      transition: left 0.3s ease-in-out;
-      z-index: 99;
-    }
-
-    nav.hidden-menu.active {
-      left: 0;
-    }
-
-    nav.hidden-menu ul {
-      list-style: none;
-      padding: 0;
-    }
-
-    nav.hidden-menu li {
-      padding: 10px;
-      text-align: center;
-    }
-
-    nav.hidden-menu a {
-      color: black;
-      text-decoration: none;
-      display: block;
-      padding: 10px;
-    }
-
-    nav.hidden-menu a:hover {
-      background: #fff;
-      border-radius: 20px;
-    }
-
-    .container {
-      display: flex;
-      justify-content: center;
-      flex-wrap: wrap;
-      margin: 20px;
-    }
-
-    .card {
-      background-color: white;
-      border-radius: 10px;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-      padding: 20px;
-      width: 90%;
-      max-width: 900px;
-      text-align: left;
-    }
-
-    .doctor-info {
-      display: flex;
-      align-items: center;
-      margin-bottom: 20px;
-    }
-
-    .doctor-info img {
-      width: 80px;
-      height: 80px;
-      border-radius: 50%;
-      margin-right: 20px;
-      object-fit: cover;
-    }
-
-    .doctor-spec {
-      font-size: 1em;
-      color: #555;
-    }
-
-    .notifications {
-      position: absolute;
-      top: 20px;
-      right: 20px;
-      color: white;
-    }
-
-    .notification-icon {
-      position: relative;
-      font-size: 20px;
-      cursor: pointer;
-    }
-
-    .notification-count {
-      background: red;
-      color: white;
-      font-size: 0.75em;
-      padding: 2px 6px;
-      border-radius: 10px;
-      position: absolute;
-      top: -8px;
-      right: -10px;
-      display: none;
-    }
-
-    .notification-dropdown {
-      position: absolute;
-      top: 30px;
-      right: 0;
-      background: white;
-      color: black;
-      width: 250px;
-      box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
-      border-radius: 5px;
-      padding: 10px;
-      z-index: 999;
-    }
-
-    .notification-item {
-      margin-bottom: 10px;
-      font-size: 0.9em;
-      border-bottom: 1px solid #ddd;
-      padding-bottom: 5px;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 15px;
-    }
-
-    th, td {
-      padding: 10px;
-      border-bottom: 1px solid #ccc;
-      text-align: left;
-    }
-
-    th {
-      background-color: #31E180;
-      color: white;
-    }
-
-    td a {
-      color: #2196F3;
-      text-decoration: none;
-    }
-
-    footer {
-      text-align: center;
-      padding: 10px;
-      font-size: 0.9em;
-      color: #999;
-    }
-  </style>
+  <!-- FullCalendar CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.css" rel="stylesheet" />
+  
 </head>
+
 
 <body>
   <header>
@@ -242,186 +39,49 @@
     </span>
     <div class="notification-dropdown" id="notificationDropdown"></div>
   </div>
-
+<br><br>
   <div class="container">
     <div class="card">
-      <div class="doctor-info">
-        <img src="pfp.PNG" alt="Doctor Profile" id="profileImage" />
-        <div>
-          <h2 id="fullNameDisplay">Loading...</h2>
-          <p class="doctor-spec" id="specializationDisplay">Loading...</p>
-        </div>
-      </div>
-
-      <h3>Appointments</h3>
-      <table>
-        <thead>
-          <tr>
-            <th>Date & Time</th>
-            <th>Patient</th>
-            <th>Reason</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
+  <div class="doctor-info">
+    <img src="pfp.PNG" alt="Doctor Profile" id="profileImage" />
+    <div>
+      <h2 id="fullNameDisplay">Loading...</h2>
+      <p class="doctor-spec" id="specializationDisplay">Loading...</p>
     </div>
   </div>
 
-  <footer>
-    <p>&copy; 2025 Doctor Dashboard</p>
-  </footer>
+  <!-- Left side: Card with calendar -->
 
-  <script>
-    function toggleMenu() {
-      document.getElementById('hiddenMenu').classList.toggle('active');
-    }
-  </script>
 
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
-  import {
-    getFirestore,
-    collection,
-    getDocs,
-    doc,
-    getDoc,
-  } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
-  import {
-    getAuth,
-    onAuthStateChanged,
-  } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
+ 
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyDwCayQZ0JO6DjzQvAT6ToT33I4QXCS_NY",
-    authDomain: "login-sample-c3af0.firebaseapp.com",
-    projectId: "login-sample-c3af0",
-    storageBucket: "login-sample-c3af0.appspot.com",
-    messagingSenderId: "372688128666",
-    appId: "1:372688128666:web:bbc529c73c4665f95f6d23",
-  };
+    <div class="calendar-container">
+      <h3>Schedule Calendar</h3>
+      <div id="calendar"></div>
+    </div>
+  </div>
 
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
-  const auth = getAuth();
+  <!-- Right side: Table -->
+  <div class="appointment-table-container">
+       <h3>Appointments</h3><br>
+    <table>
+      <thead>
+        <tr>
+          <th>Patient</th>
+          <th>Reason</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+</div>
 
-  const fullNameEl = document.getElementById("fullNameDisplay");
-  const specializationEl = document.getElementById("specializationDisplay");
-  const profileImageEl = document.getElementById("profileImage");
-  const appointmentTableBody = document.querySelector("tbody");
-  const notificationDropdown = document.getElementById("notificationDropdown");
-  const notificationCount = document.getElementById("notificationCount");
 
-  async function loadDoctorInfo(doctorId) {
-    try {
-      const docRef = doc(db, "doctors", doctorId);
-      const docSnap = await getDoc(docRef);
-
-      if (docSnap.exists()) {
-        const data = docSnap.data();
-        fullNameEl.textContent = data.fullName || "No name found";
-        specializationEl.textContent = data.specialization || "No specialization found";
-        if (data.profileImageUrl) {
-          profileImageEl.src = data.profileImageUrl;
-        }
-      } else {
-        fullNameEl.textContent = "Doctor not found";
-        specializationEl.textContent = "";
-        console.warn("No doctor document found!");
-      }
-    } catch (error) {
-      console.error("Error fetching doctor info:", error);
-    }
-  }
-
-async function loadAppointments(doctorId) {
-  try {
-    const querySnapshot = await getDocs(collection(db, "appointments"));
-    appointmentTableBody.innerHTML = "";
-    notificationDropdown.innerHTML = "";
-    let upcomingCount = 0;
-    let hasAppointments = false;
-
-    const now = new Date();
-
-    querySnapshot.forEach((doc) => {
-      const data = doc.data();
-      const dateObj = data.appointmentDateTime?.toDate
-        ? data.appointmentDateTime.toDate()
-        : new Date(data.appointmentDateTime);
-
-      // Skip past appointments
-      if (dateObj < now) return;
-
-      hasAppointments = true;  // Mark that there's at least one valid appointment
-
-      // Table row
-      const row = document.createElement("tr");
-      row.innerHTML = `
-        <td>${dateObj.toLocaleString([], {
-          year: "numeric",
-          month: "short",
-          day: "numeric",
-          hour: "2-digit",
-          minute: "2-digit",
-        })}</td>
-        <td>${data.fullName || "N/A"}</td>
-        <td>${data.reason || "N/A"}</td>
-        <td><a href="patient-details.html?id=${doc.id}" data-patient-id="${doc.id}">View Details</a></td>
-      `;
-      appointmentTableBody.appendChild(row);
-
-      // Notifications for tomorrow
-      const tomorrow = new Date();
-      tomorrow.setDate(now.getDate() + 1);
-      if (
-        dateObj.getDate() === tomorrow.getDate() &&
-        dateObj.getMonth() === tomorrow.getMonth() &&
-        dateObj.getFullYear() === tomorrow.getFullYear()
-      ) {
-        upcomingCount++;
-        const notifItem = document.createElement("div");
-        notifItem.classList.add("notification-item");
-        notifItem.innerHTML = `
-          <strong>${data.fullName}</strong> has an appointment<br/>
-          <small>${dateObj.toLocaleString([], {
-            month: "short",
-            day: "numeric",
-            hour: "2-digit",
-            minute: "2-digit",
-          })}</small>
-        `;
-        notificationDropdown.appendChild(notifItem);
-      }
-    });
-
-    // If no upcoming appointments, show message
-    if (!hasAppointments) {
-      appointmentTableBody.innerHTML =
-        "<tr><td colspan='4' style='text-align:center;'>No appointment request</td></tr>";
-    }
-
-    // Show or hide count
-    notificationCount.textContent = upcomingCount;
-    notificationCount.style.display = upcomingCount > 0 ? "inline-block" : "none";
-  } catch (error) {
-    console.error("Error loading appointments:", error);
-  }
-}
-
-  onAuthStateChanged(auth, (user) => {
-    if (user) {
-      console.log("Logged in as", user.email);
-      loadDoctorInfo(user.uid);
-      loadAppointments(user.uid);
-    } else {
-      fullNameEl.textContent = "Please log in";
-      specializationEl.textContent = "";
-      appointmentTableBody.innerHTML =
-        "<tr><td colspan='4'>You must be logged in to view appointments.</td></tr>";
-    }
-  });
-</script>
+  <script src="doctorDashboard.js" type="module"></script>
+  <!-- FullCalendar JS -->
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
 
 </body>
+
 </html>
