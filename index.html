@@ -119,9 +119,10 @@
         }
 
         .card img {
-            width: 100%;
-            border-radius: 10px;
-            margin-bottom: 10px;
+            width: 300px;      /* Set your preferred width */
+            height: 300px;     /* Same height = square */
+            object-fit: cover; /* Crop/scale image to fit container */
+            border-radius: 8px; /* Optional: round corners */
         }
 
         .info-container {
@@ -363,6 +364,27 @@
         .day-schedule button:hover {
             background-color: #0b7dda;
         }
+
+        .schedule-grid {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        margin-top: 5px;
+        }
+        .day-cell, .time-cell {
+        width: 70px;
+        text-align: center;
+        font-size: 14px;
+        }
+
+            footer {
+      text-align: center;
+      padding: 15px 0;
+      font-size: 0.9em;
+      color: #666;
+      margin-top: 40px;
+    }
+
     </style>
 </head>
 
@@ -385,6 +407,10 @@
     <div class="container">
 
     </div>
+
+  <footer>
+    <p>&copy; 2025 Doctor Dashboard</p>
+  </footer>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
@@ -401,10 +427,16 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
+
+
         function generateTimeSlots() {
             const slots = [];
-            for (let hour = 7; hour < 12; hour++) {
-                for (let minute = 0; minute < 60; minute += 30) {
+            const startTime = 7; // 7:00 AM
+            const endTime = 12; // 12:00 PM
+            const interval = 30; // 30 minutes
+
+            for (let hour = startTime; hour < endTime; hour++) {
+                for (let minute = 0; minute < 60; minute += interval) {
                     let hourStr = hour < 10 ? "0" + hour : hour;
                     let minuteStr = minute === 0 ? "00" : minute;
                     slots.push(`${hourStr}:${minuteStr} AM`);
@@ -433,45 +465,69 @@
             dropdown.classList.toggle("show");
         }
 
-        async function displayDoctors() {
-            const container = document.querySelector('.container');
-            const querySnapshot = await getDocs(collection(db, "doctors"));
+async function displayDoctors() {
+    const container = document.querySelector('.container');
 
-            let index = 0;
-            querySnapshot.forEach((doc) => {
-                const doctor = doc.data();
-                const card = document.createElement("div");
-                card.className = "card";
+    if (!container) {
+        console.error("Container with class 'container' not found in DOM.");
+        return;
+    }
 
-                // Combine dates and schedules into rows
-                let scheduleHTML = "";
-                if (doctor.date && doctor.schedule) {
-                    const daysRow = doctor.date.map(day => `<div class="day-cell">${day}</div>`).join('');
-                    const startTimes = doctor.schedule.map(slot => `<div class="time-cell">${slot.split("-")[0].trim()}</div>`).join('');
-                    const endTimes = doctor.schedule.map(slot => `<div class="time-cell">${slot.split("-")[1].trim()}</div>`).join('');
+    try {
+        const querySnapshot = await getDocs(collection(db, "doctors"));
 
-                    scheduleHTML = `
-        <div class="schedule-grid">
-            ${daysRow}
-        </div>
-        <div class="schedule-grid">
-            ${startTimes}
-        </div>
-        <div class="schedule-grid">
-            ${endTimes}
-        </div>
-    `;
-                } else {
-                    scheduleHTML = "<p>No available schedule</p>";
+        if (querySnapshot.empty) {
+            container.innerHTML = "<p>No doctors found.</p>";
+            return;
+        }
+
+        querySnapshot.forEach((doc) => {
+            const doctor = doc.data();
+            const card = document.createElement("div");
+            card.className = "card";
+
+            let scheduleHTML = "";
+            if (doctor.schedule && doctor.schedule.length > 0) {
+                let days = "";
+                let timeSlots = ["", "", ""];
+
+                doctor.schedule
+                .filter(entry => entry.day && Array.isArray(entry.times))
+                .forEach((entry, i) => {
+                    days += `<div class="day-cell">${entry.day.slice(0, 3)}</div>`;
+
+                    entry.times.forEach((time, index) => {
+                    if (!timeSlots[index]) timeSlots[index] = "";
+                    timeSlots[index] += `<div class="time-cell">${time}</div>`;
+                    });
+                });
+
+
+                for (let i = 0; i < timeSlots.length; i++) {
+                    const slotCount = doctor.schedule.length;
+                    const currentCount = (timeSlots[i].match(/<div/g) || []).length;
+                    const missing = slotCount - currentCount;
+                    for (let j = 0; j < missing; j++) {
+                        timeSlots[i] += `<div class="time-cell"></div>`;
+                    }
                 }
 
+                scheduleHTML = `
+                    <div class="schedule-grid">${days}</div>
+                    ${timeSlots.map(row => `<div class="schedule-grid">${row}</div>`).join('')}
+                `;
+            } else {
+                scheduleHTML = "<p>No available schedule</p>";
+            }
 
-                card.innerHTML = `
-    <img src="doctor1.png" alt="Doctor">
+const profileImage = doctor.profileImageURL || "doctor1.png";
+
+card.innerHTML = `
+    <img src="${profileImage}" alt="Doctor">
     <div class="info-container">
         <div class="doctor-info">
-            <h2 class="doctor-name">${doctor.name}</h2>
-            <p class="doctor-spec">${doctor.specialization}</p>
+            <h2 class="doctor-name">${doctor.fullName || 'Unnamed Doctor'}</h2>
+            <p class="doctor-spec">${doctor.specialization || ''}</p>
         </div>
         <div class="badge">Leading Doctor</div>
     </div>
@@ -483,14 +539,32 @@
         </div>
     </div>
 
-    <p class="doctor-review">${doctor.bio}</p>
-    <button class="book-btn" onclick="window.location.href='patientLogin.html'">Book Appointment</button>
+    <p class="doctor-review">${doctor.bio || ''}</p>
 `;
 
-                container.appendChild(card);
 
+            // ✅ Create button separately so template literal works
+            const button = document.createElement("button");
+            button.className = "book-btn";
+            button.textContent = "Book Appointment";
+            button.addEventListener("click", () => {
+                window.location.href = `patientLogin.html`;
             });
-        }
+
+            // Append button to card
+            card.appendChild(button);
+
+            container.appendChild(card);
+
+        });
+
+    } catch (error) {
+        console.error("Error fetching doctors:", error);
+        container.innerHTML = `<p>Error loading doctors: ${error.message}</p>`;
+    }
+}
+
+        
 
         window.addEventListener("DOMContentLoaded", displayDoctors);
 
@@ -505,38 +579,6 @@
             dropdown.classList.toggle("show");
         }
 
-        // Function to generate available time slots from 7:00 AM to 12:00 PM with 30-minute intervals
-        function generateTimeSlots() {
-            const slots = [];
-            const startTime = 7; // 7:00 AM
-            const endTime = 12; // 12:00 PM
-            const interval = 30; // 30 minutes
-
-            for (let hour = startTime; hour < endTime; hour++) {
-                for (let minute = 0; minute < 60; minute += interval) {
-                    let hourStr = hour < 10 ? "0" + hour : hour;
-                    let minuteStr = minute === 0 ? "00" : minute;
-                    slots.push(`${hourStr}:${minuteStr} AM`);
-                }
-            }
-            return slots;
-        }
-
-        // Show available times based on selected date
-        function showAvailableTimes() {
-            const selectedDate = document.getElementById("calendar").value;
-            const availableSlotsDiv = document.getElementById("availableTimeSlots");
-            const timeSlots = generateTimeSlots();
-
-            availableSlotsDiv.innerHTML = ''; // Clear previous slots
-
-            timeSlots.forEach(time => {
-                const timeSlotDiv = document.createElement("div");
-                timeSlotDiv.classList.add("time-slot");
-                timeSlotDiv.textContent = time;
-                availableSlotsDiv.appendChild(timeSlotDiv);
-            });
-        }
 
         function toggleMenu() {
             var menu = document.getElementById("hiddenMenu");
