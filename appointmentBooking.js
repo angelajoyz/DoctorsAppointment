@@ -118,6 +118,24 @@ function confirmAppointment() {
         return;
     }
 
+    function sendEmailToDoctor(appointmentData) {
+        const templateParams = {
+            to_name: selectedDoctor.name,
+            from_name: appointmentData.fullName,
+            appointment_date: appointmentData.appointmentDateTime.split("T")[0],
+            appointment_time: appointmentData.appointmentDateTime.split("T")[1],
+            to_email: selectedDoctor.email
+        };
+
+        emailjs.send('service_4neygh9', 'template_11mgiux', templateParams)
+            .then(response => {
+                console.log('Email sent successfully!', response.status, response.text);
+            })
+            .catch(error => {
+                console.error('Failed to send email:', error);
+            });
+    }
+
     function saveAppointmentToFirestore() {
         db.collection("patients").where("email", "==", email).get().then(querySnapshot => {
             if (querySnapshot.empty) {
