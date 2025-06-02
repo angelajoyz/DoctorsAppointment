@@ -266,7 +266,7 @@
 <div class="container">
   <div class="top-section">
     <div class="profile-info">
-      <img src="pfp.png" id="profileImage" alt="Profile Image" style="cursor:pointer;">
+      <img src="pfp.png" id="profileImage" alt="Profile Image">
       <div class="user-text">
         <h2 id="fullNameDisplay">Loading...</h2>
         <p id="specializationDisplay">Specialization</p>
@@ -329,24 +329,31 @@
     if (isEditMode) document.getElementById("imageUpload").click();
   });
 
-  document.getElementById("imageUpload").addEventListener("change", function () {
-    const file = this.files[0];
-    const reader = new FileReader();
+document.getElementById("imageUpload").addEventListener("change", function () {
+  const file = this.files[0];
+  const reader = new FileReader();
 
-    reader.onload = function (e) {
-      document.getElementById("profileImage").src = e.target.result;
-    };
-    reader.readAsDataURL(file);
+  reader.onload = function (e) {
+    const base64Image = e.target.result;
+    document.getElementById("profileImage").src = base64Image;
 
     const user = auth.currentUser;
-    if (user && file) {
-      const imageRef = storage.ref().child(`doctors/${user.uid}/profile.jpg`);
-      imageRef.put(file).then(() => imageRef.getDownloadURL())
-        .then(url => db.collection("doctors").doc(user.uid).update({ profileImageURL: url }))
-        .then(() => console.log("Profile image updated."))
-        .catch(err => console.error("Image upload error:", err));
+    if (user) {
+      db.collection("doctors").doc(user.uid).update({
+        profileImageURL: base64Image
+      }).then(() => {
+        console.log("Base64 image saved to Firestore");
+      }).catch(err => {
+        console.error("Error saving base64 image:", err);
+      });
     }
-  });
+  };
+
+  if (file) {
+    reader.readAsDataURL(file); // ✅ returns base64 string
+  }
+});
+
 
   function enableEditing() {
     document.querySelectorAll("input").forEach(input => {
@@ -359,34 +366,39 @@
     isEditMode = true;
   }
 
-  function saveProfile() {
-    const user = auth.currentUser;
-    if (!user) return alert("No user logged in.");
+function saveProfile() {
+  const user = auth.currentUser;
+  if (!user) return alert("No user logged in.");
 
-    const updatedData = {
-      fullName: document.getElementById("fullName").value.trim(),
-      username: document.getElementById("username").value.trim(),
-      phone: document.getElementById("phone").value.trim(),
-      gender: document.getElementById("gender").value.trim(),
-      specialization: document.getElementById("specialization").value.trim(),
-      bio: document.getElementById("bio").value.trim(),
-      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-    };
+  const updatedData = {
+    fullName: document.getElementById("fullName").value.trim(),
+    username: document.getElementById("username").value.trim(),
+    phone: document.getElementById("phone").value.trim(),
+    gender: document.getElementById("gender").value.trim(),
+    specialization: document.getElementById("specialization").value.trim(),
+    bio: document.getElementById("bio").value.trim(),
+    profileImageURL: document.getElementById("profileImage").src, // ✅ Include this
+    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+  };
 
-    db.collection("doctors").doc(user.uid).update(updatedData).then(() => {
-      alert("Profile updated!");
-      document.getElementById("fullNameDisplay").textContent = updatedData.fullName;
-      document.getElementById("specializationDisplay").textContent = updatedData.specialization;
-      document.querySelectorAll("input").forEach(i => i.disabled = true);
-      document.getElementById("bio").disabled = true;
-      document.getElementById("imageUpload").disabled = true;
-      document.getElementById("editBtn").style.display = "inline-block";
-      document.getElementById("saveBtn").style.display = "none";
-      isEditMode = false;
-    }).catch(error => {
-      alert("Error saving profile: " + error.message);
-    });
-  }
+  db.collection("doctors").doc(user.uid).update(updatedData).then(() => {
+    alert("Profile updated!");
+
+    document.getElementById("fullNameDisplay").textContent = updatedData.fullName;
+    document.getElementById("specializationDisplay").textContent = updatedData.specialization;
+
+    document.querySelectorAll("input").forEach(i => i.disabled = true);
+    document.getElementById("bio").disabled = true;
+    document.getElementById("imageUpload").disabled = true;
+
+    document.getElementById("editBtn").style.display = "inline-block";
+    document.getElementById("saveBtn").style.display = "none";
+
+    isEditMode = false;
+  }).catch(error => {
+    alert("Error saving profile: " + error.message);
+  });
+}
 
   function loadProfile(uid) {
     db.collection("doctors").doc(uid).get().then(doc => {
