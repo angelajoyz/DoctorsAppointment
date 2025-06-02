@@ -38,26 +38,22 @@ function toggleMenu() {
 }
 window.toggleMenu = toggleMenu;
 
-async function loadDoctorInfo(doctorId) {
-  try {
-    const docRef = doc(db, "doctors", doctorId);
-    const docSnap = await getDoc(docRef);
 
-    if (docSnap.exists()) {
-      const data = docSnap.data();
-      fullNameEl.textContent = data.fullName || "No name found";
-      specializationEl.textContent = data.specialization || "No specialization found";
-      if (data.profileImageUrl) {
-        profileImageEl.src = data.profileImageUrl;
-      }
-    } else {
-      fullNameEl.textContent = "Doctor not found";
-      specializationEl.textContent = "";
+
+// Load doctor info
+async function loadDoctorInfo(uid) {
+  const docRef = doc(db, "doctors", uid);
+  const docSnap = await getDoc(docRef);
+  if (docSnap.exists()) {
+    const data = docSnap.data();
+    fullNameEl.textContent = data.fullName || "No name";
+    specializationEl.textContent = data.specialization || "No specialization";
+    if (data.profileImageURL) {
+      profileImageEl.src = data.profileImageURL;
     }
-  } catch (error) {
-    console.error("Error fetching doctor info:", error);
   }
 }
+
 
 // Utility to get YYYY-MM-DD from a Date object
 function formatDate(date) {
@@ -126,7 +122,7 @@ async function loadAppointments(doctorId) {
     });
 
     // Render calendar with appointment events
-renderFullCalendar(querySnapshot.docs.map(doc => doc.data()));
+renderFullCalendar(querySnapshot.docs);
 
     if (!hasAppointments) {
       appointmentTableBody.innerHTML =
@@ -156,20 +152,18 @@ const calendarEl = document.getElementById('calendar');
 
 let calendar; // global so we can manipulate it later
 
-function renderFullCalendar(appointments) {
-  const calendarEl = document.getElementById('calendar');
+function renderFullCalendar(appointmentDocs) {
+  const events = appointmentDocs.map(doc => {
+    const data = doc.data();
+    const start = data.appointmentDateTime?.toDate?.() || new Date(data.appointmentDateTime);
+    return {
+      title: data.fullName || "Appointment",
+      start: start.toISOString(),
+      allDay: true,
+    };
+  });
 
-  // Convert appointment dates to FullCalendar event format
-  const events = appointments.map(app => ({
-    title: app.fullName || "Appointment",
-start: app.appointmentDateTime?.toDate?.().toISOString?.() || null,
-    allDay: true
-  }));
-
-  // If calendar already exists, destroy and re-render
-  if (calendar) {
-    calendar.destroy();
-  }
+  if (calendar) calendar.destroy();
 
   calendar = new FullCalendar.Calendar(calendarEl, {
     initialView: 'dayGridMonth',
@@ -184,4 +178,6 @@ start: app.appointmentDateTime?.toDate?.().toISOString?.() || null,
 
   calendar.render();
 }
+
+
 
