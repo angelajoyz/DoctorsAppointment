@@ -2,85 +2,190 @@
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Doctor Dashboard</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
-  <link rel="stylesheet" href="doctorDashboard.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Appointment Booking</title>
+  <link rel="stylesheet" href="appointmentBooking.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
-  <!-- FullCalendar CSS -->
-  <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.css" rel="stylesheet" />
-  
 </head>
 
-
 <body>
-  <header>
-    <button class="menu-icon" onclick="toggleMenu()">&#9776;</button>
-    <h1><span class="small-text">DOCTOR</span> <span class="highlight">DASHBOARD</span></h1>
-    <p>Check your schedule and appointment.</p>
-  </header>
+  <script src="https://www.gstatic.com/firebasejs/10.11.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.11.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore-compat.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/js-md5/0.7.3/md5.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js"></script>
+  <script type="text/javascript" src="https://cdn.emailjs.com/dist/email.min.js"></script>
 
-  <nav id="hiddenMenu" class="hidden-menu">
-    <ul>
-      <li><a href="doctorDashboard.html">Dashboard</a></li>
-      <li><a href="doctorDetails.html">Profile</a></li>
-      <li><a href="patients.html">Patients</a></li>
-      <li><a href="reports.html">Reports</a></li>
-      <li><a href="index.html">Logout</a></li>
-    </ul>
-  </nav>
 
-  <div class="notifications">
-    <span class="notification-icon">
-      <i class="fas fa-bell">
-        <span class="notification-count" id="notificationCount">0</span>
-      </i>
-    </span>
-    <div class="notification-dropdown" id="notificationDropdown"></div>
-  </div>
-<br><br>
-  <div class="container">
-    <div class="card">
-  <div class="doctor-info">
-    <img src="pfp.PNG" alt="Doctor Profile" id="profileImage" />
-    <div>
-      <h2 id="fullNameDisplay">Loading...</h2>
-      <p class="doctor-spec" id="specializationDisplay">Loading...</p>
+
+
+  <!-- Step 1 -->
+  <div class="container" id="step1">
+    <div class="header">Book an Appointment</div>
+    <div class="form-content">
+      <div class="form-group">
+        <div class="column">
+          <h3>Patient Information</h3>
+          <input type="text" id="fullName" placeholder="Full Name"><br>
+          <input type="tel" id="phone" placeholder="Phone Number"><br>
+          <input type="email" id="email" placeholder="Email Address"><br>
+          <input type="number" id="age" placeholder="Age"><br>
+          <input type="text" id="gender" placeholder="Gender"><br>
+          <input type="text" id="address" placeholder="address"><br>
+        </div>
+        <div class="column">
+          <h3>Medical History</h3>
+          <label for="appointmentReason"></label>
+          <select id="appointmentReason" onchange="updateFee()">
+            <option disabled selected>Select Reason</option>
+            <option value="Consultation">Consultation</option>
+            <option value="Check-up">Check-up</option>
+            <option value="Follow-up">Follow-up</option>
+          </select>
+
+          <input type="hidden" id="feeAmount">
+
+          <label for="allergies"></label>
+          <select id="allergies" required>
+            <option disabled selected>Known Allergies</option>
+            <option>None</option>
+            <option>Peanuts</option>
+            <option>Shellfish</option>
+            <option>Penicillin</option>
+            <option>Latex</option>
+            <option>Pollen</option>
+            <option>Dust mites</option>
+            <option>Other</option>
+          </select>
+
+          <label for="medications"></label>
+          <select id="medications">
+            <option disabled selected>Current Medications</option>
+            <option>None</option>
+            <option>Antibiotics</option>
+            <option>Insulin</option>
+            <option>Blood Pressure Medication</option>
+            <option>Antidepressants</option>
+            <option>Birth Control Pills</option>
+            <option>Pain Relievers</option>
+            <option>Other</option>
+          </select>
+
+          <label for="conditions"></label>
+          <select id="conditions">
+            <option disabled selected>Previous Medical Conditions</option>
+            <option>None</option>
+            <option>Diabetes</option>
+            <option>Hypertension</option>
+            <option>Asthma</option>
+            <option>Heart Disease</option>
+            <option>Kidney Disease</option>
+            <option>Arthritis</option>
+            <option>Other</option>
+          </select>
+
+          <label for="familyHistory"></label>
+          <select id="familyHistory">
+            <option disabled selected>Family Medical History</option>
+            <option>None</option>
+            <option>Diabetes</option>
+            <option>Hypertension</option>
+            <option>Cancer</option>
+            <option>Stroke</option>
+            <option>Heart Disease</option>
+            <option>Other</option>
+          </select>
+        </div>
+      </div>
+      <div style="text-align: center;">
+        <button onclick="location.href='patientDashboard.html'">Cancel</button>
+        <button onclick="nextStep(1)">Next</button>
+      </div>
     </div>
   </div>
 
-  <!-- Left side: Card with calendar -->
+  <!-- Step 2 -->
+  <div class="container hidden" id="step2">
+    <div class="header">Book an Appointment</div>
+    <div class="form-content">
+      <div class="form-group">
+        <div class="column" style="width: 100%;">
+          
+
+          <div class="doctor-schedule">
+            <h3 style="margin-bottom: 10px;">Doctor's Availability</h3>
+            <div class="doctor-details">
+            <p><strong>Name:</strong> <span id="doctorName"></span></p>
+            <p><strong>Specialization:</strong> <span id="doctorSpecialization"></span></p>
+            </div>
+
+          <label for="calendarContainer" style="font-weight: bold;">Select a Date</label><br>
+          <div id="calendarContainer"></div><br>
+
+          <label for="timeSlots" style="margin-top: 20px; font-weight: bold;">Select a Time Slot</label>
+          <div id="timeSlots" class="time-slots"></div>
+
+          <br><br>
+          <label for="appointmentDateTime" style="font-weight: bold;">Selected Date & Time</label><br>
+          <input id="appointmentDateTime" readonly><br>
+
+        </div>
 
 
- 
+          <h3>Appointment Fee Details</h3>
+          <input type="text" id="displayFee" placeholder="Appointment Fee" readonly><br>
+          <select id="paymentMethod">
+            <option disabled selected>Payment Method</option>
+            <option>Credit Card</option>
+            <option>Bank Transfer</option>
+            <option>GCash</option>
+          </select><br>
+          <input type="text" id="paymentRef" placeholder="Payment Reference Number"><br>
+          <label for="paymentProof">Upload Proof of Payment:</label>
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <input type="file" id="proofImage" accept="image/*" onchange="handleFileUpload(event)">
+            <button id="openModalBtn" style="display: none; background: none; border: none; cursor: pointer;">
+              <i class="fas fa-eye" style="font-size: 10px;" title="View Uploaded Image"></i>
+            </button>
+          </div>
 
-    <div class="calendar-container">
-      <h3>Schedule Calendar</h3>
-      <div id="calendar"></div>
+
+          <!-- Modal -->
+          <div id="imageModal" class="modal">
+            <span class="close" id="closeModal">&times;</span>
+            <img class="modal-content" id="modalImage">
+          </div>
+
+
+
+          <div class="checkbox-group">
+            <label><input type="checkbox" id="paymentConfirmed"> I confirm that I have completed the payment.</label>
+            <label><input type="checkbox" id="noRefundAccepted"> I understand that the appointment fee is non-refundable
+              and that cancellations are not allowed.</label>
+          </div>
+        </div>
+      </div>
+      <div style="text-align: center;">
+        <button onclick="prevStep(1)">Back</button>
+        <button id="confirmButton">Confirm</button>
+
+      </div>
     </div>
   </div>
 
-  <!-- Right side: Table -->
-  <div class="appointment-table-container">
-       <h3>Appointments</h3><br>
-    <table>
-      <thead>
-        <tr>
-          <th>Patient</th>
-          <th>Reason</th>
-          <th>Action</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
+  <!-- Step 3: Success Message -->
+  <div class="container hidden" id="step3">
+    <h2>✅ Appointment Successfully Scheduled</h2>
+    <p>You will receive a confirmation email with the details of your appointment.
+      Please arrive 10 minutes before your scheduled time. Thank you!</p>
+    <button onclick="location.href='patientDashboard.html'">Book Again</button>
   </div>
-</div>
 
 
-  <script src="doctorDashboard.js" type="module"></script>
-  <!-- FullCalendar JS -->
-<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
+  <script src="appointmentBooking.js"></script>
 
 </body>
 
