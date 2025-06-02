@@ -1,0 +1,256 @@
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #f0f4f8 url('bg-blue.png') no-repeat center center;
+      background-size: cover;
+      background-attachment: fixed;
+    }
+
+
+    .container {
+      width: 1000px;
+      display: flex;
+      background-color: #fff;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+      border-radius: 20px;
+      overflow: hidden;
+    }
+
+    .left-panel {
+      background-color: #29a9e1;
+      flex: 1;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 40px;
+    }
+
+    .left-panel h2 {
+      font-size: 28px;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+
+    .left-panel p {
+      font-size: 16px;
+      margin-bottom: 30px;
+      text-align: center;
+    }
+
+    .left-panel button {
+      padding: 10px 20px;
+      border: 2px solid #fff;
+      background: transparent;
+      color: white;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .right-panel {
+      flex: 2;
+      padding: 40px;
+    }
+
+    .title {
+      font-size: 22px;
+      font-weight: bold;
+      margin-bottom: 20px;
+      position: relative;
+    }
+
+    .title::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      bottom: -5px;
+      width: 30px;
+      height: 3px;
+      background: linear-gradient(to right, #00c6ff, #0072ff);
+    }
+
+    form .user-details {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+
+    .input-box {
+      width: calc(50% - 20px);
+      margin-bottom: 15px;
+      position: relative;
+    }
+
+    .input-box .details {
+      display: block;
+      font-weight: 500;
+      margin-bottom: 5px;
+      font-size: 14px;
+    }
+
+    .input-box input,
+    .input-box select {
+      width: 100%;
+      padding: 12px;
+      font-size: 14px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    .toggle-password {
+      position: absolute;
+      right: 10px;
+      top: 37px;
+      cursor: pointer;
+      width: 20px;
+      height: 20px;
+    }
+
+    .button {
+      margin-top: 20px;
+      text-align: right;
+    }
+
+    .button input {
+      padding: 12px 20px;
+      background-color: #29a9e1;
+      color: white;
+      font-size: 16px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    #addSchedule {
+      display: inline-block;
+      padding: 10px 20px;
+      background: #0072ff;
+      /* bright blue */
+      background: linear-gradient(45deg, #00c6ff, #0072ff);
+      /* gradient */
+      color: white;
+      font-weight: 600;
+      font-size: 14px;
+      border: none;
+      border-radius: 25px;
+      cursor: pointer;
+      transition: background 0.3s ease, box-shadow 0.3s ease;
+      box-shadow: 0 4px 8px rgba(0, 114, 255, 0.3);
+      margin-top: 10px;
+    }
+
+    #addSchedule:hover {
+      background: linear-gradient(45deg, #0072ff, #00c6ff);
+      box-shadow: 0 6px 12px rgba(0, 198, 255, 0.6);
+    }
+
+    #addSchedule:active {
+      background: #005bbb;
+      box-shadow: none;
+      transform: scale(0.98);
+    }
+
+    .schedule-input button {
+      background-color: #e74c3c;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      padding: 6px 12px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .schedule-input button:hover {
+      background-color: #c0392b;
+    }
+
+    .phone-input-group {
+      display: flex;
+      align-items: center;
+      /* vertically center inputs */
+      gap: 8px;
+      /* spacing between country code and phone input */
+      max-width: 400px;
+      /* optional max width */
+    }
+
+    /* Adjust Country Dropdown */
+    .country-dropdown {
+      width: 100px;
+      /* Set the desired width */
+      display: inline-block;
+      /* Align it next to the phone number */
+    }
+
+    /* Ensure Phone Number Input Field retains its size */
+
+    .phone-container {
+      display: flex;
+      align-items: center;
+      /* Aligns items in the center vertically */
+
+
+    }
+
+    .phone-number {
+      flex-grow: 10;
+      /* Takes up remaining space */
+
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .phone-input-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .country-select {
+      padding: px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 14px;
+      flex-basis: 100px;
+      /* Set an appropriate width for the dropdown */
+    }
+
+    .phone-input {
+      flex-grow: 1;
+      /* Allow the input field to take the remaining space */
+      padding: 12px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 14px;
+    }
+
+    .button {
+      text-align: right;
+    }
+
+
+    @media (max-width: 768px) {
+      .container {
+        flex-direction: column;
+      }
+
+      .input-box {
+        width: 100%;
+      }
+    }
