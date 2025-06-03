@@ -87,7 +87,7 @@ async function loadAppointments(doctorId) {
       row.innerHTML = `
         <td>${data.fullName || "N/A"}</td>
         <td>${data.reason || "N/A"}</td>
-        <td><a href="patient-details.html?id=${doc.id}">View Details</a></td>
+        <td><a href="viewDetails.html?id=${doc.id}">View Details</a></td>
       `;
       appointmentTableBody.appendChild(row);
 
@@ -223,7 +223,7 @@ function displayAppointmentsForDate(dateStr, allAppointments) {
       <td>${appt.extendedProps.fullName}</td>
       <td>${appt.extendedProps.reason}</td>
       <td>${appt.extendedProps.time}</td>
-      <td><a href="patient-details.html?id=${appt.id}">View Details</a></td>
+      <td><a href="viewDetails.html?id=${appt.id}">View Details</a></td>
     `;
     appointmentTableBody.appendChild(row);
   }
