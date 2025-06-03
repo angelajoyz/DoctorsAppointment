@@ -38,8 +38,6 @@ function toggleMenu() {
 }
 window.toggleMenu = toggleMenu;
 
-
-
 // Load doctor info
 async function loadDoctorInfo(uid) {
   const docRef = doc(db, "doctors", uid);
@@ -48,12 +46,10 @@ async function loadDoctorInfo(uid) {
     const data = docSnap.data();
     fullNameEl.textContent = data.fullName || "No name";
     specializationEl.textContent = data.specialization || "No specialization";
-    if (data.profileImageURL) {
-      profileImageEl.src = data.profileImageURL;
-    }
+    const profileImage = doctor.profileImageURL || "doctor1.png";
+
   }
 }
-
 
 // Utility to get YYYY-MM-DD from a Date object
 function formatDate(date) {
@@ -63,7 +59,7 @@ function formatDate(date) {
 // Keep only this loadAppointments function (merged and fixed)
 async function loadAppointments(doctorId) {
   try {
-    const appointmentsRef = collection(db, "appointments");
+    const appointmentsRef = collection(db, "approved"); // 👈 Changed from "appointments"
     const q = query(appointmentsRef, where("doctorId", "==", doctorId));
     const querySnapshot = await getDocs(q);
 
@@ -83,23 +79,20 @@ async function loadAppointments(doctorId) {
 
       hasAppointments = true;
 
-      // Collect dates with appointments for calendar highlight
       highlightedDates.add(formatDate(dateObj));
 
-      // Append row to appointment table
+      // Table row
       const row = document.createElement("tr");
       row.innerHTML = `
-        
         <td>${data.fullName || "N/A"}</td>
         <td>${data.reason || "N/A"}</td>
         <td><a href="patient-details.html?id=${doc.id}">View Details</a></td>
       `;
       appointmentTableBody.appendChild(row);
 
-      // Notifications for tomorrow's appointments
+      // Notifications
       const tomorrow = new Date();
       tomorrow.setDate(now.getDate() + 1);
-
       if (
         dateObj.getDate() === tomorrow.getDate() &&
         dateObj.getMonth() === tomorrow.getMonth() &&
@@ -121,8 +114,7 @@ async function loadAppointments(doctorId) {
       }
     });
 
-    // Render calendar with appointment events
-renderFullCalendar(querySnapshot.docs);
+    renderFullCalendar(querySnapshot.docs);
 
     if (!hasAppointments) {
       appointmentTableBody.innerHTML =
@@ -132,9 +124,10 @@ renderFullCalendar(querySnapshot.docs);
     notificationCount.textContent = upcomingCount;
     notificationCount.style.display = upcomingCount > 0 ? "inline-block" : "none";
   } catch (error) {
-    console.error("Error loading appointments:", error);
+    console.error("Error loading approved appointments:", error);
   }
 }
+
 
 onAuthStateChanged(auth, (user) => {
   if (user) {
@@ -153,14 +146,25 @@ const calendarEl = document.getElementById('calendar');
 let calendar; // global so we can manipulate it later
 
 function renderFullCalendar(appointmentDocs) {
-  const events = appointmentDocs.map(doc => {
+  const allAppointments = appointmentDocs.map((doc) => {
     const data = doc.data();
-    const start = data.appointmentDateTime?.toDate?.() || new Date(data.appointmentDateTime);
+    const dateObj = data.appointmentDateTime?.toDate?.() || new Date(data.appointmentDateTime);
     return {
-      title: data.fullName || "Appointment",
-      start: start.toISOString(),
-      allDay: true,
-    };
+  id: doc.id,
+  title: ' ', // invisible title
+start: toLocalDateString(dateObj),
+  allDay: true,
+  display: 'background', // Highlight background only
+  backgroundColor: '#32CD32', // LimeGreen for full-day highlight
+  extendedProps: {
+    fullName: data.fullName,
+    reason: data.reason,
+    date: dateObj.toDateString(),
+    time: dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+  },
+};
+
+
   });
 
   if (calendar) calendar.destroy();
@@ -168,16 +172,65 @@ function renderFullCalendar(appointmentDocs) {
   calendar = new FullCalendar.Calendar(calendarEl, {
     initialView: 'dayGridMonth',
     height: 'auto',
-    events: events,
+    contentHeight: 'auto',
+    aspectRatio: 2, // Controls width vs height (try 1.5–2.5)
+    events: allAppointments,
     headerToolbar: {
       left: 'prev,next today',
       center: 'title',
       right: ''
+  
+
     },
+    dateClick: function(info) {
+      displayAppointmentsForDate(info.dateStr, allAppointments);
+    }
+    
   });
 
   calendar.render();
+
+  // Show today's appointments on load if no date is clicked
+const todayStr = formatDate(new Date());
+displayAppointmentsForDate(todayStr, allAppointments);
+
 }
 
 
+function displayAppointmentsForDate(dateStr, allAppointments) {
+  const targetDate = new Date(dateStr);
+  targetDate.setHours(0, 0, 0, 0);
+
+  appointmentTableBody.innerHTML = "";
+
+  const matches = allAppointments.filter(event => {
+    const eventDate = new Date(event.start);
+    eventDate.setHours(0, 0, 0, 0);
+    return eventDate.getTime() === targetDate.getTime();
+  });
+
+  if (matches.length === 0) {
+    appointmentTableBody.innerHTML = "<tr><td colspan='4' style='text-align:center;'>No appointment</td></tr>";
+    return;
+  }
+
+  matches.sort((a, b) => new Date(a.start) - new Date(b.start)); // Sort by time
+
+  for (const appt of matches) {
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td>${appt.extendedProps.fullName}</td>
+      <td>${appt.extendedProps.reason}</td>
+      <td>${appt.extendedProps.time}</td>
+      <td><a href="patient-details.html?id=${appt.id}">View Details</a></td>
+    `;
+    appointmentTableBody.appendChild(row);
+  }
+}
+function toLocalDateString(date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
 
