@@ -341,12 +341,17 @@
             <button class="details-button">View</button>
           </td>
           <td class="rate-cell" data-label="Rate Doctor">
-            ${[1, 2, 3, 4, 5].map(i => `
-              <span class="stars ${i <= rating ? 'active' : ''}" 
-                    data-id="${docSnap.id}" 
-                    data-rate="${i}">&#9733;</span>
-            `).join('')}
-          </td>
+  ${
+    status === "Completed"
+      ? [1, 2, 3, 4, 5].map(i => `
+          <span class="stars ${i <= rating ? 'active' : ''} ${rating > 0 ? 'locked' : ''}" 
+                data-id="${docSnap.id}" 
+                data-rate="${i}">&#9733;</span>
+        `).join('')
+      : `<span style="color:#999;">Not yet available</span>`
+  }
+</td>
+
         `;
 
         const detailsBtn = row.querySelector(".details-button");
