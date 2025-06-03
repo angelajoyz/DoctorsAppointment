@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patient Details</title>
+    <link rel="stylesheet" href="patient-details.css">
+
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+    <script type="text/javascript">
+        (function () {
+            emailjs.init("uxowx8uL9zxSSj8V1");
+        })();
+    </script>
+
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>Patient Details</h1>
+        </header>
+
+        <section id="patient-info">
+            <h2>Patient Information</h2>
+            <div><strong>Name:</strong> <span id="name"></span></div>
+            <div><strong>Age:</strong> <span id="age"></span></div>
+            <div><strong>Gender:</strong> <span id="gender"></span></div>
+            <div><strong>Contact:</strong> <span id="contact"></span></div>
+            <div><strong>Email:</strong> <span id="email"></span></div>
+            <div><strong>Address:</strong> <span id="address"></span></div>
+        </section>
+
+        <section id="medical-history">
+            <h2>Medical History</h2>
+            <div><strong>Allergies:</strong> <span id="allergies"></span></div>
+            <div><strong>Medications:</strong> <span id="medications"></span></div>
+            <div><strong>Conditions:</strong> <span id="conditions"></span></div>
+            <div><strong>Family History:</strong> <span id="familyHistory"></span></div>
+        </section>
+
+        <section id="appointment-details">
+            <h2>Appointment Details</h2>
+            <div><strong>Date & Time:</strong> <span id="dateTime"></span></div>
+            <div><strong>Reason:</strong> <span id="reason"></span></div>
+            <div><strong>Fee:</strong> <span id="fee"></span></div>
+            <div><strong>Payment Method:</strong> <span id="paymentMethod"></span></div>
+            <div><strong>Payment Ref:</strong> <span id="paymentRef"></span></div>
+            <div>
+                <strong>Proof of Payment:</strong><br>
+                <img id="paymentProofImg" src="" alt="Proof of Payment"
+                    style="max-width: 100%; max-height: 300px; display: none; border: 1px solid #ccc; margin-top: 8px;">
+            </div>
+            <div><strong>Payment Confirmed:</strong> <span id="paymentConfirmed"></span></div>
+            <div><strong>Non-refundable Acknowledged:</strong> <span id="noRefundAccepted"></span></div>
+            <div id="appointment-status">
+                <strong>Status:</strong> <span id="status">Pending</span>
+            </div>
+        </section>
+
+        <!-- Button container for all buttons -->
+        <div class="button-container">
+            <!-- Back to Dashboard Button (left aligned) -->
+            <button id="back-button" onclick="location.href='doctorDashboard.html'">Back to Dashboard</button>
+
+            <!-- Approve/Deny Buttons (right aligned)
+            <div>
+                <button id="approve-button" onclick="updateStatus('Approved')">Approve</button>
+                <button id="deny-button" onclick="updateStatus('Denied')">Deny</button>
+            </div> -->
+        </div>
+
+    </div>
+
+    <script type="module">
+
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
+import { getFirestore, doc, getDoc, setDoc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
+
+// Firebase config for the new project
+const firebaseConfig = {
+  apiKey: "AIzaSyDwCayQZ0JO6DjzQvAT6ToT33I4QXCS_NY",
+  authDomain: "login-sample-c3af0.firebaseapp.com",
+  projectId: "login-sample-c3af0",
+  storageBucket: "login-sample-c3af0.firebasestorage.app",
+  messagingSenderId: "372688128666",
+  appId: "1:372688128666:web:bbc529c73c4665f95f6d23"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+document.addEventListener("DOMContentLoaded", async () => {
+  const params = new URLSearchParams(window.location.search);
+  const patientId = params.get("id");
+
+  if (!patientId) {
+    alert("No patient ID provided.");
+    return;
+  }
+
+  const patientDocRef = doc(db, "approved", patientId);
+
+  try {
+    const snapshot = await getDoc(patientDocRef);
+    if (!snapshot.exists()) {
+      alert("Patient not found.");
+      return;
+    }
+
+    const data = snapshot.data();
+
+    document.getElementById("name").textContent = data.fullName || "N/A";
+    document.getElementById("age").textContent = data.age || "N/A"; // Corrected from 'address'
+    document.getElementById("gender").textContent = data.gender || "N/A";
+    document.getElementById("contact").textContent = data.phone || "N/A";
+    document.getElementById("email").textContent = data.email || "N/A";
+    document.getElementById("address").textContent = data.address || "N/A";
+    document.getElementById("allergies").textContent = data.allergies || "N/A";
+    document.getElementById("medications").textContent = data.medications || "N/A";
+    document.getElementById("conditions").textContent = data.conditions || "N/A";
+    document.getElementById("familyHistory").textContent = data.familyHistory || "N/A";
+    document.getElementById("dateTime").textContent = new Date(data.appointmentDateTime).toLocaleString();
+    document.getElementById("reason").textContent = data.reason || "N/A";
+    document.getElementById("fee").textContent = data.feeAmount || "N/A";
+    document.getElementById("paymentMethod").textContent = data.paymentMethod || "N/A";
+    document.getElementById("paymentRef").textContent = data.paymentRef || "N/A";
+    document.getElementById("paymentConfirmed").textContent = data.paymentConfirmed ? "Confirmed" : "Not Confirmed";
+    document.getElementById("noRefundAccepted").textContent = data.noRefundAccepted ? "Acknowledged" : "Not Acknowledged";
+    document.getElementById("status").textContent = data.status || "Pending";
+
+    window.patientId = patientId;
+
+    // Show Proof of Payment image
+    if (data.paymentProof) {
+      const img = document.getElementById("paymentProofImg");
+
+      // If the string doesn't already start with "data:image/", prepend the JPEG prefix
+      const isBase64 = data.paymentProof.startsWith("data:image/");
+      img.src = isBase64 ? data.paymentProof : `data:image/jpeg;base64,${data.paymentProof}`;
+
+      img.style.display = "block";
+
+      img.onerror = () => {
+        img.style.display = "none";
+        console.warn("Payment proof image failed to load.");
+      };
+    }
+  } catch (error) {
+    console.error("Error fetching patient data:", error);
+    alert("Failed to fetch patient data.");
+  }
+
+
+});
+
+
+    </script>
+</body>
+
+</html>
