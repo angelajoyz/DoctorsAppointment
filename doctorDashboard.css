@@ -100,9 +100,10 @@ nav.hidden-menu a:hover {
   display: flex;
   flex-wrap: wrap;
   gap: 20px;
-  padding: 0;
+  padding: 20px;
   justify-content: center;
   align-items: flex-start;
+  
 }
 
 .card, .appointment-table-container {
@@ -219,7 +220,7 @@ footer {
 /* ==== FIXED FULLCALENDAR STYLING ==== */
 #calendar {
   max-width: 100%;
-  width: 350px;       /* Smaller calendar */
+  width: 100%;       /* Smaller calendar */
   height: auto;
   margin: 0 auto;
   font-size: 0.85rem;
@@ -252,4 +253,21 @@ footer {
   .fc .fc-daygrid-day-number {
     font-size: 0.7em;
   }
+}
+.fc-event-title {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.calendar-wrapper {
+  flex-grow: 1;
+}
+.calendar-container {
+  height: auto; /* or any fixed height you want */
+  max-width: 1200px;
+  width: 100%;
+  padding: 20px;
+  box-sizing: border-box;
+  min-height: 500px; /* Prevents it from being too short */
+
 }
