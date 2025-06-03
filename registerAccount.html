@@ -1,19 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <title>Registration Form</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <!-- Firebase SDKs -->
-    <script
-      src="https://www.gstatic.com/firebasejs/10.11.1/firebase-app-compat.js"></script>
-    <script
-      src="https://www.gstatic.com/firebasejs/10.11.1/firebase-auth-compat.js"></script>
-    <script
-      src="https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore-compat.js"></script>
-    <!-- EmailJS SDK -->
-    <script src="https://cdn.emailjs.com/dist/email.min.js"></script>
-    <style>
+<head>
+  <meta charset="UTF-8" />
+  <title>Registration Form</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.11.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.11.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore-compat.js"></script>
+  <!-- EmailJS SDK -->
+  <script src="https://cdn.emailjs.com/dist/email.min.js"></script>
+  <style>
     * {
       margin: 0;
       padding: 0;
@@ -21,16 +18,16 @@
       font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
     }
     body {
-  margin: 0;
-  padding: 0;
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #f0f4f8 url('bg-blue.png') no-repeat center center;
-  background-size: cover;
-  background-attachment: fixed;
-}
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #f0f4f8 url('bg-blue.png') no-repeat center center;
+      background-size: cover;
+      background-attachment: fixed;
+    }
     .container {
       width: 1000px;
       display: flex;
@@ -134,41 +131,43 @@
       cursor: pointer;
     }
     #addSchedule {
-  display: inline-block;
-  padding: 10px 20px;
-  background: #0072ff;           /* bright blue */
-  background: linear-gradient(45deg, #00c6ff, #0072ff); /* gradient */
-  color: white;
-  font-weight: 600;
-  font-size: 14px;
-  border: none;
-  border-radius: 25px;
-  cursor: pointer;
-  transition: background 0.3s ease, box-shadow 0.3s ease;
-  box-shadow: 0 4px 8px rgba(0, 114, 255, 0.3);
-  margin-top: 10px;
-}
-#addSchedule:hover {
-  background: linear-gradient(45deg, #0072ff, #00c6ff);
-  box-shadow: 0 6px 12px rgba(0, 198, 255, 0.6);
-}
-#addSchedule:active {
-  background: #005bbb;
-  box-shadow: none;
-  transform: scale(0.98);
-}
-  .schedule-input button {
-  background-color: #e74c3c;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  padding: 6px 12px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
-.schedule-input button:hover {
-  background-color: #c0392b;
-}
+      display: inline-block;
+      padding: 10px 20px;
+      background: #0072ff;
+      /* bright blue */
+      background: linear-gradient(45deg, #00c6ff, #0072ff);
+      /* gradient */
+      color: white;
+      font-weight: 600;
+      font-size: 14px;
+      border: none;
+      border-radius: 25px;
+      cursor: pointer;
+      transition: background 0.3s ease, box-shadow 0.3s ease;
+      box-shadow: 0 4px 8px rgba(0, 114, 255, 0.3);
+      margin-top: 10px;
+    }
+    #addSchedule:hover {
+      background: linear-gradient(45deg, #0072ff, #00c6ff);
+      box-shadow: 0 6px 12px rgba(0, 198, 255, 0.6);
+    }
+    #addSchedule:active {
+      background: #005bbb;
+      box-shadow: none;
+      transform: scale(0.98);
+    }
+    .schedule-input button {
+      background-color: #e74c3c;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      padding: 6px 12px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    .schedule-input button:hover {
+      background-color: #c0392b;
+    }
     .phone-container {
       display: flex;
       gap: 10px;
@@ -180,6 +179,22 @@
     .phone-number {
       flex: 1;
     }
+    .button-container {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 20px;
+    }
+    .button-container button {
+      flex: 1;
+      margin: 0 10px;
+      padding: 12px 20px;
+      background-color: #29a9e1;
+      color: white;
+      font-size: 16px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
     @media (max-width: 768px) {
       .container {
         flex-direction: column;
@@ -187,9 +202,15 @@
       .input-box {
         width: 100%;
       }
+      .button-container {
+        flex-direction: column;
+      }
+      .button-container button {
+        margin: 10px 0;
+      }
     }
   </style>
-    <script>
+  <script>
     // Hash function using SHA-256
     async function hashPassword(password) {
       const encoder = new TextEncoder();
@@ -217,7 +238,6 @@
     const auth = firebase.auth();
     const db = firebase.firestore();
     // Registration Logic
-    // Registration Logic
     document.addEventListener("DOMContentLoaded", () => {
       const roleSelect = document.querySelector("select[name='role']");
       const doctorFields = document.querySelectorAll(".doctor-only");
@@ -229,23 +249,20 @@
           doctorFields.forEach(field => field.style.display = "none");
         }
       });
-      
       // License Number Validation - 7 digits only
       const licenseNumberInput = document.querySelector("input[name='licenseNumber']");
       if (licenseNumberInput) {
-        licenseNumberInput.addEventListener('input', function() {
+        licenseNumberInput.addEventListener('input', function () {
           this.value = this.value.replace(/[^0-9]/g, '').substring(0, 7);
         });
       }
-      
       // Phone Number Validation - Country code + 11 digits
       const phoneInput = document.querySelector("input[name='phone']");
       if (phoneInput) {
-        phoneInput.addEventListener('input', function() {
+        phoneInput.addEventListener('input', function () {
           this.value = this.value.replace(/[^0-9]/g, '').substring(0, 11);
         });
       }
-      
       document.getElementById("addSchedule").addEventListener("click", () => {
         const additionalSchedulesDiv = document.getElementById("additionalSchedules");
         const scheduleContainer = document.createElement("div");
@@ -255,11 +272,9 @@
         scheduleContainer.style.alignItems = "center";
         scheduleContainer.style.gap = "10px";
         scheduleContainer.style.marginBottom = "10px";
-        
         const daySelect = document.createElement("select");
         daySelect.name = "scheduleDay";
         daySelect.required = true;
-        
         const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
         const placeholderOption = document.createElement("option");
         placeholderOption.value = "";
@@ -267,14 +282,12 @@
         placeholderOption.disabled = true;
         placeholderOption.selected = true;
         daySelect.appendChild(placeholderOption);
-        
         days.forEach(day => {
           const option = document.createElement("option");
           option.value = day;
           option.textContent = day;
           daySelect.appendChild(option);
         });
-        
         const timeInputsDiv = document.createElement("div");
         const addTimeButton = document.createElement("button");
         addTimeButton.type = "button";
@@ -285,15 +298,12 @@
         addTimeButton.style.borderRadius = "5px";
         addTimeButton.style.padding = "6px 12px";
         addTimeButton.style.cursor = "pointer";
-        
         addTimeButton.addEventListener("click", () => {
           const timeWrapper = document.createElement("div");
           timeWrapper.style.display = "flex";
           timeWrapper.style.gap = "8px";
           timeWrapper.style.marginTop = "5px";
           timeWrapper.classList.add("time-wrapper");
-          
-          // Helper: create time dropdown (1–12)
           function createHourSelect(name) {
             const select = document.createElement("select");
             select.name = name;
@@ -305,8 +315,6 @@
             }
             return select;
           }
-          
-          // Helper: create AM/PM select
           function createPeriodSelect(name) {
             const select = document.createElement("select");
             select.name = name;
@@ -318,12 +326,10 @@
             });
             return select;
           }
-          
           const startHour = createHourSelect("startHour");
           const startPeriod = createPeriodSelect("startPeriod");
           const endHour = createHourSelect("endHour");
           const endPeriod = createPeriodSelect("endPeriod");
-          
           const deleteTimeBtn = document.createElement("button");
           deleteTimeBtn.type = "button";
           deleteTimeBtn.textContent = "🗑";
@@ -333,18 +339,13 @@
           deleteTimeBtn.style.borderRadius = "5px";
           deleteTimeBtn.style.padding = "4px 8px";
           deleteTimeBtn.style.cursor = "pointer";
-          
           deleteTimeBtn.addEventListener("click", () => {
             timeWrapper.remove();
           });
-          
           timeWrapper.append("Start:", startHour, startPeriod, "End:", endHour, endPeriod, deleteTimeBtn);
           timeInputsDiv.appendChild(timeWrapper);
         });
-        
-        // Add one time input by default
         addTimeButton.click();
-        
         const deleteBtn = document.createElement("button");
         deleteBtn.type = "button";
         deleteBtn.textContent = "Delete";
@@ -352,16 +353,13 @@
         deleteBtn.style.color = "white";
         deleteBtn.style.border = "none";
         deleteBtn.style.borderRadius = "5px";
-        deleteBtn.style.padding = "4px 8px";  // smaller padding
+        deleteBtn.style.padding = "4px 8px";
         deleteBtn.style.cursor = "pointer";
-        deleteBtn.style.height = "30px"; // aligns with select height
+        deleteBtn.style.height = "30px";
         deleteBtn.style.marginTop = "0";
-        
         deleteBtn.addEventListener("click", () => {
           scheduleContainer.remove();
         });
-        
-        // Wrap delete button and day select side by side, with delete first
         const dayDeleteWrapper = document.createElement("div");
         dayDeleteWrapper.style.display = "flex";
         dayDeleteWrapper.style.alignItems = "center";
@@ -369,14 +367,11 @@
         dayDeleteWrapper.style.marginRight = "10px";
         dayDeleteWrapper.appendChild(deleteBtn);
         dayDeleteWrapper.appendChild(daySelect);
-        
         scheduleContainer.appendChild(dayDeleteWrapper);
         scheduleContainer.appendChild(timeInputsDiv);
         scheduleContainer.appendChild(addTimeButton);
-        
         additionalSchedulesDiv.appendChild(scheduleContainer);
       });
-      
       document.getElementById("registerForm").addEventListener("submit", async (e) => {
         e.preventDefault();
         const fullName = e.target.fullname.value.trim();
@@ -387,60 +382,19 @@
         const confirmPassword = e.target.confirmPassword.value;
         const gender = e.target.gender.value;
         const role = e.target.role.value;
-        
-        // Validate phone number format
-        if (role === "patient" && phone.length !== 11) {
-          alert("Phone number must be exactly 11 digits long.");
-          return;
-        }
-        
-        // Validate license number format
-        if (role === "doctor" && (!e.target.licenseNumber || e.target.licenseNumber.value.length !== 7)) {
-          alert("License number must be exactly 7 digits long.");
-          return;
-        }
-        
-        // Doctor-specific fields
-        const licenseNumber = e.target.licenseNumber?.value.trim();
-        const hospitalName = e.target.hospitalName?.value.trim();
-        const hospitalAddress = e.target.hospitalAddress?.value.trim();
-        const specialization = e.target.specialization?.value.trim();
-        const bio = e.target.bio?.value.trim();
-        const availableDays = e.target.availableDays?.value.split(',').map(day => day.trim());
-        const schedule = e.target.schedule?.value.split(',').map(time => time.trim());
-        
         if (password !== confirmPassword) {
           alert("Password and Confirm Password must match.");
           return;
         }
-        
         if (!validatePassword(password)) {
           alert("Password must be at least 8 characters long, include one uppercase letter and one number.");
           return;
         }
-        
         try {
-          // Check for duplicate email or username
-          const collectionRef = db.collection(role === "doctor" ? "doctors" : "patients");
-          const emailSnapshot = await collectionRef.where("email", "==", email).get();
-          if (!emailSnapshot.empty) {
-            alert("An account with this email already exists.");
-            return;
-          }
-          
-          const usernameSnapshot = await collectionRef.where("username", "==", username).get();
-          if (!usernameSnapshot.empty) {
-            alert("Username is already taken.");
-            return;
-          }
-          
-          // Create user
           const userCredential = await auth.createUserWithEmailAndPassword(email, password);
           const user = userCredential.user;
           await user.sendEmailVerification();
           alert("A verification email has been sent. Please verify your email before logging in.");
-          
-          // Hash password and prepare user data
           const hashedPassword = await hashPassword(password);
           const userData = {
             fullName,
@@ -452,11 +406,9 @@
             password: hashedPassword,
             createdAt: firebase.firestore.FieldValue.serverTimestamp()
           };
-          
           if (role === "doctor") {
             const scheduleEntries = document.querySelectorAll("#additionalSchedules .schedule-input");
             const schedule = [];
-            
             scheduleEntries.forEach(entry => {
               const day = entry.querySelector("select[name='scheduleDay']").value;
               const timeWrappers = entry.querySelectorAll(".time-wrapper");
@@ -470,27 +422,22 @@
                   endTime: `${endHour}:00 ${endPeriod}`
                 };
               });
-              
               if (day && times.length > 0) {
                 times.forEach(time => {
                   schedule.push({ day, ...time });
                 });
               }
             });
-            
-            userData.specialization = specialization;
-            userData.bio = bio;
+            userData.specialization = e.target.specialization?.value.trim();
+            userData.bio = e.target.bio?.value.trim();
             userData.schedule = schedule;
-            userData.licenseNumber = licenseNumber;
-            userData.hospitalName = hospitalName;
-            userData.hospitalAddress = hospitalAddress;
+            userData.licenseNumber = e.target.licenseNumber?.value.trim();
+            userData.hospitalName = e.target.hospitalName?.value.trim();
+            userData.hospitalAddress = e.target.hospitalAddress?.value.trim();
           }
-          
-          // Save user data immediately
           await db.collection(role === "doctor" ? "doctors" : "patients")
-                  .doc(user.uid)
-                  .set(userData);
-          
+            .doc(user.uid)
+            .set(userData);
           alert("Registration successful! Please verify your email before logging in.");
           window.location.href = "patientLogin.html";
         } catch (error) {
@@ -500,171 +447,161 @@
       });
     });
   </script>
-  </head>
-  <body>
-    <div class="container">
-      <div class="left-panel">
-        <h1>Welcome</h1>
-        <p>To proceed, please login with your info.</p>
-        <button onclick="window.location.href='patientLogin.html'">Back to
-          Login</button>
-      </div>
-      <div class="right-panel">
-        <div class="title">Registration Form</div>
-        <form id="registerForm">
-          <div class="user-details">
-            <div class="input-box">
-              <span class="details">Full Name</span>
-              <input type="text" name="fullname" required>
-            </div>
-            <div class="input-box">
-              <span class="details">Username</span>
-              <input type="text" name="username" required>
-            </div>
-            <div class="input-box">
-              <span class="details">Email</span>
-              <input type="email" name="email" required>
-            </div>
-            <div class="input-box">
-              <span class="details">Phone Number</span>
-              <div class="phone-container">
-                <div class="country-code">
-                  <select name="countryCode" required>
-                    <option value="+1">+1</option>
-                    <option value="+44">+44</option>
-                    <option value="+61">+61</option>
-                    <option value="+81">+81</option>
-                    <option value="+86">+86</option>
-                    <option value="+91">+91</option>
-                    <option value="+61">+61</option>
-                    <option value="+65">+65</option>
-                    <option value="+65">+63</option>
-                    <option value="+33">+33</option>
-                    <option value="+49">+49</option>
-                    <option value="+39">+39</option>
-                    <option value="+7">+7</option>
-                    <option value="+27">+27</option>
-                    <option value="+34">+34</option>
-                    <option value="+81">+81</option>
-                    <option value="+82">+82</option>
-                    <option value="+91">+91</option>
-                    <option value="+92">+92</option>
-                    <option value="+93">+93</option>
-                    <option value="+94">+94</option>
-                    <option value="+95">+95</option>
-                    <option value="+95">+63</option>
-                    <option value="+966">+966</option>
-                    <option value="+962">+962</option>
-                    <option value="+963">+963</option>
-                    <option value="+967">+967</option>
-                    <option value="+98">+98</option>
-                  </select>
-                </div>
-                <div class="phone-number">
-                  <input type="tel" name="phone" required
-                    placeholder="Enter 11 digits">
-                </div>
+</head>
+<body>
+  <div class="container">
+    <div class="left-panel">
+      <h1>Welcome</h1>
+      <p>To proceed, please login with your info.</p>
+      <button onclick="window.location.href='patientLogin.html'">Back to
+        Login</button>
+    </div>
+    <div class="right-panel">
+      <div class="title">Registration Form</div>
+      <form id="registerForm">
+        <div class="user-details">
+          <div class="input-box">
+            <span class="details">Full Name</span>
+            <input type="text" name="fullname" required>
+          </div>
+          <div class="input-box">
+            <span class="details">Username</span>
+            <input type="text" name="username" required>
+          </div>
+          <div class="input-box">
+            <span class="details">Email</span>
+            <input type="email" name="email" required>
+          </div>
+          <div class="input-box">
+            <span class="details">Phone Number</span>
+            <div class="phone-container">
+              <div class="country-code">
+                <select name="countryCode" required>
+                  <option value="+1">+1</option>
+                  <option value="+44">+44</option>
+                  <option value="+61">+61</option>
+                  <option value="+81">+81</option>
+                  <option value="+86">+86</option>
+                  <option value="+91">+91</option>
+                  <option value="+61">+61</option>
+                  <option value="+65">+65</option>
+                  <option value="+65">+63</option>
+                  <option value="+33">+33</option>
+                  <option value="+49">+49</option>
+                  <option value="+39">+39</option>
+                  <option value="+7">+7</option>
+                  <option value="+27">+27</option>
+                  <option="+34">+34</option>
+                  <option value="+81">+81</option>
+                  <option value="+82">+82</option>
+                  <option value="+91">+91</option>
+                  <option value="+92">+92</option>
+                  <option value="+93">+93</option>
+                  <option value="+94">+94</option>
+                  <option value="+95">+95</option>
+                  <option value="+95">+63</option>
+                  <option value="+966">+966</option>
+                  <option value="+2">+962</option>
+                  <option value="+963">+963</option>
+                  <option value="+967">+967</option>
+                  <option value="+98">+98</option>
+                </select>
+              </div>
+              <div class="phone-number">
+                <input type="tel" name="phone" required placeholder="Enter 11 digits">
               </div>
             </div>
-            <div class="input-box">
-              <span class="details">Password</span>
-              <input type="password" id="password" name="password" required>
-            </div>
-            <div class="input-box">
-              <span class="details">Confirm Password</span>
-              <input type="password" id="confirmPassword" name="confirmPassword"
-                required>
-            </div>
-            <div class="input-box" style="width: 100%;">
-              <span class="details">Gender</span>
-              <select name="gender" required>
-                <option value disabled selected>Select your gender</option>
-                <option value="male">Male</option>
-                <option value="female">Female</option>
-                <option value="prefer_not_to_say">Prefer not to say</option>
-              </select>
-            </div>
-            <div class="input-box" style="width: 100%;">
-              <span class="details">Role</span>
-              <select name="role" required>
-                <option value disabled selected>Select your role</option>
-                <option value="patient">Patient</option>
-                <option value="doctor">Doctor</option>
-              </select>
-            </div>
-            <!-- Doctor-only fields -->
-
-            <div class="input-box doctor-only"
-              style="width: 100%; display: none;">
-              <span class="details">Specialization</span>
-              <select name="specialization">
-                <option value disabled selected>Select specialization</option>
-                <option value="Allergy and Immunology">Allergy and
-                  Immunology</option>
-                <option value="Anesthesiology">Anesthesiology</option> 
-                <option value="Cardiology">Cardiology</option>
-                <option value="Dermatology">Dermatology</option>
-                <option value="Emergency Medicine">Emergency Medicine</option>
-                <option value="Endocrinology">Endocrinology</option>
-                <option value="Family Medicine">Family Medicine</option>
-                <option value="Gastroenterology">Gastroenterology</option>
-                <option value="General Practice">General Practice</option>
-                <option value="Geriatrics">Geriatrics</option>
-                <option value="Hematology">Hematology</option>
-                <option value="Infectious Disease">Infectious Disease</option>
-                <option value="Internal Medicine">Internal Medicine</option>
-                <option value="Nephrology">Nephrology</option>
-                <option value="Neurology">Neurology</option>
-                <option value="Obstetrics and Gynecology">Obstetrics and
-                  Gynecology</option>
-                <option value="Oncology">Oncology</option>
-                <option value="Ophthalmology">Ophthalmology</option>
-                <option value="Orthopedics">Orthopedics</option>
-                <option value="Otolaryngology (ENT)">Otolaryngology
-                  (ENT)</option>
-                <option value="Pediatrics">Pediatrics</option>
-                <option value="Physical Medicine and Rehabilitation">Physical
-                  Medicine and Rehabilitation</option>
-                <option value="Psychiatry">Psychiatry</option>
-                <option value="Pulmonology">Pulmonology</option>
-                <option value="Radiology">Radiology</option>
-                <option value="Rheumatology">Rheumatology</option>
-                <option value="Surgery">Surgery</option>
-                <option value="Urology">Urology</option>
-              </select>
-            </div>
-            <div class="input-box doctor-only"
-              style="width: 100%; display: none;">
-              <span class="details">Bio</span>
-              <input type="text" name="bio">
-            </div>
-            <div class="input-box doctor-only"
-              style="width: 100%; display: none;">
-              <span class="details">License Number (7 digits)</span>
-              <input type="text" name="licenseNumber" maxlength="7">
-            </div>
-            <div class="input-box doctor-only"
-              style="width: 100%; display: none;">
-              <span class="details">Hospital Name</span>
-              <input type="text" name="hospitalName">
-            </div>
-            <div class="input-box doctor-only"
-              style="width: 100%; display: none;">
-              <span class="details">Hospital Address</span>
-              <input type="text" name="hospitalAddress">
-            </div>
-            <div class="input-box doctor-only"
-              style="width: 100%; display: none;">
-              <span class="details">Schedule</span>
-              <div id="additionalSchedules"></div>
-              <button type="button" id="addSchedule">Add Schedule</button>
-            </div>
           </div>
-          <div class="button">
-            <input type="submit" value="Register">
+          <div class="input-box">
+            <span class="details">Password</span>
+            <input type="password" id="password" name="password" required>
           </div>
-        </form>
-      </div>
+          <div class="input-box">
+            <span class="details">Confirm Password</span>
+            <input type="password" id="confirmPassword" name="confirmPassword" required>
+          </div>
+          <div class="input-box" style="width: 100%;">
+            <span class="details">Gender</span>
+            <select name="gender" required>
+              <option value disabled selected>Select your gender</option>
+              <option value="male">Male</option>
+              <option value="female">Female</option>
+              <option value="prefer_not_to_say">Prefer not to say</option>
+            </select>
+          </div>
+          <div class="input-box" style="width: 100%;">
+            <span class="details">Role</span>
+            <select name="role" required>
+              <option value disabled selected>Select your role</option>
+              <option value="patient">Patient</option>
+              <option value="doctor">Doctor</option>
+            </select>
+          </div>
+          <!-- Doctor-only fields -->
+          <div class="input-box doctor-only" style="width: 100%; display: none;">
+            <span class="details">Specialization</span>
+            <select name="specialization">
+              <option value disabled selected>Select specialization</option>
+              <option value="Allergy and Immunology">Allergy and Immunology</option>
+              <option value="Anesthesiology">Anesthesiology</option>
+              <option value="Cardiology">Cardiology</option>
+              <option value="Dermatology">Dermatology</option>
+              <option value="Emergency Medicine">Emergency Medicine</option>
+              <option value="Endocrinology">Endocrinology</option>
+              <option value="Family Medicine">Family Medicine</option>
+              <option value="Gastroenterology">Gastroenterology</option>
+              <option value="General Practice">General Practice</option>
+              <option value="Geriatrics">Geriatrics</option>
+              <option value="Hematology">Hematology</option>
+              <option value="Infectious Disease">Infectious Disease</option>
+              <option value="Internal Medicine">Internal Medicine</option>
+              <option value="Nephrology">Nephrology</option>
+              <option value="Neurology">Neurology</option>
+              <option value="Obstetrics and Gynecology">Obstetrics and Gynecology</option>
+              <option value="Oncology">Oncology</option>
+              <option value="Ophthalmology">Ophthalmology</option>
+              <option value="Orthopedics">Orthopedics</option>
+              <option value="Otolaryngology (ENT)">Otolaryngology (ENT)</option>
+              <option value="Pediatrics">Pediatrics</option>
+              <option value="Physical Medicine and Rehabilitation">Physical
+                Medicine and Rehabilitation</option>
+              <option value="Psychiatry">Psychiatry</option>
+              <option value="Pulmonology">Pulmonology</option>
+              <option value="Radiology">Radiology</option>
+              <option value="Rheumatology">Rheumatology</option>
+              <option value="Surgery">Surgery</option>
+              <option value="Urology">Urology</option>
+            </select>
+          </div>
+          <div class="input-box doctor-only" style="width: 100%; display: none;">
+            <span class="details">Bio</span>
+            <input type="text" name="bio">
+          </div>
+          <div class="input-box doctor-only" style="width: 100%; display: none;">
+            <span class="details">License Number (7 digits)</span>
+            <input type="text" name="licenseNumber" maxlength="7">
+          </div>
+          <div class="input-box doctor-only" style="width: 100%; display: none;">
+            <span class="details">Hospital Name</span>
+            <input type="text" name="hospitalName">
+          </div>
+          <div class="input-box doctor-only" style="width: 100%; display: none;">
+            <span class="details">Hospital Address</span>
+            <input type="text" name="hospitalAddress">
+          </div>
+          <div class="input-box doctor-only" style="width: 100%; display: none;">
+            <span class="details">Schedule</span>
+            <div id="additionalSchedules"></div>
+            <button type="button" id="addSchedule">Add Schedule</button>
+          </div>
+        </div>
+        <div class="button-container">
+          <button type="submit">Register</button>
+        </div>
+      </form>
     </div>
-  </body>
+  </div>
+</body>
 </html>
+
+
