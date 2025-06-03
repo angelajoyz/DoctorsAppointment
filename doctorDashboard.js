@@ -46,8 +46,9 @@ async function loadDoctorInfo(uid) {
     const data = docSnap.data();
     fullNameEl.textContent = data.fullName || "No name";
     specializationEl.textContent = data.specialization || "No specialization";
-    const profileImage = doctor.profileImageURL || "doctor1.png";
-
+if (data.profileImageURL) {
+      profileImageEl.src = data.profileImageURL;
+    }
   }
 }
 
@@ -233,4 +234,3 @@ function toLocalDateString(date) {
   const day = String(date.getDate()).padStart(2, '0');
   return `${year}-${month}-${day}`;
 }
-
