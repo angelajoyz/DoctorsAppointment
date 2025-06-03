@@ -75,7 +75,7 @@ async function loadAppointments(doctorUid) {
       })}</td>
       <td>${data.fullName}</td>
       <td>${data.reason || "N/A"}</td>
-      <td><a href="viewDetails.html?id=${docSnap.id}">View Details</a></td>
+      <td><a href="patient-details.html?id=${docSnap.id}">View Details</a></td>
     `;
     appointmentTableBody.appendChild(row);
   });
