@@ -6,7 +6,6 @@ const firebaseConfig = {
     messagingSenderId: "372688128666",
     appId: "1:372688128666:web:bbc529c73c4665f95f6d23"
 };
-
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
@@ -118,13 +117,12 @@ function confirmAppointment() {
         return;
     }
 
-    function sendEmailToDoctor(doctorEmail, doctorName, patientName, appointmentDateTime) {
+    function sendEmailToDoctor(doctorEmail, doctorFullName, patientFullName, appointmentDateTime) {
         const templateParams = {
-            email: doctorEmail, // matches {{email}} in template "To Email"
-            doctor_name: doctorName, // optional if used in template
-            patient_name: patientName, // matches {{patient_name}}
-            fullName: patientName, // matches {{fullName}} in template content
-            appointmentDateTime: new Date(appointmentDateTime).toLocaleString() // matches {{appointmentDateTime}}
+            email: doctorEmail, // For the "To Email" field
+            doctor_fullname: doctorFullName, // For {{doctor_fullname}}
+            patient_fullname: patientFullName, // For {{patient_fullname}}
+            appointmentDateTime: new Date(appointmentDateTime).toLocaleString() // For {{appointmentDateTime}}
         };
 
         emailjs.send("service_4neygh9", "template_11mgiux", templateParams, "uxowx8uL9zxSSj8V1")
@@ -137,6 +135,7 @@ function confirmAppointment() {
                 alert("Doctor email notification failed.");
             });
     }
+
 
     function saveAppointmentToFirestore() {
         db.collection("patients").where("email", "==", email).get().then(querySnapshot => {
@@ -188,6 +187,7 @@ function confirmAppointment() {
                             .then(() => {
                                 document.getElementById("step2").classList.add("hidden");
                                 document.getElementById("step3").classList.remove("hidden");
+
                                 sendEmailToDoctor(
                                     selectedDoctor.email,
                                     selectedDoctor.name,
@@ -199,7 +199,6 @@ function confirmAppointment() {
                                 console.error("Error saving appointment:", error);
                                 alert("Error scheduling appointment.");
                             });
-
                     };
                     reader.readAsDataURL(file);
                 });
