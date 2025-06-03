@@ -18,9 +18,13 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/js-md5/0.7.3/md5.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js"></script>
   <script type="text/javascript" src="https://cdn.emailjs.com/dist/email.min.js"></script>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
 
-
-
+  <script type="text/javascript">
+    (function () {
+      emailjs.init("uxowx8uL9zxSSj8V1");
+    })();
+  </script>
 
   <!-- Step 1 -->
   <div class="container" id="step1">
@@ -113,26 +117,26 @@
     <div class="form-content">
       <div class="form-group">
         <div class="column" style="width: 100%;">
-          
+
 
           <div class="doctor-schedule">
             <h3 style="margin-bottom: 10px;">Doctor's Availability</h3>
             <div class="doctor-details">
-            <p><strong>Name:</strong> <span id="doctorName"></span></p>
-            <p><strong>Specialization:</strong> <span id="doctorSpecialization"></span></p>
+              <p><strong>Name:</strong> <span id="doctorName"></span></p>
+              <p><strong>Specialization:</strong> <span id="doctorSpecialization"></span></p>
             </div>
 
-          <label for="calendarContainer" style="font-weight: bold;">Select a Date</label><br>
-          <div id="calendarContainer"></div><br>
+            <label for="calendarContainer" style="font-weight: bold;">Select a Date</label><br>
+            <div id="calendarContainer"></div><br>
 
-          <label for="timeSlots" style="margin-top: 20px; font-weight: bold;">Select a Time Slot</label>
-          <div id="timeSlots" class="time-slots"></div>
+            <label for="timeSlots" style="margin-top: 20px; font-weight: bold;">Select a Time Slot</label>
+            <div id="timeSlots" class="time-slots"></div>
 
-          <br><br>
-          <label for="appointmentDateTime" style="font-weight: bold;">Selected Date & Time</label><br>
-          <input id="appointmentDateTime" readonly><br>
+            <br><br>
+            <label for="appointmentDateTime" style="font-weight: bold;">Selected Date & Time</label><br>
+            <input id="appointmentDateTime" readonly><br>
 
-        </div>
+          </div>
 
 
           <h3>Appointment Fee Details</h3>

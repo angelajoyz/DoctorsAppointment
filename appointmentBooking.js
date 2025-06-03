@@ -1,236 +1,442 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
-import {
-  getFirestore,
-  collection,
-  getDocs,
-  doc,
-  getDoc,
-  query,
-  where,
-} from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
-import {
-  getAuth,
-  onAuthStateChanged,
-} from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
-
 const firebaseConfig = {
-  apiKey: "AIzaSyDwCayQZ0JO6DjzQvAT6ToT33I4QXCS_NY",
-  authDomain: "login-sample-c3af0.firebaseapp.com",
-  projectId: "login-sample-c3af0",
-  storageBucket: "login-sample-c3af0.appspot.com",
-  messagingSenderId: "372688128666",
-  appId: "1:372688128666:web:bbc529c73c4665f95f6d23",
+    apiKey: "AIzaSyDwCayQZ0JO6DjzQvAT6ToT33I4QXCS_NY",
+    authDomain: "login-sample-c3af0.firebaseapp.com",
+    projectId: "login-sample-c3af0",
+    storageBucket: "login-sample-c3af0.appspot.com",
+    messagingSenderId: "372688128666",
+    appId: "1:372688128666:web:bbc529c73c4665f95f6d23"
 };
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-const auth = getAuth();
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
 
-const fullNameEl = document.getElementById("fullNameDisplay");
-const specializationEl = document.getElementById("specializationDisplay");
-const profileImageEl = document.getElementById("profileImage");
-const appointmentTableBody = document.querySelector("tbody");
-const notificationDropdown = document.getElementById("notificationDropdown");
-const notificationCount = document.getElementById("notificationCount");
+// State
+let selectedDate = null;
+let selectedDoctor = { id: "", name: "", email: "" };
 
-function toggleMenu() {
-  document.getElementById('hiddenMenu').classList.toggle('active');
-}
-window.toggleMenu = toggleMenu;
-
-// Load doctor info
-async function loadDoctorInfo(uid) {
-  const docRef = doc(db, "doctors", uid);
-  const docSnap = await getDoc(docRef);
-  if (docSnap.exists()) {
-    const data = docSnap.data();
-    fullNameEl.textContent = data.fullName || "No name";
-    specializationEl.textContent = data.specialization || "No specialization";
-    if (data.profileImageURL) {
-      profileImageEl.src = data.profileImageURL;
+// --- Step navigation ---
+function nextStep(step) {
+    if (step === 1) {
+        const inputs = document.querySelectorAll('#step1 input, #step1 select');
+        for (let input of inputs) {
+            if (!input.value || input.value === input.querySelector('option[disabled]')?.value) {
+                alert('Please complete all required fields before proceeding.');
+                return;
+            }
+        }
     }
-  }
+    document.getElementById(`step${step}`).classList.add("hidden");
+    document.getElementById(`step${step + 1}`).classList.remove("hidden");
 }
 
-// Utility to get YYYY-MM-DD from a Date object
-function formatDate(date) {
-  return date.toISOString().split('T')[0];
+function prevStep(step) {
+    document.getElementById(`step${step + 1}`).classList.add("hidden");
+    document.getElementById(`step${step}`).classList.remove("hidden");
 }
 
-// Keep only this loadAppointments function (merged and fixed)
-async function loadAppointments(doctorId) {
-  try {
-    const appointmentsRef = collection(db, "approved"); // 👈 Changed from "appointments"
-    const q = query(appointmentsRef, where("doctorId", "==", doctorId));
-    const querySnapshot = await getDocs(q);
+// --- Validation ---
+function validateReferenceNumber(referenceNumber, paymentMethod) {
+    if (paymentMethod === "GCash") {
+        return /^\d{13}$/.test(referenceNumber);
+    } else if (paymentMethod === "Bank Transfer") {
+        return /^[a-zA-Z0-9]{6,20}$/.test(referenceNumber);
+    } else if (paymentMethod === "Credit Card") {
+        return true;
+    }
+    return false;
+}
 
-    appointmentTableBody.innerHTML = "";
-    notificationDropdown.innerHTML = "";
-    let upcomingCount = 0;
-    let hasAppointments = false;
+// --- Fee Calculation ---
+function updateFee() {
+    let feeAmount;
+    const reason = document.getElementById("appointmentReason").value;
+    switch (reason) {
+        case "Consultation": feeAmount = 150; break;
+        case "Check-up": feeAmount = 100; break;
+        case "Follow-up": feeAmount = 120; break;
+        default: feeAmount = 0;
+    }
+    document.getElementById("feeAmount").value = feeAmount;
+    document.getElementById("displayFee").value = `₱${feeAmount}`;
+}
 
-    const now = new Date();
-    const highlightedDates = new Set();
+// --- File Upload Preview ---
+function handleFileUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
 
-    querySnapshot.forEach((doc) => {
-      const data = doc.data();
-      const dateObj = data.appointmentDateTime?.toDate?.() || new Date(data.appointmentDateTime);
+    const validTypes = ['image/jpeg', 'image/png', 'image/gif'];
+    const maxSize = 2 * 1024 * 1024;
 
-      if (dateObj < now) return;
+    if (!validTypes.includes(file.type)) {
+        alert("Invalid file type.");
+        return;
+    }
 
-      hasAppointments = true;
+    if (file.size > maxSize) {
+        alert("File too large. Max 2MB.");
+        return;
+    }
 
-      highlightedDates.add(formatDate(dateObj));
+    const reader = new FileReader();
+    reader.onload = function (e) {
+        document.getElementById("modalImage").src = e.target.result;
+        document.getElementById("openModalBtn").style.display = "inline-block";
+    };
+    reader.readAsDataURL(file);
+}
 
-      // Table row
-      const row = document.createElement("tr");
-      row.innerHTML = `
-        <td>${data.fullName || "N/A"}</td>
-        <td>${data.reason || "N/A"}</td>
-        <td><a href="patient-details.html?id=${doc.id}">View Details</a></td>
-      `;
-      appointmentTableBody.appendChild(row);
+// --- Confirm Appointment ---
+function confirmAppointment() {
+    const inputs = document.querySelectorAll('#step2 input:not([type="checkbox"]), #step2 select');
+    for (let input of inputs) {
+        if (!input.value || input.value === input.querySelector('option[disabled]')?.value) {
+            alert('Please complete all required fields before confirming.');
+            return;
+        }
+    }
 
-      // Notifications
-      const tomorrow = new Date();
-      tomorrow.setDate(now.getDate() + 1);
-      if (
-        dateObj.getDate() === tomorrow.getDate() &&
-        dateObj.getMonth() === tomorrow.getMonth() &&
-        dateObj.getFullYear() === tomorrow.getFullYear()
-      ) {
-        upcomingCount++;
-        const notifItem = document.createElement("div");
-        notifItem.classList.add("notification-item");
-        notifItem.innerHTML = `
-          <strong>${data.fullName}</strong> has an appointment<br/>
-          <small>${dateObj.toLocaleString([], {
-            month: "short",
-            day: "numeric",
-            hour: "2-digit",
-            minute: "2-digit",
-          })}</small>
-        `;
-        notificationDropdown.appendChild(notifItem);
-      }
+    if (!document.getElementById("paymentConfirmed").checked || !document.getElementById("noRefundAccepted").checked) {
+        alert("Please confirm payment and refund policy.");
+        return;
+    }
+
+    const email = document.getElementById("email").value;
+    const appointmentDateTime = document.getElementById("appointmentDateTime").value;
+    const paymentRef = document.getElementById("paymentRef").value;
+    const paymentMethod = document.getElementById("paymentMethod").value;
+    const file = document.getElementById("proofImage").files[0];
+
+    if (!validateReferenceNumber(paymentRef, paymentMethod)) {
+        alert(`Invalid reference number for ${paymentMethod}.`);
+        return;
+    }
+
+    if (!file) {
+        alert("Upload proof of payment.");
+        return;
+    }
+
+    function sendEmailToDoctor(doctorEmail, doctorName, patientName, appointmentDateTime) {
+        const templateParams = {
+            email: doctorEmail, // matches {{email}} in template "To Email"
+            doctor_name: doctorName, // optional if used in template
+            patient_name: patientName, // matches {{patient_name}}
+            fullName: patientName, // matches {{fullName}} in template content
+            appointmentDateTime: new Date(appointmentDateTime).toLocaleString() // matches {{appointmentDateTime}}
+        };
+
+        emailjs.send("service_4neygh9", "template_11mgiux", templateParams, "uxowx8uL9zxSSj8V1")
+            .then((result) => {
+                console.log("✅ Email sent to doctor:", result.text);
+                alert("Doctor has been notified.");
+            })
+            .catch((error) => {
+                console.error("❌ Failed to send email to doctor:", error);
+                alert("Doctor email notification failed.");
+            });
+    }
+
+    function saveAppointmentToFirestore() {
+        db.collection("patients").where("email", "==", email).get().then(querySnapshot => {
+            if (querySnapshot.empty) {
+                alert("Email not registered.");
+                return;
+            }
+
+            db.collection("appointments")
+                .where("appointmentDateTime", "==", appointmentDateTime)
+                .where("email", "==", email)
+                .get()
+                .then(snapshot => {
+                    if (!snapshot.empty) {
+                        alert("Appointment already exists.");
+                        return;
+                    }
+
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        const appointmentData = {
+                            fullName: document.getElementById("fullName").value,
+                            phone: document.getElementById("phone").value,
+                            email,
+                            age: document.getElementById("age").value,
+                            gender: document.getElementById("gender").value,
+                            address: document.getElementById("address").value,
+                            allergies: document.getElementById("allergies").value,
+                            medications: document.getElementById("medications").value,
+                            conditions: document.getElementById("conditions").value,
+                            familyHistory: document.getElementById("familyHistory").value,
+                            appointmentDateTime,
+                            reason: document.getElementById("appointmentReason").value,
+                            feeAmount: document.getElementById("feeAmount").value,
+                            paymentMethod,
+                            paymentRef,
+                            paymentProof: e.target.result,
+                            paymentConfirmed: true,
+                            noRefundAccepted: true,
+                            timestamp: new Date().toISOString(),
+                            status: "Pending",
+                            userId: auth.currentUser?.uid || "",
+                            doctorId: selectedDoctor.id,
+                            doctorName: selectedDoctor.name,
+                            doctorEmail: selectedDoctor.email
+                        };
+
+                        db.collection("appointments").add(appointmentData)
+                            .then(() => {
+                                document.getElementById("step2").classList.add("hidden");
+                                document.getElementById("step3").classList.remove("hidden");
+                                sendEmailToDoctor(
+                                    selectedDoctor.email,
+                                    selectedDoctor.name,
+                                    document.getElementById("fullName").value,
+                                    appointmentDateTime
+                                );
+                            })
+                            .catch(error => {
+                                console.error("Error saving appointment:", error);
+                                alert("Error scheduling appointment.");
+                            });
+
+                    };
+                    reader.readAsDataURL(file);
+                });
+        });
+    }
+
+    function proceedWithOCRIfNeeded() {
+        if (paymentMethod === "GCash") {
+            Tesseract.recognize(file, 'eng').then(({ data: { text } }) => {
+                if (!text.includes(paymentRef)) {
+                    alert("Reference number not found in uploaded image.");
+                    return;
+                }
+                saveAppointmentToFirestore();
+            });
+        } else {
+            saveAppointmentToFirestore();
+        }
+    }
+
+    if (paymentMethod === "GCash" || paymentMethod === "Bank Transfer") {
+        db.collection("appointments").where("paymentRef", "==", paymentRef).get().then(snapshot => {
+            if (!snapshot.empty) {
+                alert("This reference number has already been used.");
+                return;
+            }
+            proceedWithOCRIfNeeded();
+        });
+    } else {
+        proceedWithOCRIfNeeded();
+    }
+}
+
+// --- Fetch patient data ---
+function fetchUserData(uid) {
+    db.collection("patients").doc(uid).get().then(doc => {
+        if (doc.exists) {
+            const data = doc.data();
+            document.getElementById("fullName").value = data.fullName || "";
+            document.getElementById("phone").value = data.phone || "";
+            document.getElementById("email").value = data.email || "";
+            document.getElementById("age").value = data.age || "";
+            document.getElementById("address").value = data.address || "";
+            document.getElementById("gender").value = data.gender || "";
+        }
+    }).catch(error => {
+        console.error("Error fetching user data:", error);
+    });
+}
+
+// --- Fetch doctor data ---
+function fetchDoctorDetails(doctorId) {
+    db.collection("doctors").doc(doctorId).get().then(doc => {
+        if (!doc.exists) return alert("Doctor not found");
+
+        const doctor = doc.data();
+        document.getElementById("doctorName").textContent = doctor.fullName || "";
+        document.getElementById("doctorSpecialization").textContent = doctor.specialization || "";
+
+        selectedDoctor = {
+            id: doctorId,
+            name: doctor.fullName || "",
+            email: doctor.email || ""
+        };
+
+        const container = document.getElementById("scheduleContainer");
+        if (container) {
+            container.innerHTML = "";
+            doctor.schedule.forEach(entry => {
+                const div = document.createElement("div");
+                div.innerHTML = `<strong>${entry.day}:</strong> ${entry.times.join(", ")}`;
+                container.appendChild(div);
+            });
+        }
+    }).catch(console.error);
+}
+
+// --- Calendar ---
+async function setupCalendar(doctorId) {
+    const doc = await db.collection("doctors").doc(doctorId).get();
+    if (!doc.exists) return alert("Doctor not found");
+
+    const doctor = doc.data();
+    const availableDays = doctor.schedule.map(entry => entry.day);
+    const availableDates = getAvailableDates(availableDays, 30);
+
+    flatpickr("#calendarContainer", {
+        inline: true,
+        dateFormat: "Y-m-d",
+        enable: availableDates,
+        onChange: (dates, dateStr) => {
+            if (dateStr) {
+                selectedDate = dateStr;
+                displayTimeSlots(doctor.schedule, dateStr);
+                document.getElementById("appointmentDateTime").value = "";
+            }
+        }
+    });
+}
+
+function getAvailableDates(availableDays, daysAhead = 30) {
+    const result = [];
+    const today = new Date();
+    for (let i = 0; i <= daysAhead; i++) {
+        const date = new Date(today);
+        date.setDate(today.getDate() + i);
+        const day = Object.keys(weekdayMap).find(k => weekdayMap[k] === date.getDay());
+        if (availableDays.includes(day)) result.push(date);
+    }
+    return result;
+}
+
+function displayTimeSlots(schedule, dateStr) {
+    const day = Object.keys(weekdayMap).find(key => weekdayMap[key] === new Date(dateStr).getDay());
+    const timeContainer = document.getElementById("timeSlots");
+    timeContainer.innerHTML = "";
+
+    const entry = schedule.find(s => s.day === day);
+    if (!entry) {
+        timeContainer.textContent = "No available times.";
+        return;
+    }
+
+    // Parse start and end times from strings to Date objects on the same day
+    const parseTime = (timeStr) => {
+        // Example input: "10:00 AM"
+        const [time, meridian] = timeStr.split(' ');
+        let [hours, minutes] = time.split(':').map(Number);
+        if (meridian === "PM" && hours !== 12) hours += 12;
+        if (meridian === "AM" && hours === 12) hours = 0;
+
+        const date = new Date(dateStr);
+        date.setHours(hours, minutes, 0, 0);
+        return date;
+    };
+
+    const start = parseTime(entry.startTime);
+    const end = parseTime(entry.endTime);
+
+    const lunchStart = new Date(dateStr);
+    lunchStart.setHours(12, 0, 0, 0);
+    const lunchEnd = new Date(dateStr);
+    lunchEnd.setHours(13, 0, 0, 0);
+
+    let current = new Date(start);
+
+    while (current < end) {
+        const next = new Date(current.getTime() + 30 * 60000); // 30 minutes later
+
+        // Skip slots overlapping lunch break
+        if (!(next > lunchStart && current < lunchEnd)) {
+            const slotStr = `${formatTime(current)} - ${formatTime(next)}`;
+            const btn = document.createElement("button");
+            btn.textContent = slotStr;
+            btn.classList.add("time-slot-btn");
+
+            Object.assign(btn.style, {
+                padding: "8px 14px",
+                borderRadius: "20px",
+                border: "1px solid #10b981",
+                backgroundColor: "#ecfdf5",
+                color: "#065f46",
+                cursor: "pointer",
+                fontWeight: "500",
+                margin: "4px"
+            });
+
+            btn.addEventListener("click", () => {
+                if (!selectedDate) {
+                    alert("Please select a date first.");
+                    return;
+                }
+
+                Array.from(timeContainer.children).forEach(b => {
+                    b.style.backgroundColor = "#ecfdf5";
+                    b.style.color = "#065f46";
+                });
+
+                btn.style.backgroundColor = "#10b981";
+                btn.style.color = "white";
+
+                const selectedTime = formatTime(current);
+                document.getElementById("appointmentDateTime").value = `${dateStr} ${selectedTime}`;
+            });
+
+
+            timeContainer.appendChild(btn);
+        }
+
+        current = next;
+    }
+}
+
+function formatTime(date) {
+    let hours = date.getHours();
+    const minutes = date.getMinutes();
+    const ampm = hours >= 12 ? "PM" : "AM";
+    hours = hours % 12;
+    hours = hours ? hours : 12; // 0 -> 12
+    return `${hours}:${minutes.toString().padStart(2, '0')} ${ampm}`;
+}
+
+// --- Weekday map ---
+const weekdayMap = {
+    Sunday: 0, Monday: 1, Tuesday: 2, Wednesday: 3,
+    Thursday: 4, Friday: 5, Saturday: 6
+};
+
+// --- DOM Ready ---
+document.addEventListener("DOMContentLoaded", () => {
+    const doctorId = new URLSearchParams(window.location.search).get("doctorId");
+    if (doctorId) {
+        setupCalendar(doctorId);
+        fetchDoctorDetails(doctorId);
+    }
+
+    auth.onAuthStateChanged(user => {
+        if (user) fetchUserData(user.uid);
     });
 
-    renderFullCalendar(querySnapshot.docs);
+    document.getElementById("appointmentReason")?.addEventListener("change", updateFee);
+    document.getElementById("confirmButton")?.addEventListener("click", confirmAppointment);
+    document.getElementById("proofImage")?.addEventListener("change", handleFileUpload);
 
-    if (!hasAppointments) {
-      appointmentTableBody.innerHTML =
-        "<tr><td colspan='4' style='text-align:center;'>No appointment request</td></tr>";
-    }
+    document.getElementById("openModalBtn")?.addEventListener("click", () => {
+        document.getElementById("imageModal").style.display = "block";
+    });
 
-    notificationCount.textContent = upcomingCount;
-    notificationCount.style.display = upcomingCount > 0 ? "inline-block" : "none";
-  } catch (error) {
-    console.error("Error loading approved appointments:", error);
-  }
-}
+    document.getElementById("closeModal")?.addEventListener("click", () => {
+        document.getElementById("imageModal").style.display = "none";
+    });
 
+    window.addEventListener("click", event => {
+        if (event.target === document.getElementById("imageModal")) {
+            document.getElementById("imageModal").style.display = "none";
+        }
+    });
 
-onAuthStateChanged(auth, (user) => {
-  if (user) {
-    loadDoctorInfo(user.uid);
-    loadAppointments(user.uid);
-  } else {
-    fullNameEl.textContent = "Please log in";
-    specializationEl.textContent = "";
-    appointmentTableBody.innerHTML =
-      "<tr><td colspan='4'>You must be logged in to view appointments.</td></tr>";
-  }
+    updateFee();
 });
-
-const calendarEl = document.getElementById('calendar');
-
-let calendar; // global so we can manipulate it later
-
-function renderFullCalendar(appointmentDocs) {
-  const allAppointments = appointmentDocs.map((doc) => {
-    const data = doc.data();
-    const dateObj = data.appointmentDateTime?.toDate?.() || new Date(data.appointmentDateTime);
-    return {
-  id: doc.id,
-  title: ' ', // invisible title
-start: toLocalDateString(dateObj),
-  allDay: true,
-  display: 'background', // Highlight background only
-  backgroundColor: '#32CD32', // LimeGreen for full-day highlight
-  extendedProps: {
-    fullName: data.fullName,
-    reason: data.reason,
-    date: dateObj.toDateString(),
-    time: dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-  },
-};
-
-
-  });
-
-  if (calendar) calendar.destroy();
-
-  calendar = new FullCalendar.Calendar(calendarEl, {
-    initialView: 'dayGridMonth',
-    height: 'auto',
-    contentHeight: 'auto',
-    aspectRatio: 2, // Controls width vs height (try 1.5–2.5)
-    events: allAppointments,
-    headerToolbar: {
-      left: 'prev,next today',
-      center: 'title',
-      right: ''
-  
-
-    },
-    dateClick: function(info) {
-      displayAppointmentsForDate(info.dateStr, allAppointments);
-    }
-    
-  });
-
-  calendar.render();
-
-  // Show today's appointments on load if no date is clicked
-const todayStr = formatDate(new Date());
-displayAppointmentsForDate(todayStr, allAppointments);
-
-}
-
-
-function displayAppointmentsForDate(dateStr, allAppointments) {
-  const targetDate = new Date(dateStr);
-  targetDate.setHours(0, 0, 0, 0);
-
-  appointmentTableBody.innerHTML = "";
-
-  const matches = allAppointments.filter(event => {
-    const eventDate = new Date(event.start);
-    eventDate.setHours(0, 0, 0, 0);
-    return eventDate.getTime() === targetDate.getTime();
-  });
-
-  if (matches.length === 0) {
-    appointmentTableBody.innerHTML = "<tr><td colspan='4' style='text-align:center;'>No appointment</td></tr>";
-    return;
-  }
-
-  matches.sort((a, b) => new Date(a.start) - new Date(b.start)); // Sort by time
-
-  for (const appt of matches) {
-    const row = document.createElement("tr");
-    row.innerHTML = `
-      <td>${appt.extendedProps.fullName}</td>
-      <td>${appt.extendedProps.reason}</td>
-      <td>${appt.extendedProps.time}</td>
-      <td><a href="patient-details.html?id=${appt.id}">View Details</a></td>
-    `;
-    appointmentTableBody.appendChild(row);
-  }
-}
-function toLocalDateString(date) {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
-}
