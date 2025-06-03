@@ -195,6 +195,18 @@
       border-radius: 5px;
       cursor: pointer;
     }
+    .doctor-only {
+      width: 100%;
+      display: none;
+    }
+    .doctor-only input,
+    .doctor-only select {
+      width: 100%;
+      padding: 12px;
+      font-size: 14px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
     @media (max-width: 768px) {
       .container {
         flex-direction: column;
@@ -209,244 +221,39 @@
         margin: 10px 0;
       }
     }
+    
+    /* Toast notification styles */
+    .toast {
+      visibility: hidden;
+      min-width: 250px;
+      margin-left: -125px;
+      background-color: #333;
+      color: #fff;
+      text-align: center;
+      border-radius: 10px;
+      padding: 16px;
+      position: fixed;
+      z-index: 1;
+      left: 50%;
+      bottom: 30px;
+      font-size: 17px;
+    }
+
+    .toast.show {
+      visibility: visible;
+      animation: fadein 0.5s, fadeout 0.5s 2.5s;
+    }
+
+    @keyframes fadein {
+      from {bottom: 0; opacity: 0;}
+      to {bottom: 30px; opacity: 1;}
+    }
+
+    @keyframes fadeout {
+      from {bottom: 30px; opacity: 1;}
+      to {bottom: 0; opacity: 0;}
+    }
   </style>
-  <script>
-    // Hash function using SHA-256
-    async function hashPassword(password) {
-      const encoder = new TextEncoder();
-      const data = encoder.encode(password);
-      const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-      const hashArray = Array.from(new Uint8Array(hashBuffer));
-      const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-      return hashHex;
-    }
-    // Validate Password
-    function validatePassword(password) {
-      const regex = /^(?=.*[A-Z])(?=.*\d).{8,}$/;
-      return regex.test(password);
-    }
-    // Initialize Firebase
-    const firebaseConfig = {
-      apiKey: "AIzaSyDwCayQZ0JO6DjzQvAT6ToT33I4QXCS_NY",
-      authDomain: "login-sample-c3af0.firebaseapp.com",
-      projectId: "login-sample-c3af0",
-      storageBucket: "login-sample-c3af0.appspot.com",
-      messagingSenderId: "372688128666",
-      appId: "1:372688128666:web:bbc529c73c4665f95f6d23"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const db = firebase.firestore();
-    // Registration Logic
-    document.addEventListener("DOMContentLoaded", () => {
-      const roleSelect = document.querySelector("select[name='role']");
-      const doctorFields = document.querySelectorAll(".doctor-only");
-      // Show/hide doctor-only fields based on selected role
-      roleSelect.addEventListener("change", () => {
-        if (roleSelect.value === "doctor") {
-          doctorFields.forEach(field => field.style.display = "block");
-        } else {
-          doctorFields.forEach(field => field.style.display = "none");
-        }
-      });
-      // License Number Validation - 7 digits only
-      const licenseNumberInput = document.querySelector("input[name='licenseNumber']");
-      if (licenseNumberInput) {
-        licenseNumberInput.addEventListener('input', function () {
-          this.value = this.value.replace(/[^0-9]/g, '').substring(0, 7);
-        });
-      }
-      // Phone Number Validation - Country code + 11 digits
-      const phoneInput = document.querySelector("input[name='phone']");
-      if (phoneInput) {
-        phoneInput.addEventListener('input', function () {
-          this.value = this.value.replace(/[^0-9]/g, '').substring(0, 11);
-        });
-      }
-      document.getElementById("addSchedule").addEventListener("click", () => {
-        const additionalSchedulesDiv = document.getElementById("additionalSchedules");
-        const scheduleContainer = document.createElement("div");
-        scheduleContainer.classList.add("schedule-input");
-        scheduleContainer.style.display = "flex";
-        scheduleContainer.style.flexWrap = "wrap";
-        scheduleContainer.style.alignItems = "center";
-        scheduleContainer.style.gap = "10px";
-        scheduleContainer.style.marginBottom = "10px";
-        const daySelect = document.createElement("select");
-        daySelect.name = "scheduleDay";
-        daySelect.required = true;
-        const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
-        const placeholderOption = document.createElement("option");
-        placeholderOption.value = "";
-        placeholderOption.textContent = "Select day";
-        placeholderOption.disabled = true;
-        placeholderOption.selected = true;
-        daySelect.appendChild(placeholderOption);
-        days.forEach(day => {
-          const option = document.createElement("option");
-          option.value = day;
-          option.textContent = day;
-          daySelect.appendChild(option);
-        });
-        const timeInputsDiv = document.createElement("div");
-        const addTimeButton = document.createElement("button");
-        addTimeButton.type = "button";
-        addTimeButton.textContent = "Add Time";
-        addTimeButton.style.backgroundColor = "#2ecc71";
-        addTimeButton.style.color = "white";
-        addTimeButton.style.border = "none";
-        addTimeButton.style.borderRadius = "5px";
-        addTimeButton.style.padding = "6px 12px";
-        addTimeButton.style.cursor = "pointer";
-        addTimeButton.addEventListener("click", () => {
-          const timeWrapper = document.createElement("div");
-          timeWrapper.style.display = "flex";
-          timeWrapper.style.gap = "8px";
-          timeWrapper.style.marginTop = "5px";
-          timeWrapper.classList.add("time-wrapper");
-          function createHourSelect(name) {
-            const select = document.createElement("select");
-            select.name = name;
-            for (let i = 1; i <= 12; i++) {
-              const option = document.createElement("option");
-              option.value = i;
-              option.textContent = i;
-              select.appendChild(option);
-            }
-            return select;
-          }
-          function createPeriodSelect(name) {
-            const select = document.createElement("select");
-            select.name = name;
-            ["AM", "PM"].forEach(period => {
-              const option = document.createElement("option");
-              option.value = period;
-              option.textContent = period;
-              select.appendChild(option);
-            });
-            return select;
-          }
-          const startHour = createHourSelect("startHour");
-          const startPeriod = createPeriodSelect("startPeriod");
-          const endHour = createHourSelect("endHour");
-          const endPeriod = createPeriodSelect("endPeriod");
-          const deleteTimeBtn = document.createElement("button");
-          deleteTimeBtn.type = "button";
-          deleteTimeBtn.textContent = "🗑";
-          deleteTimeBtn.style.backgroundColor = "#e74c3c";
-          deleteTimeBtn.style.color = "white";
-          deleteTimeBtn.style.border = "none";
-          deleteTimeBtn.style.borderRadius = "5px";
-          deleteTimeBtn.style.padding = "4px 8px";
-          deleteTimeBtn.style.cursor = "pointer";
-          deleteTimeBtn.addEventListener("click", () => {
-            timeWrapper.remove();
-          });
-          timeWrapper.append("Start:", startHour, startPeriod, "End:", endHour, endPeriod, deleteTimeBtn);
-          timeInputsDiv.appendChild(timeWrapper);
-        });
-        addTimeButton.click();
-        const deleteBtn = document.createElement("button");
-        deleteBtn.type = "button";
-        deleteBtn.textContent = "Delete";
-        deleteBtn.style.backgroundColor = "#e74c3c";
-        deleteBtn.style.color = "white";
-        deleteBtn.style.border = "none";
-        deleteBtn.style.borderRadius = "5px";
-        deleteBtn.style.padding = "4px 8px";
-        deleteBtn.style.cursor = "pointer";
-        deleteBtn.style.height = "30px";
-        deleteBtn.style.marginTop = "0";
-        deleteBtn.addEventListener("click", () => {
-          scheduleContainer.remove();
-        });
-        const dayDeleteWrapper = document.createElement("div");
-        dayDeleteWrapper.style.display = "flex";
-        dayDeleteWrapper.style.alignItems = "center";
-        dayDeleteWrapper.style.gap = "8px";
-        dayDeleteWrapper.style.marginRight = "10px";
-        dayDeleteWrapper.appendChild(deleteBtn);
-        dayDeleteWrapper.appendChild(daySelect);
-        scheduleContainer.appendChild(dayDeleteWrapper);
-        scheduleContainer.appendChild(timeInputsDiv);
-        scheduleContainer.appendChild(addTimeButton);
-        additionalSchedulesDiv.appendChild(scheduleContainer);
-      });
-      document.getElementById("registerForm").addEventListener("submit", async (e) => {
-        e.preventDefault();
-        const fullName = e.target.fullname.value.trim();
-        const username = e.target.username.value.trim();
-        const email = e.target.email.value.trim();
-        const phone = e.target.phone.value.trim();
-        const password = e.target.password.value;
-        const confirmPassword = e.target.confirmPassword.value;
-        const gender = e.target.gender.value;
-        const role = e.target.role.value;
-        if (password !== confirmPassword) {
-          alert("Password and Confirm Password must match.");
-          return;
-        }
-        if (!validatePassword(password)) {
-          alert("Password must be at least 8 characters long, include one uppercase letter and one number.");
-          return;
-        }
-        try {
-          const userCredential = await auth.createUserWithEmailAndPassword(email, password);
-          const user = userCredential.user;
-          await user.sendEmailVerification();
-          alert("A verification email has been sent. Please verify your email before logging in.");
-          const hashedPassword = await hashPassword(password);
-          const userData = {
-            fullName,
-            username,
-            email,
-            phone,
-            gender,
-            role,
-            password: hashedPassword,
-            createdAt: firebase.firestore.FieldValue.serverTimestamp()
-          };
-          if (role === "doctor") {
-            const scheduleEntries = document.querySelectorAll("#additionalSchedules .schedule-input");
-            const schedule = [];
-            scheduleEntries.forEach(entry => {
-              const day = entry.querySelector("select[name='scheduleDay']").value;
-              const timeWrappers = entry.querySelectorAll(".time-wrapper");
-              const times = Array.from(timeWrappers).map(wrapper => {
-                const startHour = wrapper.querySelector("select[name='startHour']").value;
-                const startPeriod = wrapper.querySelector("select[name='startPeriod']").value;
-                const endHour = wrapper.querySelector("select[name='endHour']").value;
-                const endPeriod = wrapper.querySelector("select[name='endPeriod']").value;
-                return {
-                  startTime: `${startHour}:00 ${startPeriod}`,
-                  endTime: `${endHour}:00 ${endPeriod}`
-                };
-              });
-              if (day && times.length > 0) {
-                times.forEach(time => {
-                  schedule.push({ day, ...time });
-                });
-              }
-            });
-            userData.specialization = e.target.specialization?.value.trim();
-            userData.bio = e.target.bio?.value.trim();
-            userData.schedule = schedule;
-            userData.licenseNumber = e.target.licenseNumber?.value.trim();
-            userData.hospitalName = e.target.hospitalName?.value.trim();
-            userData.hospitalAddress = e.target.hospitalAddress?.value.trim();
-          }
-          await db.collection(role === "doctor" ? "doctors" : "patients")
-            .doc(user.uid)
-            .set(userData);
-          alert("Registration successful! Please verify your email before logging in.");
-          window.location.href = "patientLogin.html";
-        } catch (error) {
-          console.error("Registration Error:", error);
-          alert("Error: " + error.message);
-        }
-      });
-    });
-  </script>
 </head>
 <body>
   <div class="container">
@@ -491,7 +298,7 @@
                   <option value="+39">+39</option>
                   <option value="+7">+7</option>
                   <option value="+27">+27</option>
-                  <option="+34">+34</option>
+                  <option value="+34">+34</option>
                   <option value="+81">+81</option>
                   <option value="+82">+82</option>
                   <option value="+91">+91</option>
@@ -499,7 +306,7 @@
                   <option value="+93">+93</option>
                   <option value="+94">+94</option>
                   <option value="+95">+95</option>
-                  <option value="+95">+63</option>
+                  <option value="+63">+63</option>
                   <option value="+966">+966</option>
                   <option value="+2">+962</option>
                   <option value="+963">+963</option>
@@ -538,7 +345,7 @@
             </select>
           </div>
           <!-- Doctor-only fields -->
-          <div class="input-box doctor-only" style="width: 100%; display: none;">
+          <div class="input-box doctor-only" style="width: 100%;">
             <span class="details">Specialization</span>
             <select name="specialization">
               <option value disabled selected>Select specialization</option>
@@ -573,23 +380,23 @@
               <option value="Urology">Urology</option>
             </select>
           </div>
-          <div class="input-box doctor-only" style="width: 100%; display: none;">
+          <div class="input-box doctor-only" style="width: 100%;">
             <span class="details">Bio</span>
             <input type="text" name="bio">
           </div>
-          <div class="input-box doctor-only" style="width: 100%; display: none;">
+          <div class="input-box doctor-only" style="width: 100%;">
             <span class="details">License Number (7 digits)</span>
             <input type="text" name="licenseNumber" maxlength="7">
           </div>
-          <div class="input-box doctor-only" style="width: 100%; display: none;">
+          <div class="input-box doctor-only" style="width: 100%;">
             <span class="details">Hospital Name</span>
             <input type="text" name="hospitalName">
           </div>
-          <div class="input-box doctor-only" style="width: 100%; display: none;">
+          <div class="input-box doctor-only" style="width: 100%;">
             <span class="details">Hospital Address</span>
             <input type="text" name="hospitalAddress">
           </div>
-          <div class="input-box doctor-only" style="width: 100%; display: none;">
+          <div class="input-box doctor-only" style="width: 100%;">
             <span class="details">Schedule</span>
             <div id="additionalSchedules"></div>
             <button type="button" id="addSchedule">Add Schedule</button>
@@ -601,5 +408,292 @@
       </form>
     </div>
   </div>
+  
+  <!-- Toast notification -->
+  <div id="toast" class="toast"></div>
+
+  <script>
+    // Show toast notification
+    function showToast(message, duration = 3000) {
+      const toast = document.getElementById("toast");
+      toast.textContent = message;
+      toast.className = "toast show";
+      setTimeout(() => {
+        toast.className = toast.className.replace("show", "");
+      }, duration);
+    }
+    
+    // Initialize Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyDwCayQZ0JO6DjzQvAT6ToT33I4QXCS_NY",
+      authDomain: "login-sample-c3af0.firebaseapp.com",
+      projectId: "login-sample-c3af0",
+      storageBucket: "login-sample-c3af0.appspot.com",
+      messagingSenderId: "372688128666",
+      appId: "1:372688128666:web:bbc529c73c4665f95f6d23"
+    };
+    
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+    
+    // Password validation function
+    function validatePassword(password) {
+      const regex = /^(?=.*[A-Z])(?=.*\d).{8,}$/;
+      return regex.test(password);
+    }
+    
+    // Show/hide doctor-only fields based on selected role
+    const roleSelect = document.querySelector("select[name='role']");
+    const doctorFields = document.querySelectorAll(".doctor-only");
+    
+    roleSelect.addEventListener("change", () => {
+      if (roleSelect.value === "doctor") {
+        doctorFields.forEach(field => field.style.display = "block");
+      } else {
+        doctorFields.forEach(field => field.style.display = "none");
+      }
+    });
+    
+    // License Number Validation - 7 digits only
+    const licenseNumberInput = document.querySelector("input[name='licenseNumber']");
+    if (licenseNumberInput) {
+      licenseNumberInput.addEventListener('input', function () {
+        this.value = this.value.replace(/[^0-9]/g, '').substring(0, 7);
+      });
+    }
+    
+    // Phone Number Validation - Country code + 11 digits
+    const phoneInput = document.querySelector("input[name='phone']");
+    if (phoneInput) {
+      phoneInput.addEventListener('input', function () {
+        this.value = this.value.replace(/[^0-9]/g, '').substring(0, 11);
+      });
+    }
+    
+    // Add Schedule button functionality
+    document.getElementById("addSchedule").addEventListener("click", () => {
+      const additionalSchedulesDiv = document.getElementById("additionalSchedules");
+      const scheduleContainer = document.createElement("div");
+      scheduleContainer.classList.add("schedule-input");
+      scheduleContainer.style.display = "flex";
+      scheduleContainer.style.flexWrap = "wrap";
+      scheduleContainer.style.alignItems = "center";
+      scheduleContainer.style.gap = "10px";
+      scheduleContainer.style.marginBottom = "10px";
+      
+      const daySelect = document.createElement("select");
+      daySelect.name = "scheduleDay";
+      daySelect.required = true;
+      
+      const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+      const placeholderOption = document.createElement("option");
+      placeholderOption.value = "";
+      placeholderOption.textContent = "Select day";
+      placeholderOption.disabled = true;
+      placeholderOption.selected = true;
+      daySelect.appendChild(placeholderOption);
+      
+      days.forEach(day => {
+        const option = document.createElement("option");
+        option.value = day;
+        option.textContent = day;
+        daySelect.appendChild(option);
+      });
+      
+      const timeInputsDiv = document.createElement("div");
+      const addTimeButton = document.createElement("button");
+      addTimeButton.type = "button";
+      addTimeButton.textContent = "Add Time";
+      addTimeButton.style.backgroundColor = "#2ecc71";
+      addTimeButton.style.color = "white";
+      addTimeButton.style.border = "none";
+      addTimeButton.style.borderRadius = "5px";
+      addTimeButton.style.padding = "6px 12px";
+      addTimeButton.style.cursor = "pointer";
+      
+      addTimeButton.addEventListener("click", () => {
+        const timeWrapper = document.createElement("div");
+        timeWrapper.style.display = "flex";
+        timeWrapper.style.gap = "8px";
+        timeWrapper.style.marginTop = "5px";
+        timeWrapper.classList.add("time-wrapper");
+        
+        function createHourSelect(name) {
+          const select = document.createElement("select");
+          select.name = name;
+          for (let i = 1; i <= 12; i++) {
+            const option = document.createElement("option");
+            option.value = i;
+            option.textContent = i;
+            select.appendChild(option);
+          }
+          return select;
+        }
+        
+        function createPeriodSelect(name) {
+          const select = document.createElement("select");
+          select.name = name;
+          ["AM", "PM"].forEach(period => {
+            const option = document.createElement("option");
+            option.value = period;
+            option.textContent = period;
+            select.appendChild(option);
+          });
+          return select;
+        }
+        
+        const startHour = createHourSelect("startHour");
+        const startPeriod = createPeriodSelect("startPeriod");
+        const endHour = createHourSelect("endHour");
+        const endPeriod = createPeriodSelect("endPeriod");
+        
+        const deleteTimeBtn = document.createElement("button");
+        deleteTimeBtn.type = "button";
+        deleteTimeBtn.textContent = "🗑";
+        deleteTimeBtn.style.backgroundColor = "#e74c3c";
+        deleteTimeBtn.style.color = "white";
+        deleteTimeBtn.style.border = "none";
+        deleteTimeBtn.style.borderRadius = "5px";
+        deleteTimeBtn.style.padding = "4px 8px";
+        deleteTimeBtn.style.cursor = "pointer";
+        
+        deleteTimeBtn.addEventListener("click", () => {
+          timeWrapper.remove();
+        });
+        
+        timeWrapper.append("Start:", startHour, startPeriod, "End:", endHour, endPeriod, deleteTimeBtn);
+        timeInputsDiv.appendChild(timeWrapper);
+      });
+      
+      addTimeButton.click();
+      
+      const deleteBtn = document.createElement("button");
+      deleteBtn.type = "button";
+      deleteBtn.textContent = "Delete";
+      deleteBtn.style.backgroundColor = "#e74c3c";
+      deleteBtn.style.color = "white";
+      deleteBtn.style.border = "none";
+      deleteBtn.style.borderRadius = "5px";
+      deleteBtn.style.padding = "4px 8px";
+      deleteBtn.style.cursor = "pointer";
+      deleteBtn.style.height = "30px";
+      deleteBtn.style.marginTop = "0";
+      
+      deleteBtn.addEventListener("click", () => {
+        scheduleContainer.remove();
+      });
+      
+      const dayDeleteWrapper = document.createElement("div");
+      dayDeleteWrapper.style.display = "flex";
+      dayDeleteWrapper.style.alignItems = "center";
+      dayDeleteWrapper.style.gap = "8px";
+      dayDeleteWrapper.style.marginRight = "10px";
+      dayDeleteWrapper.appendChild(deleteBtn);
+      dayDeleteWrapper.appendChild(daySelect);
+      
+      scheduleContainer.appendChild(dayDeleteWrapper);
+      scheduleContainer.appendChild(timeInputsDiv);
+      scheduleContainer.appendChild(addTimeButton);
+      
+      additionalSchedulesDiv.appendChild(scheduleContainer);
+    });
+    
+    // Form submission handler
+    document.getElementById("registerForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      
+      const fullName = e.target.fullname.value.trim();
+      const username = e.target.username.value.trim();
+      const email = e.target.email.value.trim();
+      const phone = e.target.phone.value.trim();
+      const password = e.target.password.value;
+      const confirmPassword = e.target.confirmPassword.value;
+      const gender = e.target.gender.value;
+      const role = e.target.role.value;
+      
+      // Validate passwords match
+      if (password !== confirmPassword) {
+        showToast("Password and Confirm Password must match.");
+        return;
+      }
+      
+      // Validate password strength
+      if (!validatePassword(password)) {
+        showToast("Password must be at least 8 characters long, include one uppercase letter and one number.");
+        return;
+      }
+      
+      try {
+        // Create user with Firebase Auth
+        const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+        const user = userCredential.user;
+        
+        // Send email verification
+        await user.sendEmailVerification();
+        showToast("A verification email has been sent. Please verify your email before logging in.");
+        
+        // Prepare user data for Firestore
+        const userData = {
+          fullName,
+          username,
+          email,
+          phone,
+          gender,
+          role,
+          password, // Store plain text password (not recommended for production)
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        };
+        
+        // Add doctor-specific fields if role is doctor
+        if (role === "doctor") {
+          const scheduleEntries = document.querySelectorAll("#additionalSchedules .schedule-input");
+          const schedule = [];
+          
+          scheduleEntries.forEach(entry => {
+            const day = entry.querySelector("select[name='scheduleDay']").value;
+            const timeWrappers = entry.querySelectorAll(".time-wrapper");
+            const times = Array.from(timeWrappers).map(wrapper => {
+              const startHour = wrapper.querySelector("select[name='startHour']").value;
+              const startPeriod = wrapper.querySelector("select[name='startPeriod']").value;
+              const endHour = wrapper.querySelector("select[name='endHour']").value;
+              const endPeriod = wrapper.querySelector("select[name='endPeriod']").value;
+              
+              return {
+                startTime: `${startHour}:00 ${startPeriod}`,
+                endTime: `${endHour}:00 ${endPeriod}`
+              };
+            });
+            
+            if (day && times.length > 0) {
+              times.forEach(time => {
+                schedule.push({ day, ...time });
+              });
+            }
+          });
+          
+          userData.specialization = e.target.specialization?.value.trim();
+          userData.bio = e.target.bio?.value.trim();
+          userData.schedule = schedule;
+          userData.licenseNumber = e.target.licenseNumber?.value.trim();
+          userData.hospitalName = e.target.hospitalName?.value.trim();
+          userData.hospitalAddress = e.target.hospitalAddress?.value.trim();
+        }
+        
+        // Store user data in Firestore
+        await db.collection(role === "doctor" ? "doctors" : "patients")
+          .doc(user.uid)
+          .set(userData);
+        
+        showToast("Registration successful! Please verify your email before logging in.", 5000);
+        setTimeout(() => {
+          window.location.href = "patientLogin.html";
+        }, 5000);
+      } catch (error) {
+        console.error("Registration Error:", error);
+        showToast("Error: " + error.message);
+      }
+    });
+  </script>
 </body>
 </html>
