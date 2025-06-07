@@ -36,7 +36,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const data = snapshot.data();
 
     document.getElementById("name").textContent = data.fullName || "N/A";
-    document.getElementById("age").textContent = data.age || "N/A"; // Corrected from 'address'
+    document.getElementById("age").textContent = data.age || "N/A";
     document.getElementById("gender").textContent = data.gender || "N/A";
     document.getElementById("contact").textContent = data.phone || "N/A";
     document.getElementById("email").textContent = data.email || "N/A";
@@ -45,7 +45,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     document.getElementById("medications").textContent = data.medications || "N/A";
     document.getElementById("conditions").textContent = data.conditions || "N/A";
     document.getElementById("familyHistory").textContent = data.familyHistory || "N/A";
-    document.getElementById("dateTime").textContent = new Date(data.appointmentDateTime).toLocaleString();
+    document.getElementById("dateTime").textContent = data.appointmentDateTime || "N/A";
     document.getElementById("reason").textContent = data.reason || "N/A";
     document.getElementById("fee").textContent = data.feeAmount || "N/A";
     document.getElementById("paymentMethod").textContent = data.paymentMethod || "N/A";
@@ -75,10 +75,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     console.error("Error fetching patient data:", error);
     alert("Failed to fetch patient data.");
   }
-
-
-
-
 });
 
 window.updateStatus = async function (status) {
@@ -106,19 +102,19 @@ window.updateStatus = async function (status) {
     // ✅ Send Email
     await sendEmailNotification(data.email, data.fullName, status, data.appointmentDateTime);
 
-
     alert(`Appointment has been moved to "${destinationCollection}" and email notification sent.`);
   } catch (error) {
     console.error("Error updating status:", error);
     alert("Failed to update appointment: " + error.message);
   }
 };
+
 async function sendEmailNotification(email, fullName, status, appointmentDateTime) {
   const templateParams = {
     email: email,
     fullName: fullName,
     status: status,
-    appointmentDateTime: new Date(appointmentDateTime).toLocaleString()
+    appointmentDateTime: appointmentDateTime || "N/A" // used directly as string
   };
 
   try {
@@ -135,6 +131,3 @@ async function sendEmailNotification(email, fullName, status, appointmentDateTim
     alert("Email send error: " + (error.text || error.message));
   }
 }
-
-
-
