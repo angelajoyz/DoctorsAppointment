@@ -93,11 +93,11 @@
     }
 
     .container {
-      max-width: 1000px;
-      margin: 20px auto;
+      max-width: 1250px;
+      margin: 50px auto;
       background: white;
       border-radius: 10px;
-      padding: 30px;
+      padding: 40px;
       box-shadow: 0 2px 10px rgba(0,0,0,0.05);
     }
 
