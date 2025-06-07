@@ -123,7 +123,7 @@ function confirmAppointment() {
             email: doctorEmail, // For the "To Email" field
             doctor_fullname: doctorFullName, // For {{doctor_fullname}}
             patient_fullname: patientFullName, // For {{patient_fullname}}
-            appointmentDateTime: new Date(appointmentDateTime).toLocaleString() // For {{appointmentDateTime}}
+            appointmentDateTime: appointmentDateTime // For {{appointmentDateTime}}
         };
 
         emailjs.send("service_4neygh9", "template_11mgiux", templateParams, "uxowx8uL9zxSSj8V1")
@@ -528,9 +528,38 @@ function generateTimeSlots(timeRanges) {
             }
         }
     });
-    
-    console.log(`🔧 Generated ${slots.length} time slots:`, slots);
-    return slots;
+
+    // Define lunch break start and end in minutes from midnight
+    const lunchStart = 12 * 60; // 12:00 PM
+    const lunchEnd = 13 * 60;   // 1:00 PM
+
+    // Helper to convert "HH:MM AM/PM" to minutes since midnight
+    function timeStrToMinutes(timeStr) {
+        const match = timeStr.match(/(\d{1,2}):(\d{2})\s*(AM|PM)/i);
+        if (!match) return 0;
+
+        let hour = parseInt(match[1], 10);
+        const minutes = parseInt(match[2], 10);
+        const period = match[3].toUpperCase();
+
+        if (period === "PM" && hour !== 12) hour += 12;
+        if (period === "AM" && hour === 12) hour = 0;
+
+        return hour * 60 + minutes;
+    }
+
+    // Filter out slots overlapping lunch break
+    const filteredSlots = slots.filter(slot => {
+        const [startStr, endStr] = slot.split(' - ');
+        const startMinutes = timeStrToMinutes(startStr);
+        const endMinutes = timeStrToMinutes(endStr);
+
+        // Exclude if slot overlaps lunch break
+        return !(startMinutes < lunchEnd && endMinutes > lunchStart);
+    });
+
+    console.log(`🔧 Generated ${filteredSlots.length} time slots after excluding lunch break:`, filteredSlots);
+    return filteredSlots;
 }
 
 // Add this helper function to normalize existing time slot strings for comparison
