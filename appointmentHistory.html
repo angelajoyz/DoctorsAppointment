@@ -56,6 +56,11 @@
       font-weight: bold;
     }
 
+    header p {
+      margin-top: 5px;
+      font-size: 1.1em;
+    }
+
     .hidden-menu {
       position: fixed;
       top: 0;
@@ -97,8 +102,8 @@
     }
 
     .container {
-      max-width: 1000px;
-      margin: 100px auto;
+      max-width: 1500px;
+      margin: 50px auto;
       background: white;
       border-radius: 10px;
       padding: 40px;
@@ -328,7 +333,7 @@
         count++;
         const appointmentDate = new Date(data.appointmentDateTime);
         const status = appointmentDate < today ? "Completed" : "Pending";
-        const dateStr = appointmentDate.toLocaleString();
+        const dateStr = data.appointmentDateTime; // already a string
         const rating = data.rating || 0;
 
         const row = document.createElement("tr");
@@ -458,7 +463,7 @@ function enableRating() {
       <strong>Payment Method:</strong> ${data.paymentMethod || "N/A"}<br>
       <strong>Payment Ref:</strong> ${data.paymentRef || "N/A"}<br>
       <strong>Fee:</strong> ₱${data.feeAmount || "N/A"}<br>
-      <strong>Date:</strong> ${new Date(data.appointmentDateTime).toLocaleString()}<br>
+      <strong>Date:</strong> ${data.appointmentDateTime || "N/A"}<br>
       <strong>Status:</strong> ${data.status || "Approved"}<br>
     `;
 
