@@ -65,20 +65,30 @@ async function loadAppointments(doctorUid) {
     return;
   }
 
-  querySnapshot.forEach((docSnap) => {
-    const data = docSnap.data();
-    const row = document.createElement("tr");
-    row.innerHTML = `
-      <td>${new Date(data.appointmentDateTime).toLocaleString([], {
-        year: 'numeric', month: 'short', day: 'numeric',
-        hour: '2-digit', minute: '2-digit'
-      })}</td>
-      <td>${data.fullName}</td>
-      <td>${data.reason || "N/A"}</td>
-      <td><a href="patient-details.html?id=${docSnap.id}">View Details</a></td>
-    `;
-    appointmentTableBody.appendChild(row);
+querySnapshot.forEach((docSnap) => {
+  const data = docSnap.data();
+
+  // ✅ Format the appointment date and time
+  const [start, end] = data.appointmentDateTime.split(" - ");
+  const formattedStart = new Date(start).toLocaleString([], {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
   });
+
+  // ✅ Create row and insert formatted date
+  const row = document.createElement("tr");
+  row.innerHTML = `
+    <td>${formattedStart} - ${end}</td>
+    <td>${data.fullName}</td>
+    <td>${data.reason || "N/A"}</td>
+    <td><a href="patient-details.html?id=${docSnap.id}">View Details</a></td>
+  `;
+  appointmentTableBody.appendChild(row);
+});
+
 }
 
 
