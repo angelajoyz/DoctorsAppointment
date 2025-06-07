@@ -97,14 +97,21 @@ nav.hidden-menu a:hover {
 }
 
 .container {
+  max-width: 1250px;
+  margin: 50px auto;
+  background: white;
+  border-radius: 10px;
+  padding: 40px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+
   display: flex;
   flex-wrap: wrap;
   gap: 20px;
-  padding: 20px;
   justify-content: center;
   align-items: flex-start;
-  
 }
+
+
 
 .card, .appointment-table-container {
   background: #fff;
@@ -144,6 +151,7 @@ nav.hidden-menu a:hover {
 }
 
 .notifications {
+  display: none;
   position: absolute;
   top: 20px;
   right: 20px;
