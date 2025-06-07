@@ -46,7 +46,7 @@ async function loadDoctorInfo(uid) {
     const data = docSnap.data();
     fullNameEl.textContent = data.fullName || "No name";
     specializationEl.textContent = data.specialization || "No specialization";
-if (data.profileImageURL) {
+    if (data.profileImageURL) {
       profileImageEl.src = data.profileImageURL;
     }
   }
@@ -57,10 +57,36 @@ function formatDate(date) {
   return date.toISOString().split('T')[0];
 }
 
-// Keep only this loadAppointments function (merged and fixed)
+// Extract start datetime from appointmentDateTime string or Firestore Timestamp
+function parseAppointmentDateTime(dateTime) {
+  if (!dateTime) return null;
+
+  // If it's a Firestore Timestamp object, convert to Date
+  if (typeof dateTime.toDate === "function") {
+    return dateTime.toDate();
+  }
+
+  // If it's a string with range like "2025-06-09 10:00 AM - 10:30 AM"
+  if (typeof dateTime === "string") {
+    const startStr = dateTime.split(" - ")[0].trim();
+    const parsedDate = new Date(startStr);
+    if (!isNaN(parsedDate.getTime())) {
+      return parsedDate;
+    } else {
+      console.warn("Failed to parse start datetime from string:", dateTime);
+      return null;
+    }
+  }
+
+  // Otherwise try Date constructor (fallback)
+  const parsedDate = new Date(dateTime);
+  return isNaN(parsedDate.getTime()) ? null : parsedDate;
+}
+
+// Load appointments safely with date validation
 async function loadAppointments(doctorId) {
   try {
-    const appointmentsRef = collection(db, "approved"); // 👈 Changed from "appointments"
+    const appointmentsRef = collection(db, "approved");
     const q = query(appointmentsRef, where("doctorId", "==", doctorId));
     const querySnapshot = await getDocs(q);
 
@@ -74,12 +100,12 @@ async function loadAppointments(doctorId) {
 
     querySnapshot.forEach((doc) => {
       const data = doc.data();
-      const dateObj = data.appointmentDateTime?.toDate?.() || new Date(data.appointmentDateTime);
+      const dateObj = parseAppointmentDateTime(data.appointmentDateTime);
 
-      if (dateObj < now) return;
+      if (!dateObj) return; // Skip invalid or unparsable dates
+      if (dateObj < now) return; // Skip past appointments
 
       hasAppointments = true;
-
       highlightedDates.add(formatDate(dateObj));
 
       // Table row
@@ -91,9 +117,10 @@ async function loadAppointments(doctorId) {
       `;
       appointmentTableBody.appendChild(row);
 
-      // Notifications
-      const tomorrow = new Date();
+      // Notifications for tomorrow's appointments
+      const tomorrow = new Date(now);
       tomorrow.setDate(now.getDate() + 1);
+
       if (
         dateObj.getDate() === tomorrow.getDate() &&
         dateObj.getMonth() === tomorrow.getMonth() &&
@@ -119,7 +146,7 @@ async function loadAppointments(doctorId) {
 
     if (!hasAppointments) {
       appointmentTableBody.innerHTML =
-        "<tr><td colspan='4' style='text-align:center;'>No appointment request</td></tr>";
+        "<tr><td colspan='4' style='text-align:center;'>No appointment</td></tr>";
     }
 
     notificationCount.textContent = upcomingCount;
@@ -128,7 +155,6 @@ async function loadAppointments(doctorId) {
     console.error("Error loading approved appointments:", error);
   }
 }
-
 
 onAuthStateChanged(auth, (user) => {
   if (user) {
@@ -143,30 +169,30 @@ onAuthStateChanged(auth, (user) => {
 });
 
 const calendarEl = document.getElementById('calendar');
-
 let calendar; // global so we can manipulate it later
 
 function renderFullCalendar(appointmentDocs) {
   const allAppointments = appointmentDocs.map((doc) => {
     const data = doc.data();
-    const dateObj = data.appointmentDateTime?.toDate?.() || new Date(data.appointmentDateTime);
+    const dateObj = parseAppointmentDateTime(data.appointmentDateTime);
+
+    if (!dateObj) return null; // skip invalid entries
+
     return {
-  id: doc.id,
-  title: ' ', // invisible title
-start: toLocalDateString(dateObj),
-  allDay: true,
-  display: 'background', // Highlight background only
-  backgroundColor: '#32CD32', // LimeGreen for full-day highlight
-  extendedProps: {
-    fullName: data.fullName,
-    reason: data.reason,
-    date: dateObj.toDateString(),
-    time: dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-  },
-};
-
-
-  });
+      id: doc.id,
+      title: ' ', // invisible title
+      start: toLocalDateString(dateObj),
+      allDay: true,
+      display: 'background', // Highlight background only
+      backgroundColor: '#32CD32', // LimeGreen for full-day highlight
+      extendedProps: {
+        fullName: data.fullName,
+        reason: data.reason,
+        date: dateObj.toDateString(),
+        time: dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      },
+    };
+  }).filter(event => event !== null); // remove nulls
 
   if (calendar) calendar.destroy();
 
@@ -174,29 +200,24 @@ start: toLocalDateString(dateObj),
     initialView: 'dayGridMonth',
     height: 'auto',
     contentHeight: 'auto',
-    aspectRatio: 2, // Controls width vs height (try 1.5–2.5)
+    aspectRatio: 2,
     events: allAppointments,
     headerToolbar: {
       left: 'prev,next today',
       center: 'title',
       right: ''
-  
-
     },
     dateClick: function(info) {
       displayAppointmentsForDate(info.dateStr, allAppointments);
     }
-    
   });
 
   calendar.render();
 
   // Show today's appointments on load if no date is clicked
-const todayStr = formatDate(new Date());
-displayAppointmentsForDate(todayStr, allAppointments);
-
+  const todayStr = formatDate(new Date());
+  displayAppointmentsForDate(todayStr, allAppointments);
 }
-
 
 function displayAppointmentsForDate(dateStr, allAppointments) {
   const targetDate = new Date(dateStr);
@@ -228,6 +249,7 @@ function displayAppointmentsForDate(dateStr, allAppointments) {
     appointmentTableBody.appendChild(row);
   }
 }
+
 function toLocalDateString(date) {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, '0');
