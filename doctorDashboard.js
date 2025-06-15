@@ -146,7 +146,7 @@ async function loadAppointments(doctorId) {
 
     if (!hasAppointments) {
       appointmentTableBody.innerHTML =
-        "<tr><td colspan='4' style='text-align:center;'>No appointment</td></tr>";
+        "<tr><td colspan='4' style='text-align:center;'>No appointment.</td></tr>";
     }
 
     notificationCount.textContent = upcomingCount;
@@ -172,27 +172,30 @@ const calendarEl = document.getElementById('calendar');
 let calendar; // global so we can manipulate it later
 
 function renderFullCalendar(appointmentDocs) {
-  const allAppointments = appointmentDocs.map((doc) => {
-    const data = doc.data();
-    const dateObj = parseAppointmentDateTime(data.appointmentDateTime);
+const now = new Date();
+const allAppointments = appointmentDocs.map((doc) => {
+  const data = doc.data();
+  const dateObj = parseAppointmentDateTime(data.appointmentDateTime);
 
-    if (!dateObj) return null; // skip invalid entries
+  if (!dateObj) return null; // skip invalid entries
+  if (dateObj < now) return null; // skip past dates for highlighting
 
-    return {
-      id: doc.id,
-      title: ' ', // invisible title
-      start: toLocalDateString(dateObj),
-      allDay: true,
-      display: 'background', // Highlight background only
-      backgroundColor: '#32CD32', // LimeGreen for full-day highlight
-      extendedProps: {
-        fullName: data.fullName,
-        reason: data.reason,
-        date: dateObj.toDateString(),
-        time: dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      },
-    };
-  }).filter(event => event !== null); // remove nulls
+  return {
+    id: doc.id,
+    title: ' ',
+    start: toLocalDateString(dateObj),
+    allDay: true,
+    display: 'background',
+    backgroundColor: '#32CD32',
+    extendedProps: {
+      fullName: data.fullName,
+      reason: data.reason,
+      date: dateObj.toDateString(),
+      time: dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    },
+  };
+}).filter(event => event !== null);
+
 
   if (calendar) calendar.destroy();
 
