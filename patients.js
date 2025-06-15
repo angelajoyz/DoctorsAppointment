@@ -60,36 +60,46 @@ async function loadAppointments(doctorUid) {
 
   appointmentTableBody.innerHTML = ""; // Clear existing table
 
-  if (querySnapshot.empty) {
-    appointmentTableBody.innerHTML = "<tr><td colspan='4'>No appointments found.</td></tr>";
-    return;
-  }
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
 
-querySnapshot.forEach((docSnap) => {
-  const data = docSnap.data();
+  let count = 0;
 
-  // ✅ Format the appointment date and time
-  const [start, end] = data.appointmentDateTime.split(" - ");
-  const formattedStart = new Date(start).toLocaleString([], {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
+  querySnapshot.forEach((docSnap) => {
+    const data = docSnap.data();
+
+    // Extract and parse the appointment start time
+    const [start, end] = data.appointmentDateTime.split(" - ");
+    const startDate = new Date(start);
+
+    // ❌ Skip if appointment already passed
+    if (startDate < today) return;
+
+    // ✅ Still upcoming — display it
+    const formattedStart = startDate.toLocaleString([], {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td>${formattedStart} - ${end}</td>
+      <td>${data.fullName}</td>
+      <td>${data.reason || "N/A"}</td>
+      <td><a href="patient-details.html?id=${docSnap.id}">View Details</a></td>
+    `;
+    appointmentTableBody.appendChild(row);
+    count++;
   });
 
-  // ✅ Create row and insert formatted date
-  const row = document.createElement("tr");
-  row.innerHTML = `
-    <td>${formattedStart} - ${end}</td>
-    <td>${data.fullName}</td>
-    <td>${data.reason || "N/A"}</td>
-    <td><a href="patient-details.html?id=${docSnap.id}">View Details</a></td>
-  `;
-  appointmentTableBody.appendChild(row);
-});
-
+  if (count === 0) {
+    appointmentTableBody.innerHTML = "<tr><td colspan='4' style='text-align: center; padding: 1em;'>No upcoming appointments found.</td></tr>";
+  }
 }
+
 
 
 onAuthStateChanged(auth, (user) => {
