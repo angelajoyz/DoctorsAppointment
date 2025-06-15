@@ -317,67 +317,78 @@
     await loadAppointments(currentEmail);
   });
 
-  async function loadAppointments(email) {
-    try {
-      const snapshot = await getDocs(collection(db, "approved"));
-      tableBody.innerHTML = "";
-      let count = 0;
+async function loadAppointments(email) {
+  try {
+    const snapshot = await getDocs(collection(db, "approved"));
+    tableBody.innerHTML = "";
+    let count = 0;
 
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
 
-      snapshot.forEach((docSnap) => {
-        const data = docSnap.data();
-        if (data.email !== email) return;
+    for (const docSnap of snapshot.docs) {
+      const data = docSnap.data();
+      if (data.email !== email) continue;
 
-        count++;
-        const appointmentDate = new Date(data.appointmentDateTime);
-        const status = appointmentDate < today ? "Completed" : "Pending";
-        const dateStr = data.appointmentDateTime; // already a string
-        const rating = data.rating || 0;
+      count++;
 
-        const row = document.createElement("tr");
-        row.innerHTML = `
-          <td data-label="Date & Time">${dateStr}</td>
-          <td data-label="Doctor">${data.doctorName || "N/A"}</td>
-          <td data-label="Reason">${data.reason || "N/A"}</td>
-          <td data-label="Status">${status}</td>
-          <td data-label="Details">
-            <button class="details-button">View</button>
-          </td>
-          <td class="rate-cell" data-label="Rate Doctor">
-  ${
-    status === "Completed"
-      ? [1, 2, 3, 4, 5].map(i => `
-          <span class="stars ${i <= rating ? 'active' : ''} ${rating > 0 ? 'locked' : ''}" 
-                data-id="${docSnap.id}" 
-                data-rate="${i}">&#9733;</span>
-        `).join('')
-      : `<span style="color:#999;">Not yet available</span>`
-  }
-</td>
+      // Parse only the start time from appointmentDateTime string
+      const [startTime] = data.appointmentDateTime.split(" - ");
+      const appointmentDate = new Date(startTime);
 
-        `;
+      // Determine status
+      const isCompleted = appointmentDate < today;
+      const status = isCompleted ? "Completed" : "Pending";
+      const rating = data.rating || 0;
 
-        const detailsBtn = row.querySelector(".details-button");
-        detailsBtn.appointmentData = data;
-        detailsBtn.addEventListener("click", () => {
-          showDetails(data);
-        });
-
-        tableBody.appendChild(row);
-      });
-
-      if (count === 0) {
-        tableBody.innerHTML = `<tr><td colspan="6" style="text-align:center;">No approved appointments found.</td></tr>`;
+      // Auto-update status in Firestore if needed
+      if (isCompleted && data.status !== "Completed") {
+        const appointmentRef = doc(db, "approved", docSnap.id);
+        await updateDoc(appointmentRef, { status: "Completed" });
+        data.status = "Completed"; // reflect change in UI
       }
 
-      enableRating();
-    } catch (error) {
-      console.error("Error loading appointments:", error);
-      tableBody.innerHTML = `<tr><td colspan="6" style="text-align:center;">Failed to load appointments.</td></tr>`;
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td data-label="Date & Time">${data.appointmentDateTime}</td>
+        <td data-label="Doctor">${data.doctorName || "N/A"}</td>
+        <td data-label="Reason">${data.reason || "N/A"}</td>
+        <td data-label="Status">${status}</td>
+        <td data-label="Details">
+          <button class="details-button">View</button>
+        </td>
+        <td class="rate-cell" data-label="Rate Doctor">
+          ${
+            status === "Completed"
+              ? [1, 2, 3, 4, 5].map(i => `
+                  <span class="stars ${i <= rating ? 'active' : ''} ${rating > 0 ? 'locked' : ''}" 
+                        data-id="${docSnap.id}" 
+                        data-rate="${i}">&#9733;</span>
+                `).join('')
+              : `<span style="color:#999;">Not yet available</span>`
+          }
+        </td>
+      `;
+
+      const detailsBtn = row.querySelector(".details-button");
+      detailsBtn.appointmentData = data;
+      detailsBtn.addEventListener("click", () => {
+        showDetails(data);
+      });
+
+      tableBody.appendChild(row);
     }
+
+    if (count === 0) {
+      tableBody.innerHTML = `<tr><td colspan="6" style="text-align:center;">No approved appointments found.</td></tr>`;
+    }
+
+    enableRating();
+  } catch (error) {
+    console.error("Error loading appointments:", error);
+    tableBody.innerHTML = `<tr><td colspan="6" style="text-align:center;">Failed to load appointments.</td></tr>`;
   }
+}
 
 function enableRating() {
   document.querySelectorAll(".rate-cell").forEach(cell => {
