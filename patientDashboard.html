@@ -376,6 +376,51 @@
         text-align: center;
         font-size: 14px;
         }
+        .doctor-hospital,
+        .doctor-address {
+        font-size: 0.9rem;
+        margin-top: 4px;
+        color: #444;
+    }
+    .card {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
+    padding: 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    border-radius: 10px;
+    background: white;
+}
+.card {
+    width: 320px;               /* fixed width */
+    height: 740px;              /* fixed height */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    border-radius: 10px;
+    background: white;
+    margin: 10px;
+    overflow: hidden;          /* hide overflow content */
+}
+
+.card-body {
+    flex-grow: 1;
+    overflow-y: auto;          /* scroll if content is too tall */
+}
+
+.book-btn {
+    margin-top: 10px;
+    align-self: stretch;
+}
+
+.card .book-btn {
+    margin-top: auto;
+    align-self: stretch;
+}
+
 
             footer {
       text-align: center;
@@ -384,6 +429,33 @@
       color: #666;
       margin-top: 40px;
     }
+.image-wrapper {
+    position: relative;
+    width: 100%;
+    height: 49%;
+    overflow: hidden;
+    border-radius: 10px;
+}
+
+.image-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.badge {
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
+    background-color: gold;
+    color: black;
+    padding: 5px 10px;
+    font-weight: bold;
+    font-size: 0.8rem;
+    border-radius: 5px;
+    box-shadow: 0 0 4px rgba(0, 0, 0, 0.3);
+}
 
     </style>
 </head>
@@ -576,23 +648,32 @@
 
             const profileImage = doctor.profileImageURL || "doctor1.png";
 
-            card.innerHTML = `
-                <img src="${profileImage}" alt="Doctor">
-                <div class="info-container">
-                    <div class="doctor-info">
-                        <h2 class="doctor-name">${doctor.fullName || 'Unnamed Doctor'}</h2>
-                        <p class="doctor-spec">${doctor.specialization || ''}</p>
-                    </div>
-                    ${topDoctorEmails.includes(doctor.email) ? '<div class="badge">Leading Doctor</div>' : ''}
-                </div>
+           card.innerHTML = `
+    <div class="card-body">
+        <div class="image-wrapper">
+            <img src="${profileImage}" alt="Doctor">
+            ${topDoctorEmails.includes(doctor.email) ? '<div class="badge">Leading Doctor</div>' : ''}
+        </div>
+        <div class="info-container">
+            <div class="doctor-info">
+                <h2 class="doctor-name">${doctor.fullName || 'Unnamed Doctor'}</h2>
+                <p class="doctor-spec">${doctor.specialization || ''}</p>
+                <p class="doctor-hospital"><strong>Hospital:</strong> ${doctor.hospitalName || 'Not specified'}</p>
+                <p class="doctor-address"><strong>Address:</strong> ${doctor.hospitalAddress || 'Not provided'}</p>
+            </div>
+        </div>
 
-                <div class="schedule">
-                    <p>Consultation Schedule:</p>
-                    <div class="slots-times">${scheduleHTML}</div>
-                </div>
+        <div class="schedule">
+            <p>Consultation Schedule:</p>
+            <div class="slots-times">${scheduleHTML}</div>
+        </div>
 
-                <p class="doctor-review">${doctor.bio || ''}</p>
-            `;
+        <p class="doctor-review">${doctor.bio || ''}</p>
+    </div>
+`;
+
+
+
 
             const button = document.createElement("button");
             button.className = "book-btn";
