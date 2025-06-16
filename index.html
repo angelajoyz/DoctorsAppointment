@@ -376,6 +376,51 @@
         text-align: center;
         font-size: 14px;
         }
+        .doctor-hospital,
+        .doctor-address {
+        font-size: 0.9rem;
+        margin-top: 4px;
+        color: #444;
+    }
+    .card {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
+    padding: 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    border-radius: 10px;
+    background: white;
+}
+.card {
+    width: 320px;               /* fixed width */
+    height: 740px;              /* fixed height */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    border-radius: 10px;
+    background: white;
+    margin: 10px;
+    overflow: hidden;          /* hide overflow content */
+}
+
+.card-body {
+    flex-grow: 1;
+    overflow-y: auto;          /* scroll if content is too tall */
+}
+
+.book-btn {
+    margin-top: 10px;
+    align-self: stretch;
+}
+
+.card .book-btn {
+    margin-top: auto;
+    align-self: stretch;
+}
+
 
             footer {
       text-align: center;
@@ -384,6 +429,33 @@
       color: #666;
       margin-top: 40px;
     }
+.image-wrapper {
+    position: relative;
+    width: 100%;
+    height: 49%;
+    overflow: hidden;
+    border-radius: 10px;
+}
+
+.image-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.badge {
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
+    background-color: gold;
+    color: black;
+    padding: 5px 10px;
+    font-weight: bold;
+    font-size: 0.8rem;
+    border-radius: 5px;
+    box-shadow: 0 0 4px rgba(0, 0, 0, 0.3);
+}
 
     </style>
 </head>
@@ -397,6 +469,7 @@
 
     <nav id="hiddenMenu" class="hidden-menu">
         <ul>
+
             <li><a href="services.html">Services</a></li>
             <li><a href="about.html">About</a></li>
             <li><a href="contact.html">Contact</a></li>
@@ -412,74 +485,128 @@
     <p>&copy; 2025 Doctor Dashboard</p>
   </footer>
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getFirestore, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyDwCayQZ0JO6DjzQvAT6ToT33I4QXCS_NY",
-            authDomain: "login-sample-c3af0.firebaseapp.com",
-            projectId: "login-sample-c3af0",
-            storageBucket: "login-sample-c3af0.firebasestorage.app",
-            messagingSenderId: "372688128666",
-            appId: "1:372688128666:web:bbc529c73c4665f95f6d23"
-        };
+    const firebaseConfig = {
+        apiKey: "AIzaSyDwCayQZ0JO6DjzQvAT6ToT33I4QXCS_NY",
+        authDomain: "login-sample-c3af0.firebaseapp.com",
+        projectId: "login-sample-c3af0",
+        storageBucket: "login-sample-c3af0.firebasestorage.app",
+        messagingSenderId: "372688128666",
+        appId: "1:372688128666:web:bbc529c73c4665f95f6d23"
+    };
 
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
 
+    async function getTopRatedDoctors(limit = 3) {
+        const ratingsSnapshot = await getDocs(collection(db, "ratings"));
+        const doctorRatings = {};
 
+        ratingsSnapshot.forEach(doc => {
+            const data = doc.data();
+            const { doctorEmail, rating } = data;
 
-        function generateTimeSlots() {
-            const slots = [];
-            const startTime = 7; // 7:00 AM
-            const endTime = 12; // 12:00 PM
-            const interval = 30; // 30 minutes
-
-            for (let hour = startTime; hour < endTime; hour++) {
-                for (let minute = 0; minute < 60; minute += interval) {
-                    let hourStr = hour < 10 ? "0" + hour : hour;
-                    let minuteStr = minute === 0 ? "00" : minute;
-                    slots.push(`${hourStr}:${minuteStr} AM`);
-                }
+            if (!doctorRatings[doctorEmail]) {
+                doctorRatings[doctorEmail] = { total: 0, count: 0 };
             }
-            return slots;
-        }
 
-        function showAvailableTimes(uniqueId) {
-            const calendar = document.getElementById(`calendar-${uniqueId}`);
-            const availableSlotsDiv = document.getElementById(`slots-${uniqueId}`);
-            const timeSlots = generateTimeSlots();
+            doctorRatings[doctorEmail].total += rating;
+            doctorRatings[doctorEmail].count += 1;
+        });
 
-            availableSlotsDiv.innerHTML = '';
+        const sortedDoctors = Object.entries(doctorRatings)
+            .map(([email, { total, count }]) => ({
+                email,
+                average: total / count
+            }))
+            .sort((a, b) => b.average - a.average)
+            .slice(0, limit);
 
-            timeSlots.forEach(time => {
-                const timeSlotDiv = document.createElement("div");
-                timeSlotDiv.classList.add("time-slot");
-                timeSlotDiv.textContent = time;
-                availableSlotsDiv.appendChild(timeSlotDiv);
-            });
-        }
-
-        function toggleDropdown(uniqueId) {
-            const dropdown = document.getElementById(`dropdown-${uniqueId}`);
-            dropdown.classList.toggle("show");
-        }
-
-async function displayDoctors() {
-    const container = document.querySelector('.container');
-
-    if (!container) {
-        console.error("Container with class 'container' not found in DOM.");
-        return;
+        return sortedDoctors.map(d => d.email);
     }
 
-    try {
-        const querySnapshot = await getDocs(collection(db, "doctors"));
+    function generateTimeSlots() {
+        const slots = [];
+        const startTime = 7;
+        const endTime = 12;
+        const interval = 30;
 
-        if (querySnapshot.empty) {
-            container.innerHTML = "<p>No doctors found.</p>";
-            return;
+        for (let hour = startTime; hour < endTime; hour++) {
+            for (let minute = 0; minute < 60; minute += interval) {
+                let hourStr = hour < 10 ? "0" + hour : hour;
+                let minuteStr = minute === 0 ? "00" : minute;
+                slots.push(`${hourStr}:${minuteStr} AM`);
+            }
         }
+        return slots;
+    }
+
+    function showAvailableTimes(uniqueId) {
+        const calendar = document.getElementById(`calendar-${uniqueId}`);
+        const availableSlotsDiv = document.getElementById(`slots-${uniqueId}`);
+        const timeSlots = generateTimeSlots();
+
+        availableSlotsDiv.innerHTML = '';
+        timeSlots.forEach(time => {
+            const timeSlotDiv = document.createElement("div");
+            timeSlotDiv.classList.add("time-slot");
+            timeSlotDiv.textContent = time;
+            availableSlotsDiv.appendChild(timeSlotDiv);
+        });
+    }
+
+    function toggleDropdown(id = null) {
+        const dropdown = document.getElementById(id ? `dropdown-${id}` : "dropdownContainer");
+        if (dropdown) dropdown.classList.toggle("show");
+    }
+
+    function generateTimeSlotsFromRange(start, end) {
+        const slots = [];
+        const [startHour, startMin, startPeriod] = parseTime(start);
+        const [endHour, endMin, endPeriod] = parseTime(end);
+
+        let startDate = convertTo24Hour(startHour, startMin, startPeriod);
+        let endDate = convertTo24Hour(endHour, endMin, endPeriod);
+
+        while (startDate < endDate) {
+            let hour = Math.floor(startDate / 60);
+            let minute = startDate % 60;
+            let display = formatToAMPM(hour, minute);
+            slots.push(display);
+            startDate += 30;
+        }
+
+        return slots;
+    }
+
+    function parseTime(timeStr) {
+        const [time, period] = timeStr.split(" ");
+        const [hour, minute] = time.split(":").map(Number);
+        return [hour, minute, period];
+    }
+
+    function convertTo24Hour(hour, minute, period) {
+        if (period === "PM" && hour !== 12) hour += 12;
+        if (period === "AM" && hour === 12) hour = 0;
+        return hour * 60 + minute;
+    }
+
+    function formatToAMPM(hour, minute) {
+        const period = hour >= 12 ? "PM" : "AM";
+        const hour12 = hour % 12 || 12;
+        const minuteStr = minute < 10 ? `0${minute}` : `${minute}`;
+        return `${hour12}:${minuteStr} ${period}`;
+    }
+
+    async function displayDoctors() {
+        const container = document.querySelector('.container');
+        if (!container) return;
+
+        const topDoctorEmails = await getTopRatedDoctors();
+
+        const querySnapshot = await getDocs(collection(db, "doctors"));
 
         querySnapshot.forEach((doc) => {
             const doctor = doc.data();
@@ -488,111 +615,99 @@ async function displayDoctors() {
 
             let scheduleHTML = "";
             if (doctor.schedule && doctor.schedule.length > 0) {
-                let days = "";
-                let timeSlots = ["", "", ""];
+                const groupedByDay = {};
 
-                doctor.schedule
-                .filter(entry => entry.day && Array.isArray(entry.times))
-                .forEach((entry, i) => {
-                    days += `<div class="day-cell">${entry.day.slice(0, 3)}</div>`;
-
-                    entry.times.forEach((time, index) => {
-                    if (!timeSlots[index]) timeSlots[index] = "";
-                    timeSlots[index] += `<div class="time-cell">${time}</div>`;
-                    });
+                doctor.schedule.forEach(entry => {
+                    if (!groupedByDay[entry.day]) groupedByDay[entry.day] = [];
+                    if (entry.startTime && entry.endTime) groupedByDay[entry.day].push(`${entry.startTime} - ${entry.endTime}`);
                 });
 
+                let dayRow = "";
+                let timeRows = [];
+                const maxSlots = Math.max(...Object.values(groupedByDay).map(times => times.length));
 
-                for (let i = 0; i < timeSlots.length; i++) {
-                    const slotCount = doctor.schedule.length;
-                    const currentCount = (timeSlots[i].match(/<div/g) || []).length;
-                    const missing = slotCount - currentCount;
-                    for (let j = 0; j < missing; j++) {
-                        timeSlots[i] += `<div class="time-cell"></div>`;
-                    }
+                Object.keys(groupedByDay).forEach(day => {
+                    dayRow += `<div class="day-cell">${day.slice(0, 3)}</div>`;
+                });
+
+                for (let i = 0; i < maxSlots; i++) {
+                    let row = "";
+                    Object.keys(groupedByDay).forEach(day => {
+                        const timeRange = groupedByDay[day][i] || "";
+                        row += `<div class="time-cell">${timeRange}</div>`;
+                    });
+                    timeRows.push(`<div class="schedule-grid">${row}</div>`);
                 }
 
-                scheduleHTML = `
-                    <div class="schedule-grid">${days}</div>
-                    ${timeSlots.map(row => `<div class="schedule-grid">${row}</div>`).join('')}
-                `;
+                scheduleHTML = `<div class="schedule-grid">${dayRow}</div>${timeRows.join('')}`;
             } else {
                 scheduleHTML = "<p>No available schedule</p>";
             }
 
-const profileImage = doctor.profileImageURL || "doctor1.png";
+            const profileImage = doctor.profileImageURL || "doctor1.png";
 
-card.innerHTML = `
-    <img src="${profileImage}" alt="Doctor">
-    <div class="info-container">
-        <div class="doctor-info">
-            <h2 class="doctor-name">${doctor.fullName || 'Unnamed Doctor'}</h2>
-            <p class="doctor-spec">${doctor.specialization || ''}</p>
+           card.innerHTML = `
+    <div class="card-body">
+        <div class="image-wrapper">
+            <img src="${profileImage}" alt="Doctor">
+            ${topDoctorEmails.includes(doctor.email) ? '<div class="badge">Leading Doctor</div>' : ''}
         </div>
-        <div class="badge">Leading Doctor</div>
-    </div>
-
-    <div class="schedule">
-        <p>Consultation Schedule:</p>
-        <div class="slots-times">
-            ${scheduleHTML}
+        <div class="info-container">
+            <div class="doctor-info">
+                <h2 class="doctor-name">${doctor.fullName || 'Unnamed Doctor'}</h2>
+                <p class="doctor-spec">${doctor.specialization || ''}</p>
+                <p class="doctor-hospital"><strong>Hospital:</strong> ${doctor.hospitalName || 'Not specified'}</p>
+                <p class="doctor-address"><strong>Address:</strong> ${doctor.hospitalAddress || 'Not provided'}</p>
+            </div>
         </div>
-    </div>
 
-    <p class="doctor-review">${doctor.bio || ''}</p>
+        <div class="schedule">
+            <p>Consultation Schedule:</p>
+            <div class="slots-times">${scheduleHTML}</div>
+        </div>
+
+        <p class="doctor-review">${doctor.bio || ''}</p>
+    </div>
 `;
 
 
-            // ✅ Create button separately so template literal works
+
+
             const button = document.createElement("button");
             button.className = "book-btn";
             button.textContent = "Book Appointment";
             button.addEventListener("click", () => {
-                window.location.href = `patientLogin.html`;
+                window.location.href = `patientLogin.html?doctorId=${doc.id}`;
             });
 
-            // Append button to card
             card.appendChild(button);
-
             container.appendChild(card);
-
         });
-
-    } catch (error) {
-        console.error("Error fetching doctors:", error);
-        container.innerHTML = `<p>Error loading doctors: ${error.message}</p>`;
     }
-}
 
-        
+    window.addEventListener("DOMContentLoaded", displayDoctors);
+    window.toggleDropdown = toggleDropdown;
+    window.showAvailableTimes = showAvailableTimes;
+</script>
 
-        window.addEventListener("DOMContentLoaded", displayDoctors);
+<script>
+    function toggleMenu() {
+        const menu = document.getElementById("hiddenMenu");
+        menu.classList.toggle("active");
+    }
 
-        // Make functions globally accessible
-        window.toggleDropdown = toggleDropdown;
-        window.showAvailableTimes = showAvailableTimes;
-    </script>
-    <script>
-        // === JS ===
-        function toggleDropdown() {
-            const dropdown = document.getElementById("dropdownContainer");
-            dropdown.classList.toggle("show");
+    document.addEventListener('click', function (event) {
+        const menu = document.getElementById('hiddenMenu');
+        const icon = document.querySelector('.menu-icon');
+        if (event.target !== menu && event.target !== icon && !menu.contains(event.target)) {
+            menu.classList.remove('active');
         }
+    });
+
+    window.toggleMenu = toggleMenu;
+</script>
 
 
-        function toggleMenu() {
-            var menu = document.getElementById("hiddenMenu");
-            menu.classList.toggle("active");
-        }
-
-        // Close menu when clicking outside
-        document.addEventListener('click', function (event) {
-            var menu = document.getElementById('hiddenMenu');
-            if (event.target !== menu && event.target !== document.querySelector('.menu-icon') && !menu.contains(event.target)) {
-                menu.classList.remove('active');
-            }
-        });
-    </script>
 </body>
 
 </html>
