@@ -172,19 +172,23 @@ const calendarEl = document.getElementById('calendar');
 let calendar; // global so we can manipulate it later
 
 function renderFullCalendar(appointmentDocs) {
+  const now = new Date();
+
   const allAppointments = appointmentDocs.map((doc) => {
     const data = doc.data();
     const dateObj = parseAppointmentDateTime(data.appointmentDateTime);
 
     if (!dateObj) return null; // skip invalid entries
 
+    const isPast = dateObj < now;
+
     return {
       id: doc.id,
-      title: ' ', // invisible title
+      title: ' ',
       start: toLocalDateString(dateObj),
       allDay: true,
-      display: 'background', // Highlight background only
-      backgroundColor: '#32CD32', // LimeGreen for full-day highlight
+      display: 'background', // keeps the background highlight
+      backgroundColor: isPast ? 'transparent' : '#32CD32', // remove color if past
       extendedProps: {
         fullName: data.fullName,
         reason: data.reason,
