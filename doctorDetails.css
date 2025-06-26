@@ -5,7 +5,7 @@
     }
 
     header {
-      background-image: url("header-green.png");
+      background-image: url("header.green.png");
       background-size: cover;
       background-repeat: no-repeat;
       background-color: #31E180;
@@ -98,7 +98,7 @@
       background: white;
       border-radius: 10px;
       padding: 40px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
     }
 
     .top-section {
@@ -210,96 +210,101 @@
       .form-grid {
         grid-template-columns: 1fr;
       }
-  }
+    }
 
-  /* Add this CSS somewhere in your stylesheet or in a <style> tag */
+    /* Add this CSS somewhere in your stylesheet or in a <style> tag */
 
-.schedule-add-btn {
-  background-color: #4CAF50; /* green */
-  color: white;
-  border: none;
-  padding: 10px 18px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-weight: 600;
-  font-size: 16px;
-  transition: background-color 0.3s ease;
-  margin-top: 12px;
-}
+    .schedule-add-btn {
+      background-color: #4CAF50;
+      /* green */
+      color: white;
+      border: none;
+      padding: 10px 18px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 16px;
+      transition: background-color 0.3s ease;
+      margin-top: 12px;
+    }
 
-.schedule-add-btn:hover {
-  background-color: #45a049; /* darker green */
-}
+    .schedule-add-btn:hover {
+      background-color: #45a049;
+      /* darker green */
+    }
 
-#doctorScheduleEdit {
-  
-  padding: 15px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  max-width: 600px;
-  background-color: #fafafa;
-  font-family: Arial, sans-serif;
-}
+    #doctorScheduleEdit {
 
-#doctorScheduleEdit h3 {
-  color: #333;
-  font-weight: 600;
-  font-size: 1.2rem;
-  margin-bottom: 15px;
-  border-bottom: 2px solid #4caf50; /* green underline */
-  padding-bottom: 6px;
-}
+      padding: 15px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      max-width: 600px;
+      background-color: #fafafa;
+      font-family: Arial, sans-serif;
+    }
 
-.schedule-input {
-  background-color: #fff;
-  border: 1px solid #ddd;
-  padding: 10px 12px;
-  border-radius: 5px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 12px;
-}
+    #doctorScheduleEdit h3 {
+      color: #333;
+      font-weight: 600;
+      font-size: 1.2rem;
+      margin-bottom: 15px;
+      border-bottom: 2px solid #4caf50;
+      /* green underline */
+      padding-bottom: 6px;
+    }
 
-.schedule-input select {
-  padding: 5px 8px;
-  border-radius: 4px;
-  border: 1px solid #ccc;
-  font-size: 0.95rem;
-}
+    .schedule-input {
+      background-color: #fff;
+      border: 1px solid #ddd;
+      padding: 10px 12px;
+      border-radius: 5px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
 
-.schedule-input button {
-  background-color: #e74c3c;
-  border: none;
-  color: white;
-  cursor: pointer;
-  padding: 5px 9px;
-  border-radius: 4px;
-  font-size: 1.1rem;
-}
+    .schedule-input select {
+      padding: 5px 8px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+      font-size: 0.95rem;
+    }
 
-.schedule-add-btn {
-  background-color: #4caf50;
-  color: white;
-  border: none;
-  padding: 10px 14px;
-  font-size: 1rem;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: background-color 0.2s ease-in-out;
-}
+    .schedule-input button {
+      background-color: #e74c3c;
+      border: none;
+      color: white;
+      cursor: pointer;
+      padding: 5px 9px;
+      border-radius: 4px;
+      font-size: 1.1rem;
+    }
 
-.schedule-add-btn:hover:not(:disabled) {
-  background-color: #45a049;
-}
+    .schedule-add-btn {
+      background-color: #4caf50;
+      color: white;
+      border: none;
+      padding: 10px 14px;
+      font-size: 1rem;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.2s ease-in-out;
+    }
 
-.schedule-add-btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
+    .schedule-add-btn:hover:not(:disabled) {
+      background-color: #45a049;
+    }
 
-#doctorScheduleEdit.placeholder {
-  color: #778088; /* same as most placeholder colors (grayish) */
-  font-style: small ;
-  font-size: .85rem; /* match your form font size */
-}
+    .schedule-add-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    #doctorScheduleEdit.placeholder {
+      color: #778088;
+      /* same as most placeholder colors (grayish) */
+      font-style: small;
+      font-size: .85rem;
+      /* match your form font size */
+    }

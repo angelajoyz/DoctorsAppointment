@@ -2,162 +2,846 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Patient Details</title>
-    <link rel="stylesheet" href="patient-details.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Patient Details</title>
+  <link rel="stylesheet" href="patient-details.css">
 
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
-    <script type="text/javascript">
-        (function () {
-            emailjs.init("uxowx8uL9zxSSj8V1");
-        })();
-    </script>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+  <script type="text/javascript">
+    (function () {
+      emailjs.init("uxowx8uL9zxSSj8V1");
+    })();
+  </script>
+
+  <style>
+    /* Updated styles for vital signs section */
+    .vital-signs-section {
+      background: white;
+      border-radius: 12px;
+      padding: 30px;
+      margin: 20px 0;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .vital-signs-section h2 {
+      color: #4CAF50;
+      margin-bottom: 30px;
+      padding-bottom: 15px;
+      border-bottom: 3px solid #4CAF50;
+      font-size: 24px;
+      font-weight: 600;
+    }
+
+    .vital-signs-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+
+    .vital-sign-item {
+      background: #f8f9fa;
+      padding: 25px;
+      border-radius: 12px;
+      border: 1px solid #e9ecef;
+      transition: all 0.3s ease;
+    }
+
+    .vital-sign-item:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .vital-sign-label {
+      font-weight: 600;
+      color: #6c757d;
+      margin-bottom: 15px;
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .vital-sign-input {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .vital-sign-input input {
+      flex: 1;
+      padding: 15px 20px;
+      border: 2px solid #e9ecef;
+      border-radius: 8px;
+      font-size: 28px;
+      font-weight: 700;
+      text-align: center;
+      background: white;
+      color: #333;
+      transition: border-color 0.3s ease;
+    }
+
+    .vital-sign-input input:focus {
+      outline: none;
+      border-color: #4CAF50;
+    }
+
+    .vital-sign-input input::placeholder {
+      color: #adb5bd;
+      font-weight: 400;
+    }
+
+    .vital-sign-unit {
+      color: #6c757d;
+      font-size: 16px;
+      font-weight: 500;
+      min-width: 50px;
+      text-align: right;
+    }
+
+    /* FIXED: Better button container styling */
+    .completion-section {
+      background: #f8f9fa;
+      border-radius: 12px;
+      padding: 25px;
+      margin-top: 25px;
+      border: 1px solid #e9ecef;
+      text-align: center;
+    }
+
+    .completion-info {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    .appointment-status {
+      padding: 12px 20px;
+      border-radius: 25px;
+      font-weight: 600;
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      min-width: 200px;
+      text-align: center;
+    }
+
+    .status-ready {
+      background: #d4edda;
+      color: #155724;
+      border: 2px solid #c3e6cb;
+    }
+
+    .status-waiting {
+      background: #fff3cd;
+      color: #856404;
+      border: 2px solid #ffeaa7;
+    }
+
+    .status-error {
+      background: #f8d7da;
+      color: #721c24;
+      border: 2px solid #f5c6cb;
+    }
+
+    .status-no-show {
+      background: #f0ad4e;
+      color: #fff;
+      border: 2px solid #d58512;
+    }
+
+    /* Button styles */
+    .action-buttons {
+      display: flex;
+      gap: 15px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .completed-btn,
+    .no-show-btn {
+      border: none;
+      padding: 16px 40px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      transition: all 0.3s ease;
+      min-width: 180px;
+    }
+
+    .completed-btn {
+      background: #28a745;
+      color: white;
+      box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+    }
+
+    .completed-btn:hover:not(:disabled) {
+      background: #218838;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
+    }
+
+    .completed-btn:disabled {
+      background: #6c757d;
+      cursor: not-allowed;
+      box-shadow: none;
+      transform: none;
+      opacity: 0.7;
+    }
+
+    .no-show-btn {
+      background: #dc3545;
+      color: white;
+      box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+    }
+
+    .no-show-btn:hover:not(:disabled) {
+      background: #c82333;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(220, 53, 69, 0.4);
+    }
+
+    .no-show-btn:disabled {
+      background: #6c757d;
+      cursor: not-allowed;
+      box-shadow: none;
+      transform: none;
+      opacity: 0.7;
+    }
+
+    .completed-btn:active:not(:disabled),
+    .no-show-btn:active:not(:disabled) {
+      transform: translateY(0);
+    }
+
+    /* Button container and other styles */
+    .button-container {
+      margin-top: 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    #back-button {
+      background: #007bff;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background-color 0.3s ease;
+    }
+
+    #back-button:hover {
+      background: #0056b3;
+    }
+
+    /* Basic styling for other sections */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    header h1 {
+      color: #333;
+      text-align: center;
+      margin-bottom: 30px;
+      font-size: 32px;
+    }
+
+    section {
+      background: white;
+      margin: 20px 0;
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    section h2 {
+      color: #4CAF50;
+      border-bottom: 3px solid #4CAF50;
+      padding-bottom: 10px;
+      margin-bottom: 20px;
+      font-size: 24px;
+    }
+
+    section div {
+      margin: 10px 0;
+      font-size: 16px;
+      line-height: 1.6;
+    }
+
+    section div strong {
+      color: #333;
+      font-weight: 600;
+    }
+
+    #paymentProofImg {
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Responsive design */
+    @media (max-width: 768px) {
+      .vital-signs-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .vital-sign-input input {
+        font-size: 24px;
+        padding: 12px 15px;
+      }
+
+      .vital-signs-section {
+        padding: 20px;
+      }
+
+      .action-buttons {
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .completed-btn,
+      .no-show-btn {
+        font-size: 14px;
+        padding: 12px 20px;
+        min-width: 150px;
+      }
+
+      .container {
+        padding: 10px;
+      }
+
+      .completion-section {
+        padding: 20px;
+      }
+
+      .completion-info {
+        gap: 10px;
+      }
+
+      .appointment-status {
+        font-size: 12px;
+        padding: 10px 15px;
+        min-width: 150px;
+      }
+    }
+
+    /* Custom Notification Styles */
+    .custom-notification {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 15px 30px;
+      border-radius: 8px;
+      color: white;
+      font-weight: bold;
+      font-size: 18px;
+      z-index: 1000;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+      opacity: 0;
+      transition: opacity 0.5s ease-in-out, top 0.5s ease-in-out;
+    }
+
+    .custom-notification.show {
+      opacity: 1;
+      top: 30px;
+    }
+
+    .custom-notification.success {
+      background-color: #4CAF50;
+      /* Green */
+    }
+
+    .custom-notification.error {
+      background-color: #dc3545;
+      /* Red */
+    }
+  </style>
 
 </head>
 
 <body>
-    <div class="container">
-        <header>
-            <h1>Patient Details</h1>
-        </header>
+  <div class="container">
+    <header>
+      <h1>Patient Details</h1>
+    </header>
 
-        <section id="patient-info">
-            <h2>Patient Information</h2>
-            <div><strong>Name:</strong> <span id="name"></span></div>
-            <div><strong>Age:</strong> <span id="age"></span></div>
-            <div><strong>Gender:</strong> <span id="gender"></span></div>
-            <div><strong>Contact:</strong> <span id="contact"></span></div>
-            <div><strong>Email:</strong> <span id="email"></span></div>
-            <div><strong>Address:</strong> <span id="address"></span></div>
-        </section>
+    <!-- Custom Notification Element -->
+    <div id="customNotification" class="custom-notification"></div>
 
-        <section id="medical-history">
-            <h2>Medical History</h2>
-            <div><strong>Allergies:</strong> <span id="allergies"></span></div>
-            <div><strong>Medications:</strong> <span id="medications"></span></div>
-            <div><strong>Conditions:</strong> <span id="conditions"></span></div>
-            <div><strong>Family History:</strong> <span id="familyHistory"></span></div>
-        </section>
+    <section id="patient-info">
+      <h2>Patient Information</h2>
+      <div><strong>Name:</strong> <span id="name"></span></div>
+      <div><strong>Age:</strong> <span id="age"></span></div>
+      <div><strong>Gender:</strong> <span id="gender"></span></div>
+      <div><strong>Contact:</strong> <span id="contact"></span></div>
+      <div><strong>Email:</strong> <span id="email"></span></div>
+      <div><strong>Address:</strong> <span id="address"></span></div>
+    </section>
 
-        <section id="appointment-details">
-            <h2>Appointment Details</h2>
-            <div><strong>Date & Time:</strong> <span id="dateTime"></span></div>
-            <div><strong>Reason:</strong> <span id="reason"></span></div>
-            <div><strong>Fee:</strong> <span id="fee"></span></div>
-            <div><strong>Payment Method:</strong> <span id="paymentMethod"></span></div>
-            <div><strong>Payment Ref:</strong> <span id="paymentRef"></span></div>
-            <div>
-                <strong>Proof of Payment:</strong><br>
-                <img id="paymentProofImg" src="" alt="Proof of Payment"
-                    style="max-width: 100%; max-height: 300px; display: none; border: 1px solid #ccc; margin-top: 8px;">
-            </div>
-            <div><strong>Payment Confirmed:</strong> <span id="paymentConfirmed"></span></div>
-            <div><strong>Non-refundable Acknowledged:</strong> <span id="noRefundAccepted"></span></div>
-            <div id="appointment-status">
-                <strong>Status:</strong> <span id="status">Pending</span>
-            </div>
-        </section>
+    <section id="medical-history">
+      <h2>Medical History</h2>
+      <div><strong>Allergies:</strong> <span id="allergies"></span></div>
+      <div><strong>Medications:</strong> <span id="medications"></span></div>
+      <div><strong>Conditions:</strong> <span id="conditions"></span></div>
+      <div><strong>Family History:</strong> <span id="familyHistory"></span></div>
+    </section>
 
-        <!-- Button container for all buttons -->
-        <div class="button-container">
-            <!-- Back to Dashboard Button (left aligned) -->
-            <button id="back-button" onclick="location.href='doctorDashboard.html'">Back to Dashboard</button>
+    <section id="appointment-details">
+      <h2>Appointment Details</h2>
+      <div><strong>Date & Time:</strong> <span id="dateTime"></span></div>
+      <div><strong>Reason:</strong> <span id="reason"></span></div>
+      <div><strong>Fee:</strong> <span id="fee"></span></div>
+      <div><strong>Payment Method:</strong> <span id="paymentMethod"></span></div>
+      <div><strong>Payment Ref:</strong> <span id="paymentRef"></span></div>
+      <div>
+        <strong>Proof of Payment:</strong><br>
+        <img id="paymentProofImg" src="" alt="Proof of Payment"
+          style="max-width: 100%; max-height: 300px; display: none; border: 1px solid #ccc; margin-top: 8px;">
+      </div>
+      <div><strong>Payment Confirmed:</strong> <span id="paymentConfirmed"></span></div>
+      <div><strong>Non-refundable Acknowledged:</strong> <span id="noRefundAccepted"></span></div>
+      <div id="appointment-status">
+        <strong>Status:</strong> <span id="status">Pending</span>
+      </div>
+    </section>
 
-            <!-- Approve/Deny Buttons (right aligned)
-            <div>
-                <button id="approve-button" onclick="updateStatus('Approved')">Approve</button>
-                <button id="deny-button" onclick="updateStatus('Denied')">Deny</button>
-            </div> -->
+    <!-- FIXED: Vital Signs & Measurements Section -->
+    <section class="vital-signs-section">
+      <h2>Vital Signs & Measurements</h2>
+
+      <!-- First row: Blood Pressure and Heart Rate -->
+      <div class="vital-signs-grid">
+        <div class="vital-sign-item">
+          <div class="vital-sign-label">Blood Pressure</div>
+          <div class="vital-sign-input">
+            <input type="text" id="bloodPressure" placeholder="120/80">
+            <span class="vital-sign-unit">mmHg</span>
+          </div>
         </div>
 
+        <div class="vital-sign-item">
+          <div class="vital-sign-label">Heart Rate</div>
+          <div class="vital-sign-input">
+            <input type="number" id="heartRate" placeholder="72">
+            <span class="vital-sign-unit">bpm</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Second row: Temperature and Weight -->
+      <div class="vital-signs-grid">
+        <div class="vital-sign-item">
+          <div class="vital-sign-label">Temperature</div>
+          <div class="vital-sign-input">
+            <input type="number" id="temperature" placeholder="36.5" step="0.1">
+            <span class="vital-sign-unit">°C</span>
+          </div>
+        </div>
+
+        <div class="vital-sign-item">
+          <div class="vital-sign-label">Weight</div>
+          <div class="vital-sign-input">
+            <input type="number" id="weight" placeholder="70" step="0.1">
+            <span class="vital-sign-unit">kg</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- FIXED: Better completion section layout with both buttons -->
+      <div class="completion-section">
+        <div class="completion-info">
+          <div id="appointmentTimeInfo" class="appointment-status status-waiting">
+            Loading appointment status...
+          </div>
+        </div>
+        <div class="action-buttons">
+          <button class="completed-btn" id="completedBtn" onclick="markCompleted()" disabled>
+            Mark as Completed
+          </button>
+          <button class="no-show-btn" id="noShowBtn" onclick="markNoShow()" disabled>
+            Mark as No Show
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Button container for all buttons -->
+    <div class="button-container">
+      <!-- Back to Dashboard Button (left aligned) -->
+      <button id="back-button" onclick="location.href='doctorDashboard.html'">Back to Dashboard</button>
     </div>
 
-    <script type="module">
+  </div>
 
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
-import { getFirestore, doc, getDoc, setDoc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
+  <script type="module">
 
-// Firebase config for the new project
-const firebaseConfig = {
-  apiKey: "AIzaSyDwCayQZ0JO6DjzQvAT6ToT33I4QXCS_NY",
-  authDomain: "login-sample-c3af0.firebaseapp.com",
-  projectId: "login-sample-c3af0",
-  storageBucket: "login-sample-c3af0.firebasestorage.app",
-  messagingSenderId: "372688128666",
-  appId: "1:372688128666:web:bbc529c73c4665f95f6d23"
-};
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
+    import { getFirestore, doc, getDoc, setDoc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+    // Firebase config for the new project
+    const firebaseConfig = {
+      apiKey: "AIzaSyDwCayQZ0JO6DjzQvAT6ToT33I4QXCS_NY",
+      authDomain: "login-sample-c3af0.firebaseapp.com",
+      projectId: "login-sample-c3af0",
+      storageBucket: "login-sample-c3af0.firebasestorage.app",
+      messagingSenderId: "372688128666",
+      appId: "1:372688128666:web:bbc529c73c4665f95f6d23"
+    };
 
-document.addEventListener("DOMContentLoaded", async () => {
-  const params = new URLSearchParams(window.location.search);
-  const patientId = params.get("id");
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
 
-  if (!patientId) {
-    alert("No patient ID provided.");
-    return;
-  }
+    // Function to show custom notification
+    function showNotification(message, type) {
+      const notification = document.getElementById("customNotification");
+      notification.textContent = message;
+      notification.className = `custom-notification show ${type}`; // Add type class for styling
 
-  const patientDocRef = doc(db, "approved", patientId);
-
-  try {
-    const snapshot = await getDoc(patientDocRef);
-    if (!snapshot.exists()) {
-      alert("Patient not found.");
-      return;
+      setTimeout(() => {
+        notification.classList.remove("show");
+      }, 3000); // Hide after 3 seconds
     }
 
-    const data = snapshot.data();
+    // Function to validate vital signs input
+    function validateVitalSigns() {
+      const bloodPressure = document.getElementById("bloodPressure").value;
+      const heartRate = document.getElementById("heartRate").value;
+      const temperature = document.getElementById("temperature").value;
+      const weight = document.getElementById("weight").value;
 
-    document.getElementById("name").textContent = data.fullName || "N/A";
-    document.getElementById("age").textContent = data.age || "N/A"; // Corrected from 'address'
-    document.getElementById("gender").textContent = data.gender || "N/A";
-    document.getElementById("contact").textContent = data.phone || "N/A";
-    document.getElementById("email").textContent = data.email || "N/A";
-    document.getElementById("address").textContent = data.address || "N/A";
-    document.getElementById("allergies").textContent = data.allergies || "N/A";
-    document.getElementById("medications").textContent = data.medications || "N/A";
-    document.getElementById("conditions").textContent = data.conditions || "N/A";
-    document.getElementById("familyHistory").textContent = data.familyHistory || "N/A";
-    document.getElementById("dateTime").textContent = data.appointmentDateTime || "N/A";
-    document.getElementById("reason").textContent = data.reason || "N/A";
-    document.getElementById("fee").textContent = data.feeAmount || "N/A";
-    document.getElementById("paymentMethod").textContent = data.paymentMethod || "N/A";
-    document.getElementById("paymentRef").textContent = data.paymentRef || "N/A";
-    document.getElementById("paymentConfirmed").textContent = data.paymentConfirmed ? "Confirmed" : "Not Confirmed";
-    document.getElementById("noRefundAccepted").textContent = data.noRefundAccepted ? "Acknowledged" : "Not Acknowledged";
-    document.getElementById("status").textContent = data.status || "Pending";
+      // Check if all vital signs fields are non-empty
+      return bloodPressure.trim() !== "" &&
+        heartRate.trim() !== "" &&
+        temperature.trim() !== "" &&
+        weight.trim() !== "";
+    }
 
-    window.patientId = patientId;
+    // Function to update the disabled state of the "Mark as Completed" button
+    function updateCompletedButtonState() {
+      const completedBtn = document.getElementById("completedBtn");
+      const vitalSignsFilled = validateVitalSigns();
+      const appointmentTimeArrived = window.appointmentDateTime && new Date() >= window.appointmentDateTime;
 
-    // Show Proof of Payment image
-    if (data.paymentProof) {
-      const img = document.getElementById("paymentProofImg");
+      // Only enable if vital signs are filled AND appointment time has arrived
+      completedBtn.disabled = !(vitalSignsFilled && appointmentTimeArrived);
+    }
 
-      // If the string doesn't already start with "data:image/", prepend the JPEG prefix
-      const isBase64 = data.paymentProof.startsWith("data:image/");
-      img.src = isBase64 ? data.paymentProof : `data:image/jpeg;base64,${data.paymentProof}`;
+    // Add event listeners to vital signs inputs to trigger validation
+    document.addEventListener("DOMContentLoaded", () => {
+      const vitalSignInputs = document.querySelectorAll(".vital-sign-input input");
+      vitalSignInputs.forEach(input => {
+        input.addEventListener("input", updateCompletedButtonState);
+      });
+    });
 
-      img.style.display = "block";
 
-      img.onerror = () => {
-        img.style.display = "none";
-        console.warn("Payment proof image failed to load.");
+    // Make markCompleted function global
+    window.markCompleted = async function () {
+      const params = new URLSearchParams(window.location.search);
+      const patientId = params.get("id");
+      if (!patientId) {
+        showNotification("No patient ID found.", "error");
+        return;
+      }
+      // Double check if appointment time has arrived
+      const appointmentDateTime = window.appointmentDateTime;
+      if (appointmentDateTime) {
+        const appointmentTime = new Date(appointmentDateTime);
+        const now = new Date();
+        if (now < appointmentTime) {
+          showNotification("Cannot mark as completed. Appointment time has not arrived yet.", "error");
+          return;
+        }
+      }
+
+      // Validate vital signs before proceeding
+      if (!validateVitalSigns()) {
+        showNotification("Please fill in all vital signs before marking as completed.", "error");
+        return;
+      }
+      // Collect vital signs data before marking as completed
+      const vitalSigns = {
+        bloodPressure: document.getElementById("bloodPressure").value,
+        heartRate: document.getElementById("heartRate").value,
+        temperature: document.getElementById("temperature").value,
+        weight: document.getElementById("weight").value,
+        lastUpdated: new Date().toISOString()
       };
+      try {
+        const patientDocRef = doc(db, "approved", patientId);
+        // We will now update the existing document in 'approved' collection
+        await updateDoc(patientDocRef, {
+          status: "Completed",
+          completedAt: new Date().toISOString(),
+          vitalSigns: vitalSigns // Save vital signs when marking as completed
+        });
+
+        showNotification("Appointment marked as completed and vital signs saved!", "success");
+        document.getElementById("status").textContent = "Completed";
+        // Update the completion section to show completed status
+        const timeInfo = document.getElementById("appointmentTimeInfo");
+        const actionButtons = document.querySelector(".action-buttons");
+        timeInfo.textContent = "Appointment Completed";
+        timeInfo.className = "appointment-status status-ready";
+        actionButtons.style.display = "none"; // Hide the action buttons
+      } catch (error) {
+        console.error("Error updating status:", error);
+        showNotification("Failed to update status.", "error");
+      }
+    };
+
+    // The markNoShow function remains unchanged as it already updates the status without deleting.
+    window.markNoShow = async function () {
+      const params = new URLSearchParams(window.location.search);
+      const patientId = params.get("id");
+      if (!patientId) {
+        showNotification("No patient ID found.", "error");
+        return;
+      }
+      try {
+        const patientDocRef = doc(db, "approved", patientId);
+        await updateDoc(patientDocRef, {
+          status: "No Show",
+          noShowAt: new Date().toISOString()
+        });
+        showNotification("Appointment marked as No Show!", "error"); // Red notification for No Show
+        document.getElementById("status").textContent = "No Show";
+        // Update the completion section to show no show status
+        const timeInfo = document.getElementById("appointmentTimeInfo");
+        const actionButtons = document.querySelector(".action-buttons");
+        timeInfo.textContent = "Patient Did Not Show";
+        timeInfo.className = "appointment-status status-no-show";
+        actionButtons.style.display = "none"; // Hide the action buttons
+
+      } catch (error) {
+        console.error("Error updating status:", error);
+        showNotification("Failed to update status.", "error");
+      }
+    };
+
+    // FIXED: Better time calculation and display function
+    function updateActionButtonsState(appointmentDateTime, currentStatus) {
+      const completedBtn = document.getElementById("completedBtn");
+      const noShowBtn = document.getElementById("noShowBtn");
+      const timeInfo = document.getElementById("appointmentTimeInfo");
+      const actionButtons = document.querySelector(".action-buttons"); // Get action buttons container
+
+      // If appointment is already completed or no show, hide buttons
+      if (currentStatus === "Completed") {
+        timeInfo.textContent = "Appointment Completed";
+        timeInfo.className = "appointment-status status-ready";
+        actionButtons.style.display = "none"; // Hide buttons
+        return;
+      } else if (currentStatus === "No Show") {
+        timeInfo.textContent = "Patient Did Not Show";
+        timeInfo.className = "appointment-status status-no-show";
+        actionButtons.style.display = "none"; // Hide buttons
+        return;
+      }
+
+      if (!appointmentDateTime || appointmentDateTime === "N/A") {
+        completedBtn.disabled = true;
+        noShowBtn.disabled = true;
+        timeInfo.textContent = "⚠️ No appointment time set";
+        timeInfo.className = "appointment-status status-error";
+        actionButtons.style.display = "flex"; // Ensure buttons are visible if status is not completed/no show
+        return;
+      }
+
+      // --- Start of fix for parsing appointmentDateTime ---
+      let appointmentTime;
+      try {
+        // Extract only the start date and time part (e.g., "2025-06-25 07:30 PM")
+        const dateTimePart = appointmentDateTime.split(' - ')[0];
+
+        // Custom parsing for "YYYY-MM-DD HH:mm AM/PM" format
+        const [datePart, timePart, ampm] = dateTimePart.split(' ');
+        const [year, month, day] = datePart.split('-');
+        let [hours, minutes] = timePart.split(':');
+
+        hours = parseInt(hours);
+        minutes = parseInt(minutes);
+
+        if (ampm === 'PM' && hours < 12) {
+          hours += 12;
+        } else if (ampm === 'AM' && hours === 12) { // Midnight (12 AM) is 00 hours
+          hours = 0;
+        }
+
+        // Create a Date object using components
+        appointmentTime = new Date(year, month - 1, day, hours, minutes);
+
+      } catch (e) {
+        console.error("Error parsing appointment date time:", e);
+        completedBtn.disabled = true;
+        noShowBtn.disabled = true;
+        timeInfo.textContent = "⚠️ Invalid appointment time format";
+        timeInfo.className = "appointment-status status-error";
+        actionButtons.style.display = "flex"; // Ensure buttons are visible
+        return;
+      }
+      // --- End of fix for parsing appointmentDateTime ---
+
+      // Check if the date is valid after parsing
+      if (isNaN(appointmentTime.getTime())) {
+        completedBtn.disabled = true;
+        noShowBtn.disabled = true;
+        timeInfo.textContent = "⚠️ Invalid appointment time";
+        timeInfo.className = "appointment-status status-error";
+        actionButtons.style.display = "flex"; // Ensure buttons are visible
+        return;
+      }
+
+      const now = new Date();
+
+      // Store appointment datetime globally for the functions (using the parsed Date object)
+      window.appointmentDateTime = appointmentTime; // Store the parsed Date object
+
+      if (now >= appointmentTime) {
+        // Appointment time has arrived - enable no show button
+        noShowBtn.disabled = false;
+        timeInfo.textContent = "✅ Ready to complete or mark no show";
+        timeInfo.className = "appointment-status status-ready";
+        actionButtons.style.display = "flex"; // Ensure buttons are visible
+
+        // Also update the completed button state based on vital signs
+        updateCompletedButtonState();
+
+      } else {
+        // Appointment time hasn't arrived yet
+        completedBtn.disabled = true;
+
+        // Check if it's past 15 minutes of appointment time for no show
+        const fifteenMinutesAfter = new Date(appointmentTime.getTime() + (15 * 60 * 1000));
+        noShowBtn.disabled = now < fifteenMinutesAfter;
+
+        const timeUntil = appointmentTime.getTime() - now.getTime();
+
+        // Calculate time components
+        const daysUntil = Math.floor(timeUntil / (1000 * 60 * 60 * 24));
+        const hoursUntil = Math.floor((timeUntil % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutesUntil = Math.floor((timeUntil % (1000 * 60 * 60)) / (1000 * 60));
+
+        let timeUntilText = "";
+        if (daysUntil > 0) {
+          timeUntilText = `${daysUntil} day${daysUntil > 1 ? 's' : ''}, ${hoursUntil} hour${hoursUntil > 1 ? 's' : ''} remaining`;
+        } else if (hoursUntil > 0) {
+          timeUntilText = `${hoursUntil} hour${hoursUntil > 1 ? 's' : ''}, ${minutesUntil} minute${minutesUntil > 1 ? 's' : ''} remaining`;
+        } else if (minutesUntil > 0) {
+          timeUntilText = `${minutesUntil} minute${minutesUntil > 1 ? 's' : ''} remaining`;
+        } else {
+          timeUntilText = "Less than a minute remaining";
+        }
+
+        timeInfo.textContent = `⏰ ${timeUntilText}`;
+        timeInfo.className = "appointment-status status-waiting";
+        actionButtons.style.display = "flex"; // Ensure buttons are visible
+      }
     }
-  } catch (error) {
-    console.error("Error fetching patient data:", error);
-    alert("Failed to fetch patient data.");
-  }
 
 
-});
+    // The DOMContentLoaded listener also needs a slight adjustment to only check 'approved'
+    // since 'completed' collection is no longer used for completed appointments.
+    document.addEventListener("DOMContentLoaded", async () => {
+      const params = new URLSearchParams(window.location.search);
+      const patientId = params.get("id");
+      if (!patientId) {
+        showNotification("No patient ID provided.", "error");
+        return;
+      }
+      const patientDocRef = doc(db, "approved", patientId);
+      try {
+        const snapshot = await getDoc(patientDocRef);
+        if (!snapshot.exists()) {
+          // If not found in 'approved', it means it was never approved or was deleted.
+          // In the new logic, completed appointments stay in 'approved'.
+          showNotification("Patient not found or appointment no longer active.", "error");
+          return;
+        }
 
+        const data = snapshot.data();
+        displayPatientData(data);
+        // Check if appointment is already completed or no show
+        if (data.status === "Completed") {
+          const timeInfo = document.getElementById("appointmentTimeInfo");
+          const actionButtons = document.querySelector(".action-buttons");
+          timeInfo.textContent = "Appointment Completed";
+          timeInfo.className = "appointment-status status-ready";
+          actionButtons.style.display = "none";
+        } else if (data.status === "No Show") {
+          const timeInfo = document.getElementById("appointmentTimeInfo");
+          const actionButtons = document.querySelector(".action-buttons");
+          timeInfo.textContent = "Patient Did Not Show";
+          timeInfo.className = "appointment-status status-no-show";
+          actionButtons.style.display = "none";
+        } else {
+          // Check and update the action buttons state based on appointment time
+          updateActionButtonsState(data.appointmentDateTime, data.status);
+          // Update button state every minute
+          setInterval(() => {
+            updateActionButtonsState(data.appointmentDateTime, data.status);
+          }, 60000);
+        }
+        window.patientId = patientId;
+        // Show Proof of Payment image
+        if (data.paymentProof) {
+          const img = document.getElementById("paymentProofImg");
+          const isBase64 = data.paymentProof.startsWith("data:image/");
+          img.src = isBase64 ? data.paymentProof : `data:image/jpeg;base64,${data.paymentProof}`;
+          img.style.display = "block";
+          img.onerror = () => {
+            img.style.display = "none";
+            console.warn("Payment proof image failed to load.");
+          };
+        }
+      } catch (error) {
+        console.error("Error fetching patient data:", error);
+        showNotification("Failed to fetch patient data.", "error");
+      }
+    });
 
-    </script>
+    function displayPatientData(data) {
+      document.getElementById("name").textContent = data.fullName || "N/A";
+      document.getElementById("age").textContent = data.age || "N/A";
+      document.getElementById("gender").textContent = data.gender || "N/A";
+      document.getElementById("contact").textContent = data.phone || "N/A";
+      document.getElementById("email").textContent = data.email || "N/A";
+      document.getElementById("address").textContent = data.address || "N/A";
+      document.getElementById("allergies").textContent = data.allergies || "N/A";
+      document.getElementById("medications").textContent = data.medications || "N/A";
+      document.getElementById("conditions").textContent = data.conditions || "N/A";
+      document.getElementById("familyHistory").textContent = data.familyHistory || "N/A";
+      document.getElementById("dateTime").textContent = data.appointmentDateTime || "N/A";
+      document.getElementById("reason").textContent = data.reason || "N/A";
+      document.getElementById("fee").textContent = data.feeAmount || "N/A";
+      document.getElementById("paymentMethod").textContent = data.paymentMethod || "N/A";
+      document.getElementById("paymentRef").textContent = data.paymentRef || "N/A";
+      document.getElementById("paymentConfirmed").textContent = data.paymentConfirmed ? "Confirmed" : "Not Confirmed";
+      document.getElementById("noRefundAccepted").textContent = data.noRefundAccepted ? "Acknowledged" : "Not Acknowledged";
+      document.getElementById("status").textContent = data.status || "Pending";
+
+      // Load existing vital signs if available
+      if (data.vitalSigns) {
+        document.getElementById("bloodPressure").value = data.vitalSigns.bloodPressure || "";
+        document.getElementById("heartRate").value = data.vitalSigns.heartRate || "";
+        document.getElementById("temperature").value = data.vitalSigns.temperature || "";
+        document.getElementById("weight").value = data.vitalSigns.weight || "";
+      }
+    }
+
+  </script>
 </body>
 
 </html>

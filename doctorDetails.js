@@ -1,21 +1,64 @@
-      const firebaseConfig = {
-      apiKey: "AIzaSyDwCayQZ0JO6DjzQvAT6ToT33I4QXCS_NY",
-      authDomain: "login-sample-c3af0.firebaseapp.com",
-      projectId: "login-sample-c3af0",
-      storageBucket: "login-sample-c3af0.appspot.com",
-      messagingSenderId: "372688128666",
-      appId: "1:372688128666:web:bbc529c73c4665f95f6d23"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const db = firebase.firestore();
-    const storage = firebase.storage();
-  
-  let isEditMode = false;
+const firebaseConfig = {
+  apiKey: "AIzaSyDwCayQZ0JO6DjzQvAT6ToT33I4QXCS_NY",
+  authDomain: "login-sample-c3af0.firebaseapp.com",
+  projectId: "login-sample-c3af0",
+  storageBucket: "login-sample-c3af0.appspot.com",
+  messagingSenderId: "372688128666",
+  appId: "1:372688128666:web:bbc529c73c4665f95f6d23"
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+const storage = firebase.storage();
 
-  function toggleMenu() {
-    document.getElementById("sidebarMenu").classList.toggle("active");
+let isEditMode = false;
+
+function toggleMenu() {
+  document.getElementById("sidebarMenu").classList.toggle("active");
+}
+
+// Function to display custom alerts (instead of default browser alerts)
+function showCustomAlert(message, isSuccess = false) {
+  let alertDiv = document.getElementById('custom-alert');
+  if (!alertDiv) {
+    alertDiv = document.createElement('div');
+    alertDiv.id = 'custom-alert';
+    // Add basic styling for the custom alert
+    alertDiv.style.cssText = `
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: #f44336; /* Red for errors */
+      color: white;
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+      z-index: 1000;
+      opacity: 0;
+      transition: opacity 0.5s ease-in-out;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      text-align: center;
+      min-width: 300px;
+    `;
+    document.body.appendChild(alertDiv);
   }
+
+  alertDiv.textContent = message;
+  alertDiv.style.backgroundColor = isSuccess ? "#4CAF50" : "#f44336"; // Green for success, Red for error
+  alertDiv.style.opacity = 1;
+
+  setTimeout(() => {
+    alertDiv.style.opacity = 0;
+    // Optional: remove the element after it fades out
+    setTimeout(() => {
+      if (alertDiv.parentNode) {
+        alertDiv.parentNode.removeChild(alertDiv);
+      }
+    }, 500);
+  }, 5000); // Alert disappears after 5 seconds
+}
+
 
 document.addEventListener('DOMContentLoaded', () => {
   // Image click
@@ -38,8 +81,10 @@ document.addEventListener('DOMContentLoaded', () => {
           profileImageURL: base64Image
         }).then(() => {
           console.log("Base64 image saved to Firestore");
+          showCustomAlert("Profile image updated successfully!", true); // Custom alert for success
         }).catch(err => {
           console.error("Error saving base64 image:", err);
+          showCustomAlert("Failed to update profile image. Please try again.", false); // Custom alert for error
         });
       }
     };
@@ -51,36 +96,37 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 
-  function enableEditing() {
-    document.querySelectorAll("input").forEach(input => {
-      if (input.id !== "email") input.disabled = false;
-    });
-    document.getElementById('fullName').disabled = false;
-    document.getElementById('username').disabled = false;
-    document.getElementById('phone').disabled = false;
-    document.getElementById('gender').disabled = false;
-    document.getElementById('specialization').disabled = false; // ✅ ADD THIS
-    document.getElementById("bio").disabled = false;
-    document.getElementById("imageUpload").disabled = false;
-    document.getElementById("editBtn").style.display = "none";
-    document.getElementById("saveBtn").style.display = "inline-block";
-    isEditMode = true;
+function enableEditing() {
+  document.querySelectorAll("input").forEach(input => {
+    if (input.id !== "email") input.disabled = false;
+  });
+  document.getElementById('fullName').disabled = false;
+  document.getElementById('username').disabled = false;
+  document.getElementById('phone').disabled = false;
+  document.getElementById('gender').disabled = false;
+  document.getElementById('specialization').disabled = false; // ✅ ADD THIS
+  document.getElementById("bio").disabled = false;
+  document.getElementById("imageUpload").disabled = false;
+  document.getElementById("editBtn").style.display = "none";
+  document.getElementById("saveBtn").style.display = "inline-block";
+  isEditMode = true;
 
-    const user = auth.currentUser;
-    if (user) {
+  const user = auth.currentUser;
+  if (user) {
     db.collection("doctors").doc(user.uid).get().then(doc => {
-        const data = doc.data();
-        const schedule = data.schedule && Array.isArray(data.schedule) ? data.schedule : [];
-        renderDoctorSchedule(schedule); // ✅ Always render the schedule section
+      const data = doc.data();
+      const schedule = data.schedule && Array.isArray(data.schedule) ? data.schedule : [];
+      renderDoctorSchedule(schedule); // ✅ Always render the schedule section
     });
-    }
-
-
   }
+}
 
 function saveProfile() {
   const user = auth.currentUser;
-  if (!user) return alert("No user logged in.");
+  if (!user) {
+    showCustomAlert("No user logged in. Please log in to save changes."); // Custom alert
+    return;
+  }
 
   const updatedData = {
     fullName: document.getElementById("fullName").value.trim(),
@@ -98,7 +144,7 @@ function saveProfile() {
       // 🔥 Call this to save the schedule too!
       await saveScheduleToFirestore();
 
-      alert("Profile and schedule updated!");
+      showCustomAlert("Profile and schedule updated successfully!", true); // Custom alert for success
 
       document.getElementById("fullNameDisplay").textContent = updatedData.fullName;
       document.getElementById("specializationDisplay").textContent = updatedData.specialization;
@@ -113,43 +159,43 @@ function saveProfile() {
       isEditMode = false;
     })
     .catch(error => {
-      alert("Error saving profile: " + error.message);
+      showCustomAlert("Error saving profile: " + error.message, false); // Custom alert for error
     });
 }
 
-  function loadProfile(uid) {
-    db.collection("doctors").doc(uid).get().then(doc => {
-      if (!doc.exists) return;
+function loadProfile(uid) {
+  db.collection("doctors").doc(uid).get().then(doc => {
+    if (!doc.exists) return;
 
-      const data = doc.data();
-      document.getElementById("fullName").value = data.fullName || "";
-      document.getElementById("username").value = data.username || "";
-      document.getElementById("phone").value = data.phone || "";
-      document.getElementById("gender").value = data.gender || "";
-      document.getElementById("specialization").value = data.specialization || "";
-      document.getElementById("bio").value = data.bio || "";
-      document.getElementById("email").textContent = data.email || "";
-      document.getElementById("fullNameDisplay").textContent = data.fullName || "No Name";
-      document.getElementById("specializationDisplay").textContent = data.specialization || "";
-      if (data.profileImageURL) {
-        document.getElementById("profileImage").src = data.profileImageURL;
-      } else if (data.email) {
-        const hash = md5(data.email.trim().toLowerCase());
-        document.getElementById("profileImage").src = `https://www.gravatar.com/avatar/${hash}?d=identicon`;
-      }
+    const data = doc.data();
+    document.getElementById("fullName").value = data.fullName || "";
+    document.getElementById("username").value = data.username || "";
+    document.getElementById("phone").value = data.phone || "";
+    document.getElementById("gender").value = data.gender || "";
+    document.getElementById("specialization").value = data.specialization || "";
+    document.getElementById("bio").value = data.bio || "";
+    document.getElementById("email").textContent = data.email || "";
+    document.getElementById("fullNameDisplay").textContent = data.fullName || "No Name";
+    document.getElementById("specializationDisplay").textContent = data.specialization || "";
+    if (data.profileImageURL) {
+      document.getElementById("profileImage").src = data.profileImageURL;
+    } else if (data.email) {
+      const hash = md5(data.email.trim().toLowerCase());
+      document.getElementById("profileImage").src = `https://www.gravatar.com/avatar/${hash}?d=identicon`;
+    }
     if (data.schedule && Array.isArray(data.schedule)) {
       renderDoctorSchedule(data.schedule);
-        }
-    });
-  }
-
-  auth.onAuthStateChanged(user => {
-    if (!user) {
-      window.location.href = "login.html";
-    } else {
-      loadProfile(user.uid);
     }
   });
+}
+
+auth.onAuthStateChanged(user => {
+  if (!user) {
+    window.location.href = "login.html";
+  } else {
+    loadProfile(user.uid);
+  }
+});
 
 function renderDoctorSchedule(schedule) {
   console.log("👉 Add Schedule button clicked!");
@@ -184,7 +230,10 @@ function renderDoctorSchedule(schedule) {
     function parseTime(timeStr) {
       const [time, period] = timeStr.split(' ');
       const [hour] = time.split(':');
-      return { hour: parseInt(hour), period };
+      return {
+        hour: parseInt(hour),
+        period
+      };
     }
 
     const start = parseTime(entry.startTime);
@@ -402,7 +451,10 @@ function addEmptyScheduleInput(container) {
 // Save function — collects all inputs and updates Firestore
 async function saveScheduleToFirestore() {
   const user = auth.currentUser;
-  if (!user) return alert('User not logged in');
+  if (!user) {
+    showCustomAlert('User not logged in. Please log in to update schedule.', false); // Custom alert
+    return;
+  }
   const doctorId = user.uid; // ← ito ang dinagdag
 
   const container = document.getElementById('doctorScheduleEdit');
@@ -422,28 +474,34 @@ async function saveScheduleToFirestore() {
       const startTime = `${startHour}:00 ${startPeriod}`;
       const endTime = `${endHour}:00 ${endPeriod}`;
 
-      newSchedule.push({ day, startTime, endTime });
+      newSchedule.push({
+        day,
+        startTime,
+        endTime
+      });
     }
   });
 
   // Optional: validate schedule (e.g. start < end, no overlaps)
 
   try {
-    await db.collection('doctors').doc(doctorId).update({ schedule: newSchedule });
+    await db.collection('doctors').doc(doctorId).update({
+      schedule: newSchedule
+    });
 
-    alert('Schedule updated successfully!');
+    showCustomAlert('Schedule updated successfully!', true); // Custom alert for success
 
     // After save, disable edit mode
     isEditMode = false;
 
     // Disable inputs and buttons again after save
-    renderDoctorSchedule(newSchedule);  // Rerender para ma-disable ang inputs at button
-    
+    renderDoctorSchedule(newSchedule); // Rerender para ma-disable ang inputs at button
+
     // Hide the save schedule button
 
 
   } catch (error) {
     console.error('Error updating schedule:', error);
-    alert('Failed to update schedule');
+    showCustomAlert('Failed to update schedule. Please try again.', false); // Custom alert for error
   }
 }

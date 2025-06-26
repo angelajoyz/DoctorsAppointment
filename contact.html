@@ -1,8 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Contact Us</title>
   <style>
     body {
@@ -105,7 +106,7 @@
       background: white;
       border-radius: 10px;
       padding: 40px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
     }
 
     .container h2 {
@@ -186,6 +187,7 @@
     }
   </style>
 </head>
+
 <body>
 
   <!-- Firebase -->
@@ -212,6 +214,7 @@
       <li><a href="patientDashboard.html">Home</a></li>
       <li><a href="patientProfile.html">Profile</a></li>
       <li><a href="appointmentHistory.html">Appointment History</a></li>
+      <li><a href="medicalHistory.html">Medical History</a></li>
       <li><a href="services.html">Services</a></li>
       <li><a href="about.html">About</a></li>
       <li><a href="contact.html">Contact</a></li>
@@ -243,26 +246,27 @@
       </div>
     </div>
 
-  <!-- Menu Script -->
-  <script>
-    function toggleMenu() {
-      document.getElementById("sidebarMenu").classList.toggle("active");
-    }
-
-    function submitForm(event) {
-      event.preventDefault();
-      const name = document.getElementById("name").value.trim();
-      const email = document.getElementById("email").value.trim();
-      const message = document.getElementById("message").value.trim();
-
-      if (name && email && message) {
-        alert("Thank you for contacting us, " + name + "! We will get back to you shortly.");
-        document.querySelector('.contact-form').reset();
-      } else {
-        alert("Please fill out all fields.");
+    <!-- Menu Script -->
+    <script>
+      function toggleMenu() {
+        document.getElementById("sidebarMenu").classList.toggle("active");
       }
-    }
-  </script>
+
+      function submitForm(event) {
+        event.preventDefault();
+        const name = document.getElementById("name").value.trim();
+        const email = document.getElementById("email").value.trim();
+        const message = document.getElementById("message").value.trim();
+
+        if (name && email && message) {
+          alert("Thank you for contacting us, " + name + "! We will get back to you shortly.");
+          document.querySelector('.contact-form').reset();
+        } else {
+          alert("Please fill out all fields.");
+        }
+      }
+    </script>
 
 </body>
+
 </html>

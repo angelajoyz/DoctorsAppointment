@@ -1,8 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>User Profile</title>
   <style>
     body {
@@ -105,7 +106,7 @@
       background: white;
       border-radius: 10px;
       padding: 40px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
     }
 
     .top-section {
@@ -225,15 +226,16 @@
       .form-grid {
         grid-template-columns: 1fr;
       }
-  }
+    }
   </style>
 </head>
+
 <body>
   <script src="https://www.gstatic.com/firebasejs/10.11.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.11.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore-compat.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/js-md5/0.7.3/md5.min.js"></script>
-  
+
   <script>
     const firebaseConfig = {
       apiKey: "AIzaSyDwCayQZ0JO6DjzQvAT6ToT33I4QXCS_NY",
@@ -243,21 +245,99 @@
       messagingSenderId: "372688128666",
       appId: "1:372688128666:web:bbc529c73c4665f95f6d23"
     };
-  
+
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.firestore();
+    const storage = firebase.storage(); // Initialize Firebase Storage
+
+    // --- Custom Alert Function (MODERNIZED AND TOP-CENTERED) ---
+    function showCustomAlert(message, isSuccess = false) {
+      let alertDiv = document.getElementById('custom-alert');
+      if (!alertDiv) {
+        alertDiv = document.createElement('div');
+        alertDiv.id = 'custom-alert';
+
+        // Modern styling with top-center positioning
+        alertDiv.style.cssText = `
+                position: fixed;
+                top: 20px; /* Distance from the top */
+                left: 50%;
+                transform: translateX(-50%); /* Center horizontally */
+                background-color: #f44336; /* Default red color */
+                color: white;
+                padding: 15px 25px;
+                border-radius: 8px;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+                z-index: 10000; /* Ensure it's on top of everything */
+                opacity: 0;
+                transition: all 0.3s ease-out; /* Smooth transition for fade and slide */
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                text-align: center;
+                min-width: 300px;
+                max-width: 90vw; /* Responsive width */
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                backdrop-filter: blur(5px); /* Frosted glass effect */
+                border: 1px solid rgba(255, 255, 255, 0.1); /* Subtle border */
+                /* Initial state for animation */
+                transform: translateX(-50%) translateY(-20px); 
+            `;
+
+        // Add keyframes for slideDown animation if not already present
+        if (!document.getElementById('slideDownKeyframes')) {
+          const style = document.createElement('style');
+          style.id = 'slideDownKeyframes';
+          style.textContent = `
+                    @keyframes slideDown {
+                        from {
+                            opacity: 0;
+                            transform: translateX(-50%) translateY(-20px);
+                        }
+                        to {
+                            opacity: 1;
+                            transform: translateX(-50%) translateY(0);
+                        }
+                    }
+                `;
+          document.head.appendChild(style);
+        }
+
+        document.body.appendChild(alertDiv);
+      }
+
+      // Set message and styling based on type
+      alertDiv.textContent = message;
+      alertDiv.style.backgroundColor = isSuccess ? "#4CAF50" : "#f44336"; // Green for success, red for error
+      alertDiv.style.opacity = 1;
+      alertDiv.style.animation = 'slideDown 0.3s forwards'; // Apply slideDown animation
+
+      // Auto-hide after 5 seconds with fade-out animation
+      setTimeout(() => {
+        alertDiv.style.opacity = 0;
+        alertDiv.style.animation = 'none'; // Remove animation to prevent re-trigger on hide
+        // Optional: remove the element after it fades out
+        setTimeout(() => {
+          if (alertDiv.parentNode) {
+            alertDiv.parentNode.removeChild(alertDiv);
+          }
+        }, 300); // Match transition duration
+      }, 5000); // Alert disappears after 5 seconds
+    }
+
   </script>
   <!-- Sidebar Menu -->
   <div class="hidden-menu" id="sidebarMenu">
     <ul>
-        <li><a href="patientDashboard.html">Home</a></li>
-        <li><a href="patientProfile.html">Profile</a></li>
-        <li><a href="appointmentHistory.html">Appointment History</a></li>
-        <li><a href="services.html">Services</a></li>
-        <li><a href="about.html">About</a></li>
-        <li><a href="contact.html">Contact</a></li>
-        <li><a href="index.html">Logout</a></li>
+      <li><a href="patientDashboard.html">Home</a></li>
+      <li><a href="patientProfile.html">Profile</a></li>
+      <li><a href="appointmentHistory.html">Appointment History</a></li>
+      <li><a href="medicalHistory.html">Medical History</a></li>
+      <li><a href="services.html">Services</a></li>
+      <li><a href="about.html">About</a></li>
+      <li><a href="contact.html">Contact</a></li>
+      <li><a href="index.html">Logout</a></li>
     </ul>
   </div>
 
@@ -300,7 +380,7 @@
         <label for="phone">Gender</label>
         <input type="text" id="gender" value="Loading..." disabled>
       </div>
-      
+
     </div>
 
     <div class="email-section">
@@ -323,123 +403,125 @@
       document.getElementById("sidebarMenu").classList.toggle("active");
     }
 
-  let isEditMode = false;
+    let isEditMode = false;
     document.getElementById('profileImage').addEventListener('click', function () {
-  if (isEditMode) {
-    document.getElementById('imageUpload').click();
-  }
-});
-
-  
-document.getElementById('imageUpload').addEventListener('change', function () {
-  const file = this.files[0];
-  const reader = new FileReader();
-
-  reader.onload = function (e) {
-    document.getElementById('profileImage').src = e.target.result;
-  };
-  reader.readAsDataURL(file);
-
-  const user = auth.currentUser;
-  if (user && file) {
-    const storage = firebase.storage(); // ✅ ensure storage is initialized
-    const imageRef = storage.ref().child(`users/${user.uid}/profile.jpg`);
-
-    imageRef.put(file).then(() => {
-      return imageRef.getDownloadURL();
-    }).then((url) => {
-      document.getElementById('profileImage').src = url; // show uploaded image
-      return db.collection("patients").doc(user.uid).update({
-        profileImageURL: url
-      });
-    }).then(() => {
-      console.log("Profile image uploaded, shown, and URL saved!");
-    }).catch((error) => {
-      console.error("Error uploading or saving image:", error);
+      if (isEditMode) {
+        document.getElementById('imageUpload').click();
+      }
     });
-  }
-});
-  
-    function enableEditing() {
-  const fields = document.querySelectorAll('input, select');
-  fields.forEach(f => f.disabled = false);
-
-  // Enable file input so user can upload new profile picture
-  document.getElementById('imageUpload').disabled = false;
-
-  // Show the Save button and hide the Edit button
-  document.querySelector(".edit-btn").style.display = "none";
-  document.querySelector(".save-btn").style.display = "block";
-
-  // Set edit mode flag
-  isEditMode = true;
-}
-
-  
-// Function to save user profile data, with automatic creation of missing fields
-function saveProfile() {
-  const fields = document.querySelectorAll('input, select');
-  const fullName = document.getElementById("fullName").value;
-  const username = document.getElementById("username").value;
-  const phone = document.getElementById("phone").value;
-  const gender = document.getElementById("gender").value;
-  const profileImageURL = document.getElementById("profileImage").src;
-
-  const updatedData = {
-    fullName,
-    username,
-    phone,
-    gender,
-    profileImageURL
-  };
-
-  const user = auth.currentUser;
-  if (user) {
-    db.collection("patients").doc(user.uid).set(updatedData, { merge: true })
-      .then(() => {
-        alert("Changes saved!");
-
-        document.getElementById("displayName").innerText = fullName;
-        document.getElementById("displayEmail").innerText = user.email;
-
-        fields.forEach(f => f.disabled = true);
-
-        // Disable file input again
-        document.getElementById('imageUpload').disabled = true;
-
-        document.querySelector(".edit-btn").style.display = "block";
-        document.querySelector(".save-btn").style.display = "none";
-
-        // Clear edit mode flag
-        isEditMode = false;
-      })
-      .catch((error) => {
-        console.error("Error updating profile:", error);
-        alert("Failed to save changes.");
-      });
-  } else {
-    alert("No user logged in.");
-  }
-}
 
 
+    document.getElementById('imageUpload').addEventListener('change', function () {
+      const file = this.files[0];
+      const reader = new FileReader();
 
-      
-        auth.onAuthStateChanged((user) => {
-          if (user) {
-            if (!user.emailVerified) {
-              alert("Please verify your email.");
-              window.location.href = "patientLogin.html";
-              return;
-            }
-      
-            fetchUserData(user.uid);
-          } else {
-            // Redirect if not logged in
-            window.location.href = "patientLogin.html";
-          }
+      reader.onload = function (e) {
+        document.getElementById('profileImage').src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+
+      const user = auth.currentUser;
+      if (user && file) {
+        // const storage = firebase.storage(); // Already initialized globally
+        const imageRef = storage.ref().child(`users/${user.uid}/profile.jpg`);
+
+        imageRef.put(file).then(() => {
+          return imageRef.getDownloadURL();
+        }).then((url) => {
+          document.getElementById('profileImage').src = url; // show uploaded image
+          return db.collection("patients").doc(user.uid).update({
+            profileImageURL: url
+          });
+        }).then(() => {
+          console.log("Profile image uploaded, shown, and URL saved!");
+          showCustomAlert("Profile image updated successfully!", true); // Success notification
+        }).catch((error) => {
+          console.error("Error uploading or saving image:", error);
+          showCustomAlert("Failed to update profile image. Please try again.", false); // Error notification
         });
-  
+      }
+    });
+
+    function enableEditing() {
+      const fields = document.querySelectorAll('input, select');
+      fields.forEach(f => f.disabled = false);
+
+      // Enable file input so user can upload new profile picture
+      document.getElementById('imageUpload').disabled = false;
+
+      // Show the Save button and hide the Edit button
+      document.querySelector(".edit-btn").style.display = "none";
+      document.querySelector(".save-btn").style.display = "block";
+
+      // Set edit mode flag
+      isEditMode = true;
+    }
+
+
+    // Function to save user profile data, with automatic creation of missing fields
+    function saveProfile() {
+      const fields = document.querySelectorAll('input, select');
+      const fullName = document.getElementById("fullName").value;
+      const username = document.getElementById("username").value;
+      const phone = document.getElementById("phone").value;
+      const gender = document.getElementById("gender").value;
+      const profileImageURL = document.getElementById("profileImage").src;
+
+      const updatedData = {
+        fullName,
+        username,
+        phone,
+        gender,
+        profileImageURL
+      };
+
+      const user = auth.currentUser;
+      if (user) {
+        db.collection("patients").doc(user.uid).set(updatedData, { merge: true })
+          .then(() => {
+            showCustomAlert("Changes saved successfully!", true); // Success notification
+
+            document.getElementById("displayName").innerText = fullName;
+            document.getElementById("displayEmail").innerText = user.email;
+
+            fields.forEach(f => f.disabled = true);
+
+            // Disable file input again
+            document.getElementById('imageUpload').disabled = true;
+
+            document.querySelector(".edit-btn").style.display = "block";
+            document.querySelector(".save-btn").style.display = "none";
+
+            // Clear edit mode flag
+            isEditMode = false;
+          })
+          .catch((error) => {
+            console.error("Error updating profile:", error);
+            showCustomAlert("Failed to save changes. Please try again.", false); // Error notification
+          });
+      } else {
+        showCustomAlert("No user logged in. Please log in to save changes.", false); // Error notification
+      }
+    }
+
+
+
+
+    auth.onAuthStateChanged((user) => {
+      if (user) {
+        if (!user.emailVerified) {
+          showCustomAlert("Please verify your email to continue.", false); // Error notification
+          window.location.href = "patientLogin.html";
+          return;
+        }
+
+        fetchUserData(user.uid);
+      } else {
+        // Redirect if not logged in
+        window.location.href = "patientLogin.html";
+      }
+    });
+
     // Function to fetch user data and show profile image
     function fetchUserData(uid) {
       db.collection("patients").doc(uid).get().then((doc) => {
@@ -472,15 +554,15 @@ function saveProfile() {
           }
         } else {
           console.log("No user data found!");
+          showCustomAlert("No user data found. Please complete your profile.", false); // Error notification
         }
       }).catch((error) => {
         console.error("Error fetching user data:", error);
+        showCustomAlert("Error fetching user data. Please try again.", false); // Error notification
       });
     }
 
   </script>
 </body>
-</html>
-  
-</body>
+
 </html>

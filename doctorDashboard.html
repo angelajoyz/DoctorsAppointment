@@ -10,7 +10,7 @@
 
   <!-- FullCalendar CSS -->
   <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.css" rel="stylesheet" />
-  
+
 </head>
 
 
@@ -42,43 +42,43 @@
 
   <div class="container">
     <div class="card">
-  <div class="doctor-info">
-    <img src="pfp.PNG" alt="Doctor Profile" id="profileImage" />
-    <div>
-      <h2 id="fullNameDisplay">Loading...</h2>
-      <p class="doctor-spec" id="specializationDisplay">Loading...</p>
+      <div class="doctor-info">
+        <img src="pfp.PNG" alt="Doctor Profile" id="profileImage" />
+        <div>
+          <h2 id="fullNameDisplay">Loading...</h2>
+          <p class="doctor-spec" id="specializationDisplay">Loading...</p>
+        </div>
+      </div>
+
+      <!-- Left side: Card with calendar -->
+
+      <div class="calendar-container">
+        <h3>Schedule Calendar</h3>
+        <div id="calendar"></div>
+      </div>
+    </div>
+
+    <!-- Right side: Table -->
+    <div class="appointment-table-container">
+      <h3>Appointments</h3><br>
+      <table>
+        <thead>
+          <tr>
+            <th>Patient</th>
+            <th>Reason</th>
+            <th>Time</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
     </div>
   </div>
-
-  <!-- Left side: Card with calendar -->
-
-    <div class="calendar-container">
-      <h3>Schedule Calendar</h3>
-      <div id="calendar"></div>
-    </div>
-  </div>
-
-  <!-- Right side: Table -->
-  <div class="appointment-table-container">
-       <h3>Appointments</h3><br>
-    <table>
-      <thead>
-        <tr>
-          <th>Patient</th>
-          <th>Reason</th>
-          <th>Time</th>
-          <th>Action</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-  </div>
-</div>
 
 
   <script src="doctorDashboard.js" type="module"></script>
   <!-- FullCalendar JS -->
-<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
 
 </body>
 

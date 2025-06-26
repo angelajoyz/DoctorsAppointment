@@ -132,11 +132,11 @@ async function loadAppointments(doctorId) {
         notifItem.innerHTML = `
           <strong>${data.fullName}</strong> has an appointment<br/>
           <small>${dateObj.toLocaleString([], {
-            month: "short",
-            day: "numeric",
-            hour: "2-digit",
-            minute: "2-digit",
-          })}</small>
+          month: "short",
+          day: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+        })}</small>
         `;
         notificationDropdown.appendChild(notifItem);
       }
@@ -211,7 +211,7 @@ function renderFullCalendar(appointmentDocs) {
       center: 'title',
       right: ''
     },
-    dateClick: function(info) {
+    dateClick: function (info) {
       displayAppointmentsForDate(info.dateStr, allAppointments);
     }
   });

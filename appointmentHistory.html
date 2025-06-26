@@ -1,8 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Appointment History</title>
   <style>
     body {
@@ -107,7 +108,7 @@
       background: white;
       border-radius: 10px;
       padding: 40px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
     }
 
     table {
@@ -116,11 +117,14 @@
       margin-top: 20px;
     }
 
-    table, th, td {
+    table,
+    th,
+    td {
       border: 1px solid #ddd;
     }
 
-    th, td {
+    th,
+    td {
       padding: 12px;
       text-align: left;
     }
@@ -134,6 +138,48 @@
       background-color: #f9f9f9;
     }
 
+    /* Status styling */
+    .status-pending {
+      background-color: #ffc107;
+      color: #856404;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-weight: bold;
+    }
+
+    .status-approved {
+      background-color: #28a745;
+      color: white;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-weight: bold;
+    }
+
+    .status-denied {
+      background-color: #dc3545;
+      color: white;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-weight: bold;
+    }
+
+    .status-completed {
+      background-color: #6c757d;
+      color: white;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-weight: bold;
+    }
+
+    .status-no-show {
+      background-color: #dc3545;
+      /* Red background for No Show */
+      color: white;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-weight: bold;
+    }
+
     .stars {
       cursor: pointer;
       color: #ccc;
@@ -142,7 +188,7 @@
       transition: color 0.3s ease;
     }
 
-      .stars.locked {
+    .stars.locked {
       pointer-events: none;
       opacity: 0.6;
     }
@@ -206,7 +252,13 @@
     }
 
     @media(max-width: 768px) {
-      table, thead, tbody, th, td, tr {
+
+      table,
+      thead,
+      tbody,
+      th,
+      td,
+      tr {
         display: block;
       }
 
@@ -230,294 +282,469 @@
         font-weight: bold;
       }
     }
+
+    /* Custom Alert Styling */
+    #custom-alert {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 15px 30px;
+      border-radius: 8px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+      z-index: 1000;
+      opacity: 0;
+      transition: opacity 0.5s ease-in-out;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-size: 16px;
+      font-weight: 500;
+      text-align: center;
+      min-width: 300px;
+      max-width: 80%;
+    }
+
+    .alert-success {
+      background-color: #4CAF50;
+      color: white;
+    }
+
+    .alert-error {
+      background-color: #f44336;
+      color: white;
+    }
+
+    /* Filter controls styling */
+    .filter-controls {
+      margin-bottom: 20px;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .filter-controls label {
+      font-weight: bold;
+      margin-right: 5px;
+    }
+
+    .filter-controls select {
+      padding: 8px 12px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 1em;
+      background-color: white;
+      cursor: pointer;
+      min-width: 150px;
+    }
+
+    .filter-controls select:focus {
+      outline: none;
+      border-color: #29a9e1;
+      box-shadow: 0 0 0 2px rgba(41, 169, 225, 0.2);
+    }
   </style>
 </head>
+
 <body>
+  <!-- Custom Alert HTML Structure -->
+  <div id="custom-alert"></div>
 
-<!-- Sidebar -->
-<div class="hidden-menu" id="sidebarMenu">
-  <ul>
-    <li><a href="patientDashboard.html">Home</a></li>
-    <li><a href="patientProfile.html">Profile</a></li>
-    <li><a href="appointmentHistory.html">Appointment History</a></li>
-    <li><a href="services.html">Services</a></li>
-    <li><a href="about.html">About</a></li>
-    <li><a href="contact.html">Contact</a></li>
-    <li><a href="index.html">Logout</a></li>
-  </ul>
-</div>
-
-<!-- Header -->
-<header>
-  <button class="menu-icon" id="menu-icon">&#9776;</button>
-  <h1><span class="small-text">VIEW YOUR</span> <span class="highlight">APPOINTMENTS</span></h1>
-  <p>Keep track of your past and upcoming bookings.</p>
-</header>
-
-
-<!-- Main Content -->
-<div class="container">
-  <h2>Appointment History</h2>
-  <table id="appointmentsTable">
-    <thead>
-      <tr>
-        <th>Date & Time</th>
-        <th>Doctor</th>
-        <th>Reason</th>
-        <th>Status</th>
-        <th>Details</th>
-        <th>Rate Doctor</th>
-      </tr>
-    </thead>
-    <tbody>
-      <!-- Appointments will be loaded here -->
-    </tbody>
-  </table>
-</div>
-
-<!-- Modal -->
-<div class="modal" id="detailsModal">
-  <div class="modal-content">
-    <span class="modal-close" onclick="document.getElementById('detailsModal').style.display='none'">&times;</span>
-    <h3>Appointment Details</h3>
-    <pre id="detailsContent" style="white-space: pre-wrap;"></pre>
+  <!-- Sidebar -->
+  <div class="hidden-menu" id="sidebarMenu">
+    <ul>
+      <li><a href="patientDashboard.html">Home</a></li>
+      <li><a href="patientProfile.html">Profile</a></li>
+      <li><a href="appointmentHistory.html">Appointment History</a></li>
+      <li><a href="medicalHistory.html">Medical History</a></li>
+      <li><a href="services.html">Services</a></li>
+      <li><a href="about.html">About</a></li>
+      <li><a href="contact.html">Contact</a></li>
+      <li><a href="index.html">Logout</a></li>
+    </ul>
   </div>
-</div>
 
-<!-- Firebase + Sidebar Toggle Script -->
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
-  import { getFirestore, collection, getDocs, doc, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
-  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
-  import { setDoc } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js"; 
+  <!-- Header -->
+  <header>
+    <button class="menu-icon" id="menu-icon">&#9776;</button>
+    <h1><span class="small-text">VIEW YOUR</span> <span class="highlight">APPOINTMENTS</span></h1>
+    <p>Keep track of your past and upcoming bookings.</p>
+  </header>
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyDwCayQZ0JO6DjzQvAT6ToT33I4QXCS_NY",
-    authDomain: "login-sample-c3af0.firebaseapp.com",
-    projectId: "login-sample-c3af0",
-    storageBucket: "login-sample-c3af0.appspot.com",
-    messagingSenderId: "372688128666",
-    appId: "1:372688128666:web:bbc529c73c4665f95f6d23"
-  };
+  <!-- Main Content -->
+  <div class="container">
+    <h2>Appointment History</h2>
 
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
-  const auth = getAuth(app);
+    <!-- Filter Controls Added Here -->
+    <div class="filter-controls">
+      <label for="statusFilter">Filter by Status:</label>
+      <select id="statusFilter">
+        <option value="All">All</option>
+        <option value="Pending">Pending</option>
+        <option value="Approved">Approved</option>
+        <option value="Denied">Denied</option>
+        <option value="Completed">Completed</option>
+        <option value="No Show">No Show</option>
+      </select>
+    </div>
 
-  const tableBody = document.querySelector("#appointmentsTable tbody");
+    <table id="appointmentsTable">
+      <thead>
+        <tr>
+          <th>Date & Time</th>
+          <th>Doctor</th>
+          <th>Reason</th>
+          <th>Status</th>
+          <th>Details</th>
+          <th>Rate Doctor</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Appointments will be loaded here -->
+      </tbody>
+    </table>
+  </div>
 
-  onAuthStateChanged(auth, async (user) => {
-    if (!user) {
-      alert("You are not logged in.");
-      window.location.href = "index.html";
-      return;
+  <!-- Modal -->
+  <div class="modal" id="detailsModal">
+    <div class="modal-content">
+      <span class="modal-close" onclick="document.getElementById('detailsModal').style.display='none'">&times;</span>
+      <h3>Appointment Details</h3>
+      <pre id="detailsContent" style="white-space: pre-wrap;"></pre>
+    </div>
+  </div>
+
+  <!-- Firebase + Sidebar Toggle Script -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
+    import { getFirestore, collection, getDocs, doc, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
+    import { setDoc } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDwCayQZ0JO6DjzQvAT6ToT33I4QXCS_NY",
+      authDomain: "login-sample-c3af0.firebaseapp.com",
+      projectId: "login-sample-c3af0",
+      storageBucket: "login-sample-c3af0.appspot.com",
+      messagingSenderId: "372688128666",
+      appId: "1:372688128666:web:bbc529c73c4665f95f6d23"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+
+    const tableBody = document.querySelector("#appointmentsTable tbody");
+    const statusFilter = document.getElementById("statusFilter"); // Get the filter dropdown
+
+    let allLoadedAppointments = []; // Store all appointments here for filtering
+
+    // Function to display custom alerts (similar to patientLogin.html)
+    function showCustomAlert(message, isSuccess = false) {
+      let alertDiv = document.getElementById('custom-alert');
+      if (!alertDiv) {
+        alertDiv = document.createElement('div');
+        alertDiv.id = 'custom-alert';
+        document.body.appendChild(alertDiv);
+      }
+      alertDiv.textContent = message;
+      alertDiv.className = isSuccess ? 'alert-success' : 'alert-error';
+      alertDiv.style.opacity = 1;
+      setTimeout(() => {
+        alertDiv.style.opacity = 0;
+        setTimeout(() => {
+          if (alertDiv.parentNode) {
+            alertDiv.parentNode.removeChild(alertDiv);
+          }
+        }, 500);
+      }, 5000); // Alert disappears after 5 seconds
     }
 
-    const currentEmail = user.email;
-    await loadAppointments(currentEmail);
-  });
-
-async function loadAppointments(email) {
-  try {
-    const snapshot = await getDocs(collection(db, "approved"));
-    tableBody.innerHTML = "";
-    let count = 0;
-
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    for (const docSnap of snapshot.docs) {
-      const data = docSnap.data();
-      if (data.email !== email) continue;
-
-      count++;
-
-      // Parse only the start time from appointmentDateTime string
-      const [startTime] = data.appointmentDateTime.split(" - ");
-      const appointmentDate = new Date(startTime);
-
-      // Determine status
-      const isCompleted = appointmentDate < today;
-      const status = isCompleted ? "Completed" : "Pending";
-      const rating = data.rating || 0;
-
-      // Auto-update status in Firestore if needed
-      if (isCompleted && data.status !== "Completed") {
-        const appointmentRef = doc(db, "approved", docSnap.id);
-        await updateDoc(appointmentRef, { status: "Completed" });
-        data.status = "Completed"; // reflect change in UI
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        showCustomAlert("You are not logged in.", false);
+        window.location.href = "index.html";
+        return;
       }
 
-      const row = document.createElement("tr");
-      row.innerHTML = `
-        <td data-label="Date & Time">${data.appointmentDateTime}</td>
-        <td data-label="Doctor">${data.doctorName || "N/A"}</td>
-        <td data-label="Reason">${data.reason || "N/A"}</td>
-        <td data-label="Status">${status}</td>
-        <td data-label="Details">
-          <button class="details-button">View</button>
-        </td>
-        <td class="rate-cell" data-label="Rate Doctor">
-          ${
-            status === "Completed"
-              ? [1, 2, 3, 4, 5].map(i => `
-                  <span class="stars ${i <= rating ? 'active' : ''} ${rating > 0 ? 'locked' : ''}" 
-                        data-id="${docSnap.id}" 
-                        data-rate="${i}">&#9733;</span>
-                `).join('')
-              : `<span style="color:#999;">Not yet available</span>`
-          }
-        </td>
-      `;
+      const currentEmail = user.email;
+      await loadAllAppointments(currentEmail);
 
-      const detailsBtn = row.querySelector(".details-button");
-      detailsBtn.appointmentData = data;
-      detailsBtn.addEventListener("click", () => {
-        showDetails(data);
+      // Add event listener for filter change
+      statusFilter.addEventListener("change", () => {
+        displayAppointments(allLoadedAppointments, statusFilter.value);
+      });
+    });
+
+    async function loadAllAppointments(email) {
+      try {
+        // Updated collections to include 'appointments' for pending
+        const collections = ['appointments', 'approved', 'denied', 'completed'];
+        const tempAllAppointments = []; // Use a temporary array
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        for (const collectionName of collections) {
+          const snapshot = await getDocs(collection(db, collectionName));
+          for (const docSnap of snapshot.docs) {
+            const data = docSnap.data();
+            if (data.email !== email) continue;
+
+            let status = '';
+            let statusClass = '';
+
+            if (collectionName === 'appointments') { // This is for pending appointments
+              status = 'Pending';
+              statusClass = 'status-pending';
+            } else if (collectionName === 'denied') {
+              status = 'Denied';
+              statusClass = 'status-denied';
+            } else if (collectionName === 'completed') { // Explicitly handle 'completed' collection
+              status = 'Completed';
+              statusClass = 'status-completed';
+            } else if (collectionName === 'approved') {
+              status = data.status || 'Approved'; // Use the status from Firebase if available
+
+              if (status === 'Completed') {
+                statusClass = 'status-completed';
+              } else if (status === 'No Show') {
+                statusClass = 'status-no-show';
+              } else {
+                statusClass = 'status-approved';
+              }
+
+              // Auto-update status in Firestore if needed
+              const [startTime] = data.appointmentDateTime.split(" - ");
+              const appointmentDate = new Date(startTime);
+              if (appointmentDate < today && status !== "Completed" && status !== "No Show") {
+                status = 'Completed';
+                statusClass = 'status-completed';
+                const appointmentRef = doc(db, "approved", docSnap.id);
+                await updateDoc(appointmentRef, { status: "Completed" });
+              }
+            }
+            tempAllAppointments.push({
+              id: docSnap.id,
+              data: data,
+              status: status,
+              statusClass: statusClass,
+              collection: collectionName,
+              appointmentDate: data.appointmentDateTime ? new Date(data.appointmentDateTime.split(" - ")[0]) : new Date()
+            });
+          }
+        }
+
+        // Sort appointments by date (newest first)
+        tempAllAppointments.sort((a, b) => b.appointmentDate - a.appointmentDate);
+
+        allLoadedAppointments = tempAllAppointments; // Store all loaded appointments
+        displayAppointments(allLoadedAppointments, statusFilter.value); // Display initial filtered view
+      } catch (error) {
+        console.error("Error loading appointments:", error);
+        tableBody.innerHTML = `<tr><td colspan="6" style="text-align:center;">Failed to load appointments.</td></tr>`;
+      }
+    }
+
+    // New function to display appointments based on filter
+    function displayAppointments(appointments, filterStatus) {
+      tableBody.innerHTML = ""; // Clear table
+
+      const filteredAppointments = appointments.filter(appointment => {
+        if (filterStatus === "All") {
+          return true;
+        }
+        return appointment.status === filterStatus;
       });
 
-      tableBody.appendChild(row);
+      if (filteredAppointments.length === 0) {
+        tableBody.innerHTML = `<tr><td colspan="6" style="text-align:center;">No ${filterStatus !== "All" ? filterStatus : ''} appointments found.</td></tr>`;
+        return;
+      }
+
+      filteredAppointments.forEach(appointment => {
+        const { id, data, status, statusClass } = appointment;
+        const rating = data.rating || 0;
+
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td data-label="Date & Time">${data.appointmentDateTime || "N/A"}</td>
+          <td data-label="Doctor">${data.doctorName || "N/A"}</td>
+          <td data-label="Reason">${data.reason || "N/A"}</td>
+          <td data-label="Status">
+            <span class="${statusClass}">${status}</span>
+          </td>
+          <td data-label="Details">
+            <button class="details-button">View</button>
+          </td>
+          <td class="rate-cell" data-label="Rate Doctor">
+            ${status === "Completed"
+            ? [1, 2, 3, 4, 5].map(i => `
+                  <span class="stars ${i <= rating ? 'active' : ''} ${rating > 0 ? 'locked' : ''}" 
+                        data-id="${id}" 
+                        data-rate="${i}">&#9733;</span>
+                `).join('')
+            : `<span style="color:#999;">Not available</span>`
+          }
+          </td>
+        `;
+
+        const detailsBtn = row.querySelector(".details-button");
+        detailsBtn.appointmentData = data;
+        detailsBtn.addEventListener("click", () => {
+          showDetails(data, status);
+        });
+
+        tableBody.appendChild(row);
+      });
+
+      enableRating(); // Re-enable rating for newly displayed rows
     }
 
-    if (count === 0) {
-      tableBody.innerHTML = `<tr><td colspan="6" style="text-align:center;">No approved appointments found.</td></tr>`;
-    }
+    function enableRating() {
+      document.querySelectorAll(".rate-cell").forEach(cell => {
+        const stars = cell.querySelectorAll(".stars");
+        const alreadyRated = [...stars].some(star => star.classList.contains("locked"));
 
-    enableRating();
-  } catch (error) {
-    console.error("Error loading appointments:", error);
-    tableBody.innerHTML = `<tr><td colspan="6" style="text-align:center;">Failed to load appointments.</td></tr>`;
-  }
-}
+        if (alreadyRated) return; // Already rated, do nothing
 
-function enableRating() {
-  document.querySelectorAll(".rate-cell").forEach(cell => {
-    const stars = cell.querySelectorAll(".stars");
-    const alreadyRated = [...stars].some(star => star.classList.contains("locked"));
+        stars.forEach(star => {
+          star.addEventListener("click", async function () {
+            const rate = parseInt(this.getAttribute("data-rate"));
+            const id = this.getAttribute("data-id");
 
-    if (alreadyRated) return; // Already rated, do nothing
+            try {
+              // Check if the appointment is in 'approved' or 'completed'
+              let appointmentRef = doc(db, "approved", id); // Default to approved
+              let appointmentSnap = await getDocs(collection(db, "approved"));
+              let appointmentData = null;
 
-    stars.forEach(star => {
-      star.addEventListener("click", async function () {
-        const rate = parseInt(this.getAttribute("data-rate"));
-        const id = this.getAttribute("data-id");
+              appointmentSnap.forEach(docSnap => {
+                if (docSnap.id === id) {
+                  appointmentData = docSnap.data();
+                }
+              });
 
-        try {
-          const appointmentRef = doc(db, "approved", id);
-          const appointmentSnap = await getDocs(collection(db, "approved"));
-          let appointmentData = null;
+              if (!appointmentData) { // If not found in approved, check completed
+                appointmentRef = doc(db, "completed", id);
+                appointmentSnap = await getDocs(collection(db, "completed"));
+                appointmentSnap.forEach(docSnap => {
+                  if (docSnap.id === id) {
+                    appointmentData = docSnap.data();
+                  }
+                });
+              }
 
-          appointmentSnap.forEach(docSnap => {
-            if (docSnap.id === id) {
-              appointmentData = docSnap.data();
+              if (!appointmentData) {
+                showCustomAlert("Appointment not found for rating.", false);
+                return;
+              }
+
+              if (appointmentData.rating) {
+                showCustomAlert("You have already rated this appointment.", false);
+                return;
+              }
+
+              // Update rating in the correct collection (either 'approved' or 'completed')
+              await updateDoc(appointmentRef, {
+                rating: rate,
+                rated: true
+              });
+
+              // Save rating in new 'ratings' collection
+              const ratingData = {
+                rating: rate,
+                appointmentId: id,
+                doctorName: appointmentData.doctorName || "N/A",
+                doctorEmail: appointmentData.doctorEmail || "",
+                patientName: appointmentData.fullName || "N/A",
+                email: appointmentData.email || "",
+                appointmentDateTime: appointmentData.appointmentDateTime || "",
+                reason: appointmentData.reason || "",
+                ratedAt: new Date().toISOString()
+              };
+
+              await setDoc(doc(db, "ratings", id), ratingData);
+
+              // Lock the stars visually
+              stars.forEach(s => {
+                s.classList.remove("active");
+                s.classList.add("locked");
+              });
+              for (let i = 0; i < rate; i++) {
+                stars[i].classList.add("active");
+              }
+
+              showCustomAlert("Thank you for your feedback!", true);
+
+            } catch (err) {
+              console.error("Rating error:", err);
+              showCustomAlert("Could not update rating.", false);
             }
           });
+        });
+      });
+    }
 
-          if (!appointmentData || appointmentData.rating) {
-            alert("You have already rated this appointment.");
-            return;
-          }
+    function showDetails(data, status) {
+      const content = `
+        <strong>Full Name:</strong> ${data.fullName || "N/A"}<br>
+        <strong>Conditions:</strong> ${data.conditions || "N/A"}<br>
+        <strong>Allergies:</strong> ${data.allergies || "N/A"}<br>
+        <strong>Medications:</strong> ${data.medications || "N/A"}<br>
+        <strong>Family History:</strong> ${data.familyHistory || "N/A"}<br>
+        <strong>Gender:</strong> ${data.gender || "N/A"}<br>
+        <strong>Age:</strong> ${data.age || "N/A"}<br>
+        <strong>Phone:</strong> ${data.phone || "N/A"}<br>
+        <strong>Address:</strong> ${data.address || "N/A"}<br>
+        <strong>Payment Method:</strong> ${data.paymentMethod || "N/A"}<br>
+        <strong>Payment Ref:</strong> ${data.paymentRef || "N/A"}<br>
+        <strong>Fee:</strong> ₱${data.feeAmount || "N/A"}<br>
+        <strong>Date:</strong> ${data.appointmentDateTime || "N/A"}<br>
+        <strong>Status:</strong> <span class="${status === 'No Show' ? 'status-no-show' :
+          status === 'Completed' ? 'status-completed' :
+            status === 'Approved' ? 'status-approved' :
+              status === 'Denied' ? 'status-denied' : 'status-pending'}">${status}</span><br>
+      `;
 
-          // Update rating in 'approved' collection
-          await updateDoc(appointmentRef, {
-            rating: rate,
-            rated: true
-          });
+      document.getElementById("detailsContent").innerHTML = content;
+      document.getElementById("detailsModal").style.display = "flex";
+    }
 
-          // Save rating in new 'ratings' collection
-          const ratingData = {
-            rating: rate,
-            appointmentId: id,
-            doctorName: appointmentData.doctorName || "N/A",
-            doctorEmail: appointmentData.doctorEmail || "",
-            patientName: appointmentData.fullName || "N/A",
-            email: appointmentData.email || "",
-            appointmentDateTime: appointmentData.appointmentDateTime || "",
-            reason: appointmentData.reason || "",
-            ratedAt: new Date().toISOString()
-          };
+    document.getElementById("detailsModal").addEventListener("click", (e) => {
+      if (e.target.id === "detailsModal") {
+        e.target.style.display = "none";
+      }
+    });
 
-          await setDoc(doc(db, "ratings", id), ratingData);
+    // Sidebar toggle logic
+    document.addEventListener("DOMContentLoaded", () => {
+      const menuIcon = document.getElementById("menu-icon");
+      const sidebarMenu = document.getElementById("sidebarMenu");
 
-          // Lock the stars visually
-          stars.forEach(s => {
-            s.classList.remove("active");
-            s.classList.add("locked");
-          });
-          for (let i = 0; i < rate; i++) {
-            stars[i].classList.add("active");
-          }
+      menuIcon.addEventListener("click", () => {
+        const isActive = sidebarMenu.classList.toggle("active");
+        menuIcon.innerHTML = isActive ? "&#10005;" : "&#9776;";
+      });
 
-          // ✅ Show feedback message
-          alert("Thank you for your feedback!");
+      document.querySelectorAll(".hidden-menu a").forEach(link => {
+        link.addEventListener("click", () => {
+          sidebarMenu.classList.remove("active");
+          menuIcon.innerHTML = "&#9776;";
+        });
+      });
 
-        } catch (err) {
-          console.error("Rating error:", err);
-          alert("Could not update rating.");
+      document.addEventListener("click", (e) => {
+        if (
+          sidebarMenu.classList.contains("active") &&
+          !sidebarMenu.contains(e.target) &&
+          e.target !== menuIcon
+        ) {
+          sidebarMenu.classList.remove("active");
+          menuIcon.innerHTML = "&#9776;";
         }
       });
     });
-  });
-}
-
-  function showDetails(data) {
-    const content = `
-      <strong>Full Name:</strong> ${data.fullName || "N/A"}<br>
-      <strong>Conditions:</strong> ${data.conditions || "N/A"}<br>
-      <strong>Allergies:</strong> ${data.allergies || "N/A"}<br>
-      <strong>Medications:</strong> ${data.medications || "N/A"}<br>
-      <strong>Family History:</strong> ${data.familyHistory || "N/A"}<br>
-      <strong>Gender:</strong> ${data.gender || "N/A"}<br>
-      <strong>Age:</strong> ${data.age || "N/A"}<br>
-      <strong>Phone:</strong> ${data.phone || "N/A"}<br>
-      <strong>Address:</strong> ${data.address || "N/A"}<br>
-      <strong>Payment Method:</strong> ${data.paymentMethod || "N/A"}<br>
-      <strong>Payment Ref:</strong> ${data.paymentRef || "N/A"}<br>
-      <strong>Fee:</strong> ₱${data.feeAmount || "N/A"}<br>
-      <strong>Date:</strong> ${data.appointmentDateTime || "N/A"}<br>
-      <strong>Status:</strong> ${data.status || "Approved"}<br>
-    `;
-
-    document.getElementById("detailsContent").innerHTML = content;
-    document.getElementById("detailsModal").style.display = "flex";
-  }
-
-  document.getElementById("detailsModal").addEventListener("click", (e) => {
-    if (e.target.id === "detailsModal") {
-      e.target.style.display = "none";
-    }
-  });
-
-  // Sidebar toggle logic
-  document.addEventListener("DOMContentLoaded", () => {
-    const menuIcon = document.getElementById("menu-icon");
-    const sidebarMenu = document.getElementById("sidebarMenu");
-
-    menuIcon.addEventListener("click", () => {
-      const isActive = sidebarMenu.classList.toggle("active");
-      menuIcon.innerHTML = isActive ? "&#10005;" : "&#9776;"; // X or menu icon
-    });
-
-    document.querySelectorAll(".hidden-menu a").forEach(link => {
-      link.addEventListener("click", () => {
-        sidebarMenu.classList.remove("active");
-        menuIcon.innerHTML = "&#9776;";
-      });
-    });
-
-    // Close sidebar on outside click
-    document.addEventListener("click", (e) => {
-      if (
-        sidebarMenu.classList.contains("active") &&
-        !sidebarMenu.contains(e.target) &&
-        e.target !== menuIcon
-      ) {
-        sidebarMenu.classList.remove("active");
-        menuIcon.innerHTML = "&#9776;";
-      }
-    });
-  });
-</script>
+  </script>
 
 </body>
+
 </html>

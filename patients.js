@@ -26,9 +26,9 @@ document.querySelector(".menu-icon").addEventListener("click", () => {
   document.getElementById("sidebarMenu").classList.toggle("active");
 });
 
-    function toggleMenu() {
-      document.getElementById("sidebarMenu").classList.toggle("active");
-    }
+function toggleMenu() {
+  document.getElementById("sidebarMenu").classList.toggle("active");
+}
 
 
 // UI references

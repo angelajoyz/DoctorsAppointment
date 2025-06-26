@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Medical History</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background-color: #f4f4f4;
+        }
+
+        header {
+            background-image: url("header.png");
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-color: #29a9e1;
+            padding: 15px 20px;
+            height: 80px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: flex-start;
+            padding-left: 80px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .menu-icon {
+            font-size: 24px;
+            cursor: pointer;
+            position: absolute;
+            top: 10px;
+            left: 15px;
+            background: none;
+            border: none;
+            padding: 10px;
+            z-index: 1100;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 2em;
+            margin-top: 30px;
+        }
+
+        h1 .small-text {
+            font-size: 0.5em;
+            display: block;
+        }
+
+        h1 .highlight {
+            color: #000000;
+            font-size: 1em;
+            font-weight: bold;
+        }
+
+        header p {
+            margin-top: 5px;
+            font-size: 1.1em;
+        }
+
+        .hidden-menu {
+            position: fixed;
+            top: 0;
+            left: -250px;
+            width: 250px;
+            height: 100%;
+            background: #29a9e1;
+            color: white;
+            padding-top: 60px;
+            transition: left 0.3s ease-in-out;
+            z-index: 1000;
+        }
+
+        .hidden-menu.active {
+            left: 0;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .hidden-menu ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .hidden-menu li {
+            padding: 10px;
+            text-align: center;
+        }
+
+        .hidden-menu a {
+            color: black;
+            text-decoration: none;
+            display: block;
+            padding: 10px;
+        }
+
+        .hidden-menu a:hover {
+            background: #fff;
+            border-radius: 20px;
+        }
+
+        .container {
+            max-width: 1500px;
+            margin: 50px auto;
+            background: white;
+            border-radius: 10px;
+            padding: 40px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .section {
+            margin-bottom: 40px;
+            padding: 20px;
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            background-color: #fafafa;
+        }
+
+        .section h3 {
+            color: #29a9e1;
+            margin-top: 0;
+            margin-bottom: 20px;
+            font-size: 1.3em;
+            border-bottom: 2px solid #29a9e1;
+            padding-bottom: 5px;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .info-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #29a9e1;
+        }
+
+        .info-item strong {
+            color: #333;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .info-item span {
+            color: #666;
+            font-size: 0.95em;
+        }
+
+        .medical-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .medical-table th,
+        .medical-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .medical-table th {
+            background-color: #29a9e1;
+            color: white;
+            font-weight: bold;
+        }
+
+        .medical-table tr:hover {
+            background-color: #f9f9f9;
+        }
+
+        .medical-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .vital-card {
+            background: linear-gradient(135deg, #29a9e1, #1f8ec2);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .vital-card h4 {
+            margin: 0 0 10px 0;
+            font-size: 1.1em;
+        }
+
+        .vital-card .value {
+            font-size: 1.8em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .vital-card .unit {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+
+        .timeline {
+            position: relative;
+            padding-left: 30px;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 10px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: #29a9e1;
+        }
+
+        .timeline-item {
+            position: relative;
+            margin-bottom: 25px;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -25px;
+            top: 20px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #29a9e1;
+            border: 3px solid white;
+            box-shadow: 0 0 0 3px #29a9e1;
+        }
+
+        .timeline-date {
+            color: #29a9e1;
+            font-weight: bold;
+            font-size: 0.9em;
+            margin-bottom: 5px;
+        }
+
+        .alert-box {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-left: 4px solid #f39c12;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        .alert-box.critical {
+            background: #f8d7da;
+            border-color: #f5c6cb;
+            border-left-color: #e74c3c;
+        }
+
+        .no-data {
+            text-align: center;
+            color: #999;
+            font-style: italic;
+            padding: 40px;
+        }
+
+        @media(max-width: 768px) {
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .medical-table,
+            .medical-table thead,
+            .medical-table tbody,
+            .medical-table th,
+            .medical-table td,
+            .medical-table tr {
+                display: block;
+            }
+
+            .medical-table th {
+                position: absolute;
+                top: -9999px;
+                left: -9999px;
+            }
+
+            .medical-table td {
+                position: relative;
+                padding-left: 50%;
+                border: none;
+                border-bottom: 1px solid #eee;
+            }
+
+            .medical-table td::before {
+                content: attr(data-label);
+                position: absolute;
+                left: 15px;
+                font-weight: bold;
+                color: #29a9e1;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Sidebar -->
+    <div class="hidden-menu" id="sidebarMenu">
+        <ul>
+            <li><a href="patientDashboard.html">Home</a></li>
+            <li><a href="patientProfile.html">Profile</a></li>
+            <li><a href="appointmentHistory.html">Appointment History</a></li>
+            <li><a href="medicalHistory.html">Medical History</a></li>
+            <li><a href="services.html">Services</a></li>
+            <li><a href="about.html">About</a></li>
+            <li><a href="contact.html">Contact</a></li>
+            <li><a href="index.html">Logout</a></li>
+        </ul>
+    </div>
+
+    <!-- Header -->
+    <header>
+        <button class="menu-icon" id="menu-icon">&#9776;</button>
+        <h1><span class="small-text">YOUR COMPLETE</span> <span class="highlight">MEDICAL HISTORY</span></h1>
+        <p>Comprehensive overview of your health records and medical information.</p>
+    </header>
+
+    <!-- Main Content -->
+    <div class="container">
+        <h2>Medical History Overview</h2>
+
+        <!-- Patient Basic Information -->
+        <div class="section">
+            <h3>🏥 Patient Information</h3>
+            <div class="info-grid" id="patientInfo">
+                <!-- Patient info will be loaded here -->
+            </div>
+        </div>
+
+        <!-- Medical Conditions -->
+        <div class="section">
+            <h3>🩺 Medical Conditions & Diagnoses</h3>
+            <div id="conditionsContainer">
+                <!-- Medical conditions will be loaded here -->
+            </div>
+        </div>
+
+        <!-- Medications -->
+        <div class="section">
+            <h3>💊 Current Medications</h3>
+            <div id="medicationsContainer">
+                <!-- Medications will be loaded here -->
+            </div>
+        </div>
+
+        <!-- Allergies -->
+        <div class="section">
+            <h3>⚠️ Allergies & Reactions</h3>
+            <div id="allergiesContainer">
+                <!-- Allergies will be loaded here -->
+            </div>
+        </div>
+
+        <!-- Family History -->
+        <div class="section">
+            <h3>👨‍👩‍👧‍👦 Family Medical History</h3>
+            <div id="familyHistoryContainer">
+                <!-- Family history will be loaded here -->
+            </div>
+        </div>
+
+        <!-- Appointment History Timeline -->
+        <div class="section">
+            <h3>📅 Recent Medical Visits</h3>
+            <div class="timeline" id="appointmentTimeline">
+                <!-- Timeline will be loaded here -->
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Firebase Script -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
+        import { getFirestore, collection, getDocs, query, where, orderBy } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDwCayQZ0JO6DjzQvAT6ToT33I4QXCS_NY",
+            authDomain: "login-sample-c3af0.firebaseapp.com",
+            projectId: "login-sample-c3af0",
+            storageBucket: "login-sample-c3af0.appspot.com",
+            messagingSenderId: "372688128666",
+            appId: "1:372688128666:web:bbc529c73c4665f95f6d23"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) {
+                alert("You are not logged in.");
+                window.location.href = "index.html";
+                return;
+            }
+
+            const currentEmail = user.email;
+            await loadMedicalHistory(currentEmail);
+        });
+
+        async function loadMedicalHistory(email) {
+            try {
+                // *** MODIFICATION START ***
+                // Fetch all appointments from the 'approved' collection
+                const approvedSnapshot = await getDocs(query(collection(db, "approved"), where("email", "==", email)));
+                let patientData = null;
+                let completedAppointments = [];
+
+                // Filter for completed appointments and collect patient data
+                approvedSnapshot.docs.forEach(doc => {
+                    const data = doc.data();
+                    if (data.status === "Completed") { // Only process if status is 'Completed'
+                        if (!patientData) {
+                            patientData = data; // Use first completed appointment for patient basic info
+                        }
+                        completedAppointments.push({
+                            ...data,
+                            id: doc.id,
+                            // Ensure appointmentDateTime is correctly parsed for date sorting
+                            date: new Date(data.appointmentDateTime.split(" - ")[0])
+                        });
+                    }
+                });
+
+                if (completedAppointments.length === 0) {
+                    showNoDataMessage();
+                    return;
+                }
+
+                // Sort completed appointments by date (newest first)
+                completedAppointments.sort((a, b) => b.date - a.date);
+
+                // Load different sections using the completedAppointments
+                loadPatientInfo(patientData); // Use patientData from a completed appointment
+                loadConditions(completedAppointments);
+                loadMedications(completedAppointments);
+                loadAllergies(completedAppointments);
+                loadFamilyHistory(completedAppointments);
+                loadAppointmentTimeline(completedAppointments); // This will now show completed appointments
+                // *** MODIFICATION END ***
+
+            } catch (error) {
+                console.error("Error loading medical history:", error);
+                showNoDataMessage();
+            }
+        }
+
+        function loadPatientInfo(data) {
+            const patientInfo = document.getElementById('patientInfo');
+            patientInfo.innerHTML = `
+      <div class="info-item">
+        <strong>Full Name:</strong>
+        <span>${data.fullName || 'N/A'}</span>
+      </div>
+      <div class="info-item">
+        <strong>Age:</strong>
+        <span>${data.age || 'N/A'} years old</span>
+      </div>
+      <div class="info-item">
+        <strong>Gender:</strong>
+        <span>${data.gender || 'N/A'}</span>
+      </div>
+      <div class="info-item">
+        <strong>Contact Number:</strong>
+        <span>${data.phone || 'N/A'}</span>
+      </div>
+      <div class="info-item">
+        <strong>Email Address:</strong>
+        <span>${data.email || 'N/A'}</span>
+      </div>
+      <div class="info-item">
+        <strong>Address:</strong>
+        <span>${data.address || 'N/A'}</span>
+      </div>
+    `;
+        }
+
+        function loadConditions(appointments) {
+            const container = document.getElementById('conditionsContainer');
+            const allConditions = new Set();
+
+            appointments.forEach(appointment => {
+                if (appointment.conditions && appointment.conditions.trim() !== '') {
+                    appointment.conditions.split(',').forEach(condition => {
+                        allConditions.add(condition.trim());
+                    });
+                }
+            });
+
+            if (allConditions.size === 0) {
+                container.innerHTML = '<div class="no-data">No medical conditions recorded</div>';
+                return;
+            }
+
+            let html = '';
+            allConditions.forEach(condition => {
+                html += `
+        <div class="info-item">
+          <strong>Condition:</strong>
+          <span>${condition}</span>
+        </div>
+      `;
+            });
+
+            container.innerHTML = `<div class="info-grid">${html}</div>`;
+        }
+
+        function loadMedications(appointments) {
+            const container = document.getElementById('medicationsContainer');
+            const allMedications = new Set();
+
+            appointments.forEach(appointment => {
+                if (appointment.medications && appointment.medications.trim() !== '') {
+                    appointment.medications.split(',').forEach(medication => {
+                        allMedications.add(medication.trim());
+                    });
+                }
+            });
+
+            if (allMedications.size === 0) {
+                container.innerHTML = '<div class="no-data">No current medications recorded</div>';
+                return;
+            }
+
+            let html = '';
+            allMedications.forEach(medication => {
+                html += `
+        <div class="info-item">
+          <strong>Medication:</strong>
+          <span>${medication}</span>
+        </div>
+      `;
+            });
+
+            container.innerHTML = `<div class="info-grid">${html}</div>`;
+        }
+
+        function loadAllergies(appointments) {
+            const container = document.getElementById('allergiesContainer');
+            const allAllergies = new Set();
+
+            appointments.forEach(appointment => {
+                if (appointment.allergies && appointment.allergies.trim() !== '') {
+                    appointment.allergies.split(',').forEach(allergy => {
+                        allAllergies.add(allergy.trim());
+                    });
+                }
+            });
+
+            if (allAllergies.size === 0) {
+                container.innerHTML = '<div class="no-data">No known allergies recorded</div>';
+                return;
+            }
+
+            let html = '';
+            allAllergies.forEach(allergy => {
+                html += `
+        <div class="alert-box critical">
+          <strong>⚠️ Allergy:</strong> ${allergy}
+        </div>
+      `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        function loadFamilyHistory(appointments) {
+            const container = document.getElementById('familyHistoryContainer');
+            const allFamilyHistory = new Set();
+
+            appointments.forEach(appointment => {
+                if (appointment.familyHistory && appointment.familyHistory.trim() !== '') {
+                    appointment.familyHistory.split(',').forEach(history => {
+                        allFamilyHistory.add(history.trim());
+                    });
+                }
+            });
+
+            if (allFamilyHistory.size === 0) {
+                container.innerHTML = '<div class="no-data">No family medical history recorded</div>';
+                return;
+            }
+
+            let html = '';
+            allFamilyHistory.forEach(history => {
+                html += `
+        <div class="info-item">
+          <strong>Family History:</strong>
+          <span>${history}</span>
+        </div>
+      `;
+            });
+
+            container.innerHTML = `<div class="info-grid">${html}</div>`;
+        }
+
+        function loadAppointmentTimeline(appointments) {
+            const timeline = document.getElementById('appointmentTimeline');
+
+            if (appointments.length === 0) {
+                timeline.innerHTML = '<div class="no-data">No appointment history available</div>';
+                return;
+            }
+
+            let html = '';
+            appointments.slice(0, 10).forEach(appointment => { // Show last 10 completed appointments
+                const date = appointment.date.toLocaleDateString();
+                const time = appointment.date.toLocaleTimeString();
+
+                html += `
+        <div class="timeline-item">
+          <div class="timeline-date">${date} at ${time}</div>
+          <strong>Dr. ${appointment.doctorName || 'N/A'}</strong>
+          <p><strong>Reason:</strong> ${appointment.reason || 'N/A'}</p>
+          <p><strong>Status:</strong> Completed</p>
+        </div>
+      `;
+            });
+
+            timeline.innerHTML = html;
+        }
+
+        function showNoDataMessage() {
+            document.querySelector('.container').innerHTML = `
+      <div class="no-data">
+        <h3>No Medical History Available</h3>
+        <p>You don't have any medical records yet. Your medical history will be populated as you complete appointments.</p>
+      </div>
+    `;
+        }
+
+        // Sidebar toggle logic
+        document.addEventListener("DOMContentLoaded", () => {
+            const menuIcon = document.getElementById("menu-icon");
+            const sidebarMenu = document.getElementById("sidebarMenu");
+
+            menuIcon.addEventListener("click", () => {
+                const isActive = sidebarMenu.classList.toggle("active");
+                menuIcon.innerHTML = isActive ? "&#10005;" : "&#9776;";
+            });
+
+            document.querySelectorAll(".hidden-menu a").forEach(link => {
+                link.addEventListener("click", () => {
+                    sidebarMenu.classList.remove("active");
+                    menuIcon.innerHTML = "&#9776;";
+                });
+            });
+
+            document.addEventListener("click", (e) => {
+                if (
+                    sidebarMenu.classList.contains("active") &&
+                    !sidebarMenu.contains(e.target) &&
+                    e.target !== menuIcon
+                ) {
+                    sidebarMenu.classList.remove("active");
+                    menuIcon.innerHTML = "&#9776;";
+                }
+            });
+        });
+    </script>
+
+</body>
+
+</html>

@@ -147,6 +147,26 @@
       background-color: #fff;
       color: #29a9e1;
     }
+
+    /* Custom Alert Styling */
+    #custom-alert {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: #f44336;
+      /* Red for errors */
+      color: white;
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      z-index: 1000;
+      opacity: 0;
+      transition: opacity 0.5s ease-in-out;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      text-align: center;
+      min-width: 300px;
+    }
   </style>
 
   <!-- Firebase SDKs -->
@@ -172,12 +192,36 @@
     const db = firebase.firestore();
     const provider = new firebase.auth.GoogleAuthProvider();
     emailjs.init("bl3WcauRTizZhqr5b");
+
+    // Function to display custom alerts (instead of default browser alerts)
+    function showCustomAlert(message, isSuccess = false) {
+      let alertDiv = document.getElementById('custom-alert');
+      if (!alertDiv) {
+        alertDiv = document.createElement('div');
+        alertDiv.id = 'custom-alert';
+        document.body.appendChild(alertDiv);
+      }
+
+      alertDiv.textContent = message;
+      alertDiv.style.backgroundColor = isSuccess ? "#4CAF50" : "#f44336"; // Green for success, Red for error
+      alertDiv.style.opacity = 1;
+
+      setTimeout(() => {
+        alertDiv.style.opacity = 0;
+        // Optional: remove the element after it fades out
+        setTimeout(() => {
+          if (alertDiv.parentNode) {
+            alertDiv.parentNode.removeChild(alertDiv);
+          }
+        }, 500);
+      }, 5000); // Alert disappears after 5 seconds
+    }
   </script>
 </head>
 
 <body>
   <div class="container">
-   <div class="left-panel">
+    <div class="left-panel">
       <h1>Welcome</h1>
       <p>To proceed, please login with your info.</p>
     </div>
@@ -194,7 +238,7 @@
           <a href="#" style="color: #29a9e1; font-size: 12px; text-decoration: none;" onclick="forgotPassword()">Forgot
             Password?</a>
         </div>
-        <button class="login-btn" onclick="loginUser()">Log In</button>
+        <button class="login-btn" onclick="loginUser ()">Log In</button>
 
         <button class="google-btn" onclick="signInWithGoogle()">
           <img src="https://www.svgrepo.com/show/355037/google.svg" alt="Google logo" />
@@ -228,7 +272,7 @@
       const password = document.getElementById("patient-password").value;
 
       if (!email || !password) {
-        alert("Please enter both email and password.");
+        showCustomAlert("Please enter both email and password.");
         return;
       }
 
@@ -245,36 +289,42 @@
         const doctorDoc = await db.collection("doctors").doc(user.uid).get();
 
         if (!patientDoc.exists && !doctorDoc.exists) {
-          alert("This account is not registered in Firestore.");
+          showCustomAlert("This account is not registered in our system.");
           await auth.signOut();
           return;
         }
 
         if (!user.emailVerified) {
-          alert("Please verify your email first.");
+          showCustomAlert("Please verify your email first to proceed.");
           await auth.signOut();
           return;
         }
 
         if (patientDoc.exists) {
-          alert("Patient login successful!");
-          window.location.href = "patientDashboard.html";
+          showCustomAlert("Patient login successful!", true); // true for success
+          // Add 2-second delay before redirect
+          setTimeout(() => {
+            window.location.href = "patientDashboard.html";
+          }, 2000);
         } else if (doctorDoc.exists) {
-          alert("Doctor login successful!");
-          window.location.href = "doctorDashboard.html";
+          showCustomAlert("Doctor login successful!", true); // true for success
+          // Add 2-second delay before redirect
+          setTimeout(() => {
+            window.location.href = "doctorDashboard.html";
+          }, 2000);
         }
 
       } catch (error) {
         console.error("Login error:", error);
 
         if (error.code === "auth/wrong-password") {
-          alert("Incorrect password.");
+          showCustomAlert("Incorrect password. Please try again.");
         } else if (error.code === "auth/user-not-found") {
-          alert("No user found with this email.");
+          showCustomAlert("No account found with this email address.");
         } else if (error.code === "auth/network-request-failed") {
-          alert("Network error. Please check your connection.");
+          showCustomAlert("Network error. Please check your internet connection.");
         } else {
-          alert("Something went wrong. Please try again.");
+          showCustomAlert("An unexpected error occurred. Please try again.");
         }
       } finally {
         const loginBtn = document.querySelector('.login-btn');
@@ -282,7 +332,6 @@
         loginBtn.innerText = "Log In";
       }
     }
-
 
     async function signInWithGoogle() {
       try {
@@ -294,28 +343,31 @@
           .get();
 
         if (snapshot.empty) {
-          alert("Email is not registered.");
+          showCustomAlert("Your Google account email is not registered in our system.");
           await auth.signOut();
           return;
         }
 
         if (!user.emailVerified) {
-          alert("Please verify your email first.");
+          showCustomAlert("Please verify your email first to proceed.");
           await auth.signOut();
           return;
         }
 
-        alert("Welcome back!");
-        window.location.href = "patientDashboard.html";
+        showCustomAlert("Welcome back! Google login successful.", true); // true for success
+        // Add 2-second delay before redirect
+        setTimeout(() => {
+          window.location.href = "patientDashboard.html";
+        }, 2000);
       } catch (error) {
         console.error("Google Sign-In Error:", error);
 
         if (error.code === "auth/popup-closed-by-user") {
-          alert("Popup closed before sign in.");
+          showCustomAlert("Google sign-in was cancelled.");
         } else if (error.code === "auth/network-request-failed") {
-          alert("Network error. Please check your connection.");
+          showCustomAlert("Network error. Please check your internet connection.");
         } else {
-          alert("Google Sign-In failed: " + error.message);
+          showCustomAlert("Google Sign-In failed: " + error.message);
         }
       }
     }
@@ -323,7 +375,7 @@
     function forgotPassword() {
       let email = document.getElementById("patient-email").value.trim().toLowerCase();
       if (!email) {
-        alert("Please enter your email address.");
+        showCustomAlert("Please enter your email address to reset your password.");
         return;
       }
 
@@ -332,23 +384,23 @@
         .get()
         .then((querySnapshot) => {
           if (querySnapshot.empty) {
-            alert("Invalid email. This email is not registered.");
+            showCustomAlert("The email you entered is not registered in our patient database.");
             return;
           }
 
           // Email exists, send password reset
           auth.sendPasswordResetEmail(email)
             .then(() => {
-              alert("Password reset email sent! Please check your inbox.");
+              showCustomAlert("Password reset email sent! Please check your inbox.", true); // true for success
             })
             .catch((error) => {
               console.error("Error sending password reset email:", error);
-              alert("Error: " + error.message);
+              showCustomAlert("Failed to send password reset email: " + error.message);
             });
         })
         .catch((error) => {
           console.error("Firestore query error:", error);
-          alert("Something went wrong. Please try again.");
+          showCustomAlert("An error occurred while checking your email. Please try again.");
         });
     }
 

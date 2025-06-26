@@ -1,4 +1,5 @@
-html, body {
+html,
+body {
   height: 100%;
   margin: 0;
   padding: 0;
@@ -226,8 +227,10 @@ button:hover {
 
 
 #calendarContainer {
-  width: 100%; /* full width of the container */
-  max-width: 480px; /* same width as inputs */
+  width: 100%;
+  /* full width of the container */
+  max-width: 480px;
+  /* same width as inputs */
   margin: 0 auto;
 }
 
@@ -246,7 +249,8 @@ button:hover {
   background-color: #007BFF;
   color: white;
   padding: 8px 12px;
-  border-radius: 6px; /* slightly more rounded but less than 20px */
+  border-radius: 6px;
+  /* slightly more rounded but less than 20px */
   cursor: pointer;
   font-weight: 600;
   text-align: center;
@@ -264,4 +268,11 @@ button:hover {
   background-color: #0056b3;
   color: white;
   border: 2px solid #003d80;
+
+}
+
+/* Hide days from previous and next months in Flatpickr */
+.flatpickr-day.prevMonthDay,
+.flatpickr-day.nextMonthDay {
+  visibility: hidden;
 }

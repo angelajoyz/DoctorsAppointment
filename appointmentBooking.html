@@ -40,6 +40,8 @@
           <input type="text" id="gender" placeholder="Gender"><br>
           <input type="text" id="address" placeholder="address"><br>
         </div>
+
+
         <div class="column">
           <h3>Medical History</h3>
           <label for="appointmentReason"></label>
@@ -102,6 +104,17 @@
             <option>Heart Disease</option>
             <option>Other</option>
           </select>
+        </div>
+      </div>
+      <!-- Inside the Patient Information column in step1 -->
+      <div id="parentConsentSection" class="hidden">
+        <h3>Parent/Guardian Information (for minors)</h3>
+        <input type="text" id="parentFullName" placeholder="Parent/Guardian Full Name"><br>
+        <input type="tel" id="parentPhone" placeholder="Parent/Guardian Phone Number"><br>
+        <input type="email" id="parentEmail" placeholder="Parent/Guardian Email Address"><br>
+        <div class="checkbox-group">
+          <label><input type="checkbox" id="parentConsent"> I confirm that I am the parent/legal guardian and consent
+            to this appointment.</label>
         </div>
       </div>
       <div style="text-align: center;">

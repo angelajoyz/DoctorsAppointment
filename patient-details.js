@@ -15,12 +15,79 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
+// --- Custom Alert Function (MODERNIZED AND TOP-CENTERED) ---
+function showCustomAlert(message, isSuccess = false) {
+  // Remove existing alerts
+  const existingAlerts = document.querySelectorAll('.custom-alert');
+  existingAlerts.forEach(alert => alert.remove());
+
+  // Create alert
+  const alertDiv = document.createElement('div');
+  const typeClass = isSuccess ? 'success' : 'error';
+
+  alertDiv.className = `custom-alert ${typeClass}`;
+  alertDiv.textContent = message;
+
+  document.body.appendChild(alertDiv);
+
+  // Show animation
+  setTimeout(() => alertDiv.classList.add('show'), 10);
+
+  // Auto-hide after 5 seconds
+  setTimeout(() => {
+    alertDiv.classList.remove('show');
+    setTimeout(() => alertDiv.remove(), 300);
+  }, 5000);
+}
+
+
+
+
+// Add CSS styles for the custom alert
+const style = document.createElement('style');
+style.textContent = `
+.custom-alert {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: white;
+  padding: 12px 24px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  z-index: 99999;
+  opacity: 0;
+  transition: all 0.3s ease;
+  max-width: 90%;
+  width: max-content;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Only show color when .success or .error is added */
+.custom-alert.success {
+  background: #4CAF50; /* green */
+}
+
+.custom-alert.error {
+  background: #f44336; /* red */
+}
+
+.custom-alert.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+`;
+
+
+document.head.appendChild(style);
+
+
 document.addEventListener("DOMContentLoaded", async () => {
   const params = new URLSearchParams(window.location.search);
   const patientId = params.get("id");
 
   if (!patientId) {
-    alert("No patient ID provided.");
+    showCustomAlert("No patient ID provided.", false); // Changed from alert
     return;
   }
 
@@ -29,7 +96,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   try {
     const snapshot = await getDoc(patientDocRef);
     if (!snapshot.exists()) {
-      alert("Patient not found.");
+      showCustomAlert("Patient not found.", false); // Changed from alert
       return;
     }
 
@@ -73,7 +140,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   } catch (error) {
     console.error("Error fetching patient data:", error);
-    alert("Failed to fetch patient data.");
+    showCustomAlert("Failed to fetch patient data.", false); // Changed from alert
   }
 });
 
@@ -84,7 +151,7 @@ window.updateStatus = async function (status) {
   try {
     const snapshot = await getDoc(appointmentRef);
     if (!snapshot.exists()) {
-      alert("Appointment data not found.");
+      showCustomAlert("Appointment data not found.", false);
       return;
     }
 
@@ -102,12 +169,17 @@ window.updateStatus = async function (status) {
     // ✅ Send Email
     await sendEmailNotification(data.email, data.fullName, status, data.appointmentDateTime);
 
-    alert(`Appointment has been moved to "${destinationCollection}" and email notification sent.`);
+    const isSuccess = status.toLowerCase() === "approved";
+    showCustomAlert(
+      `Appointment has been moved to "${destinationCollection}" and email notification sent.`,
+      isSuccess
+    );
   } catch (error) {
     console.error("Error updating status:", error);
-    alert("Failed to update appointment: " + error.message);
+    showCustomAlert("Failed to update appointment: " + error.message, false);
   }
 };
+
 
 async function sendEmailNotification(email, fullName, status, appointmentDateTime) {
   const templateParams = {
@@ -125,9 +197,9 @@ async function sendEmailNotification(email, fullName, status, appointmentDateTim
       "uxowx8uL9zxSSj8V1"
     );
     console.log("✅ Email sent:", result);
-    alert("Email sent to " + email);
+    showCustomAlert("Email sent to " + email, true); // Changed from alert
   } catch (error) {
     console.error("❌ Email sending failed:", error);
-    alert("Email send error: " + (error.text || error.message));
+    showCustomAlert("Email send error: " + (error.text || error.message), false); // Changed from alert
   }
 }
